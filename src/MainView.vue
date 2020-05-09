@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="l-game-container">
         <h1>Game</h1>
 
         <div class="b-game-ground">
@@ -20,10 +20,7 @@
 <script lang="ts">
   import { Vue, Component } from 'vue-property-decorator'
 
-  type Point2D = {
-    x: number
-    y: number
-  }
+  import { Point2D } from '@/types/geometry'
 
   type Cell = {
     point: Point2D
@@ -123,7 +120,8 @@
 </script>
 
 <style lang="scss">
-    @import "./assets/scss/normalize";
+    @import "assets/scss/normalize";
+    @import "assets/scss/layout/l-game-container";
     @import "assets/scss/blocks/b-game-ground";
     @import "assets/scss/blocks/b-game-tile";
 </style>
