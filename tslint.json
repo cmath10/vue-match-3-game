@@ -1,0 +1,7 @@
+{
+  "defaultSeverity": "warning",
+  "linterOptions": {
+    "defaultSeverity": "warning",
+    "exclude": ["**/*.*"]
+  }
+}

@@ -1,0 +1,16 @@
+version: "3.2"
+services:
+  node:
+    image: vue-match-3-game-node
+    environment:
+      UID: ${uid}
+      GID: ${gid}
+      PORT_KARMA: ${port_karma}
+      PORT_VUE: ${port_vue}
+    ports:
+      - "${port_vue}:8080"
+      - "${port_karma}:9876"
+    volumes:
+      - type: bind
+        source: .
+        target: /var/www/vue-match-3-game
