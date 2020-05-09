@@ -5,13 +5,14 @@
         <div class="b-game-ground">
             <div
                 v-for="cell in ground"
-                :key="cell.point.x + '-' + cell.point.y"
-                class="b-game-ground__cell"
+                :key="cell.point.x + '-' + cell.point.y + '-cell'"
                 :class="{ 'b-game-ground__cell--selected': cell.selected }"
+                class="b-game-ground__cell"
                 @click="onCellClick(cell)"
             >
                 <b-game-tile
                     v-if="getTile(cell.point)"
+                    :key="cell.point.x + '-' + cell.point.y + '-tile'"
                     :tile="getTile(cell.point)"
                 />
             </div>
@@ -32,20 +33,20 @@
     Tile,
   } from '@/types/game'
 
-  import { TILE_TYPES } from '@/enums/game'
+  import { TILE_TYPE } from '@/enums/game'
 
   const WIDTH = 9
   const HEIGHT = 7
 
   const AVAILABLE_TILE_TYPES = [
-    TILE_TYPES.BLUE,
-    TILE_TYPES.GREEN,
-    TILE_TYPES.PURPLE,
-    TILE_TYPES.RED,
-    TILE_TYPES.YELLOW,
+    TILE_TYPE.BLUE,
+    TILE_TYPE.GREEN,
+    TILE_TYPE.PURPLE,
+    TILE_TYPE.RED,
+    TILE_TYPE.YELLOW,
   ]
 
-  const getRandomType = () => AVAILABLE_TILE_TYPES[Math.floor(Math.random() * AVAILABLE_TILE_TYPES.length)]
+  const getRandom = (array: TILE_TYPE[]) => array[Math.floor(Math.random() * array.length)]
 
   @Component({
     name: 'MainView',
@@ -79,14 +80,42 @@
       this.ground.forEach((cell: Cell) => {
         this.tiles.push({
           point: cell.point,
-          type: getRandomType(),
+          type: this.generateType(cell),
         })
       })
     }
 
-    tileType ({ point }: Cell) {
-      const tile = this.getTile(point)
-      return tile ? tile.type : 0
+    generateType (cell: Cell) {
+      const excluded: TILE_TYPE[] = [
+        this.getTypeOfTwoPrevXIfRepeated(cell),
+        this.getTypeOfTwoPrevYIfRepeated(cell),
+      ]
+
+      return getRandom(AVAILABLE_TILE_TYPES.filter(type => !excluded.includes(type)))
+    }
+
+    getTypeOfTwoPrevXIfRepeated ({ point }: Cell) {
+      const prevX1 = this.getTile({ x: point.x - 1, y: point.y })
+      // eslint-disable-next-line no-magic-numbers
+      const prevX2 = this.getTile({ x: point.x - 2, y: point.y })
+
+      if (prevX1 && prevX2 && prevX1.type === prevX2.type) {
+        return prevX1.type
+      }
+
+      return undefined
+    }
+
+    getTypeOfTwoPrevYIfRepeated ({ point }: Cell) {
+      const prevY1 = this.getTile({ x: point.x, y: point.y - 1 })
+      // eslint-disable-next-line no-magic-numbers
+      const prevY2 = this.getTile({ x: point.x, y: point.y - 2 })
+
+      if (prevY1 && prevY2 && prevY1.type === prevY2.type) {
+        return prevY1.type
+      }
+
+      return undefined
     }
 
     getTile (point: Point2D) {

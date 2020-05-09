@@ -1,4 +1,4 @@
-export enum TILE_TYPES {
+export enum TILE_TYPE {
   BLUE = 'blue',
   GREEN = 'green',
   PURPLE = 'purple',

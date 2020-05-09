@@ -6,7 +6,7 @@
   import { Vue, Component, Prop } from 'vue-property-decorator'
   import { Tile } from '@/types/game'
 
-  import { TILE_TYPES } from '@/enums/game'
+  import { TILE_TYPE } from '@/enums/game'
 
   @Component({
     name: 'BGameTile'
@@ -19,11 +19,11 @@
     get classes () {
       return {
         'b-game-tile': true,
-        'b-game-tile--blue': this.tile.type === TILE_TYPES.BLUE,
-        'b-game-tile--green': this.tile.type === TILE_TYPES.GREEN,
-        'b-game-tile--purple': this.tile.type === TILE_TYPES.PURPLE,
-        'b-game-tile--red': this.tile.type === TILE_TYPES.RED,
-        'b-game-tile--yellow': this.tile.type === TILE_TYPES.YELLOW,
+        'b-game-tile--blue': this.tile.type === TILE_TYPE.BLUE,
+        'b-game-tile--green': this.tile.type === TILE_TYPE.GREEN,
+        'b-game-tile--purple': this.tile.type === TILE_TYPE.PURPLE,
+        'b-game-tile--red': this.tile.type === TILE_TYPE.RED,
+        'b-game-tile--yellow': this.tile.type === TILE_TYPE.YELLOW,
       }
     }
   }

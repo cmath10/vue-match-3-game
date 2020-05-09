@@ -1,3 +1,4 @@
+import { TILE_TYPE } from '@/enums/game'
 import { Point2D } from '@/types/geometry'
 
 export type Cell = {
@@ -7,5 +8,5 @@ export type Cell = {
 
 export type Tile = {
   point: Point2D
-  type: string
+  type: TILE_TYPE
 }
