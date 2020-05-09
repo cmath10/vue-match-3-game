@@ -9,7 +9,7 @@
   import { TILE_TYPES } from '@/enums/game'
 
   @Component({
-    name: 'components.blocks.BGameTile'
+    name: 'BGameTile'
   })
   export default class BGameTile extends Vue {
     @Prop({
