@@ -90,7 +90,8 @@ module.exports = {
     rules: {
       'no-magic-numbers': 'off',
       '@typescript-eslint/no-magic-numbers': ['error', {
-        ignoreEnums: true
+        ignore: [0, 1, -1],
+        ignoreEnums: true,
       }],
     },
   }, {
