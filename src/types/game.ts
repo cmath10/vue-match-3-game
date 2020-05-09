@@ -7,5 +7,5 @@ export type Cell = {
 
 export type Tile = {
   point: Point2D
-  value: string
+  type: string
 }

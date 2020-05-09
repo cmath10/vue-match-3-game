@@ -45,6 +45,8 @@
     TILE_TYPES.YELLOW,
   ]
 
+  const getRandomType = () => AVAILABLE_TILE_TYPES[Math.floor(Math.random() * AVAILABLE_TILE_TYPES.length)]
+
   @Component({
     name: 'MainView',
 
@@ -77,14 +79,14 @@
       this.ground.forEach((cell: Cell) => {
         this.tiles.push({
           point: cell.point,
-          value: AVAILABLE_TILE_TYPES[Math.floor(Math.random() * AVAILABLE_TILE_TYPES.length)]
+          type: getRandomType(),
         })
       })
     }
 
-    tileValue ({ point }: Cell) {
+    tileType ({ point }: Cell) {
       const tile = this.getTile(point)
-      return tile ? tile.value : 0
+      return tile ? tile.type : 0
     }
 
     getTile (point: Point2D) {
