@@ -62,8 +62,6 @@ export default class TileGrid {
     const indexOfA = this.indexOf(a)
     const indexOfB = this.indexOf(b)
 
-    console.log({ indexOfA, indexOfB })
-
     return indexOfA && indexOfB && (
       TileGrid.isNeighborByRow(indexOfA, indexOfB) ||
       TileGrid.isNeighborByColumn(indexOfA, indexOfB)

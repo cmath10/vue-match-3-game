@@ -77,6 +77,18 @@
     }
 
     getTypeOfTwoPrevXIfRepeated (i: number, j: number) {
+      const prevY1 = this.grid.getTileByIndex(i, j - 1)
+      // eslint-disable-next-line no-magic-numbers
+      const prevY2 = this.grid.getTileByIndex(i, j - 2)
+
+      if (prevY1 && prevY2 && prevY1.type === prevY2.type) {
+        return prevY1.type
+      }
+
+      return null
+    }
+
+    getTypeOfTwoPrevYIfRepeated (i: number, j: number) {
       const prevX1 = this.grid.getTileByIndex(i - 1, j)
       // eslint-disable-next-line no-magic-numbers
       const prevX2 = this.grid.getTileByIndex(i - 2, j)
@@ -88,16 +100,17 @@
       return null
     }
 
-    getTypeOfTwoPrevYIfRepeated (i: number, j: number) {
-      const prevY1 = this.grid.getTileByIndex(i, j - 1)
-      // eslint-disable-next-line no-magic-numbers
-      const prevY2 = this.grid.getTileByIndex(i, j - 2)
+    onTileClick (tile: Tile) {
+      const selectedTile = this.grid.find(tile => tile.selected)
 
-      if (prevY1 && prevY2 && prevY1.type === prevY2.type) {
-        return prevY1.type
+      if (selectedTile !== null && selectedTile !== tile && this.grid.isNeighbors(selectedTile, tile)) {
+        this.swapTiles(selectedTile, tile)
+        selectedTile.selected = false
+        this.clearFilled()
+      } else {
+        this.grid.forEach(tile => { tile.selected = false })
+        tile.selected = true
       }
-
-      return null
     }
 
     swapTiles (a: Tile, b: Tile) {
@@ -113,16 +126,38 @@
       }
     }
 
-    onTileClick (tile: Tile) {
-      const selectedTile = this.grid.find(tile => tile.selected)
-
-      if (selectedTile !== null && selectedTile !== tile && this.grid.isNeighbors(selectedTile, tile)) {
-        this.swapTiles(selectedTile, tile)
-        selectedTile.selected = false
-      } else {
-        this.grid.forEach(tile => { tile.selected = false })
-        tile.selected = true
+    // eslint-disable-next-line max-lines-per-function
+    clearFilled () {
+      const filled: Tile[] = []
+      const add = (tile: Tile) => {
+        if (!filled.includes(tile)) {
+          filled.push(tile)
+        }
       }
+
+      // eslint-disable-next-line complexity
+      this.grid.forEach((tile, i, j) => {
+        const byX1 = this.grid.getTileByIndex(i + 1, j)
+        // eslint-disable-next-line no-magic-numbers
+        const byX2 = this.grid.getTileByIndex(i + 2, j)
+        const byY1 = this.grid.getTileByIndex(i, j + 1)
+        // eslint-disable-next-line no-magic-numbers
+        const byY2 = this.grid.getTileByIndex(i, j + 2)
+
+        if (byX1 && byX2 && tile.type === byX1.type && byX1.type === byX2.type) {
+          add(tile)
+          add(byX1)
+          add(byX2)
+        }
+
+        if (byY1 && byY2 && tile.type === byY1.type && byY1.type === byY2.type) {
+          add(tile)
+          add(byY1)
+          add(byY2)
+        }
+      })
+
+      filled.forEach(tile => { tile.type = null })
     }
   }
 </script>
