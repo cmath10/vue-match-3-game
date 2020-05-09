@@ -3,19 +3,20 @@
         <h1>Game</h1>
 
         <div class="b-game-ground">
-            <div
-                v-for="cell in ground"
-                :key="cell.point.x + '-' + cell.point.y + '-cell'"
-                :class="{ 'b-game-ground__cell--selected': cell.selected }"
-                class="b-game-ground__cell"
-                @click="onCellClick(cell)"
-            >
-                <b-game-tile
-                    v-if="getTile(cell.point)"
-                    :key="cell.point.x + '-' + cell.point.y + '-tile'"
-                    :tile="getTile(cell.point)"
-                />
-            </div>
+            <template v-for="(row, i) in tiles">
+                <div
+                    v-for="(tile, j) in row"
+                    :key="i + '-' + j + '-cell'"
+                    :class="{ 'b-game-ground__cell--selected': tile.selected }"
+                    class="b-game-ground__cell"
+                    @click="onTileClick(tile)"
+                >
+                    <b-game-tile
+                        :key="i + '-' + j + '-tile'"
+                        :tile="tile"
+                    />
+                </div>
+            </template>
         </div>
     </l-game-container>
 </template>
@@ -27,11 +28,7 @@
   import BGameTile from '@/components/blocks/BGameTile.vue'
   import LGameContainer from '@/components/layout/LGameContainer.vue'
 
-  import { Point2D } from '@/types/geometry'
-  import {
-    Cell,
-    Tile,
-  } from '@/types/game'
+  import { Tile } from '@/types/game'
 
   import { TILE_TYPE } from '@/enums/game'
 
@@ -57,96 +54,135 @@
     },
   })
   export default class MainView extends Vue {
-    ground: Cell[] = []
-    tiles: Tile[] = []
+    tiles: Tile[][] = []
 
     created () {
-      this.generateGround()
       this.generateTiles()
-    }
-
-    generateGround () {
-      for (let i = 0; i < HEIGHT; i++) {
-        for (let j = 0; j < WIDTH; j++) {
-          this.ground.push({
-            point: { x: i, y: j },
-            selected: false,
-          })
-        }
-      }
+      this.fillTiles()
     }
 
     generateTiles () {
-      this.ground.forEach((cell: Cell) => {
-        this.tiles.push({
-          point: cell.point,
-          type: this.generateType(cell),
+      this.tiles = []
+
+      for (let i = 0; i < HEIGHT; i++) {
+        const row: Tile[] = []
+
+        for (let j = 0; j < WIDTH; j++) {
+          row.push({ type: null, selected: false })
+        }
+
+        this.tiles.push(row)
+      }
+    }
+
+    fillTiles () {
+      this.tiles.forEach((row, i) => {
+        row.forEach((tile, j) => {
+          tile.type = this.generateType(i, j)
         })
       })
     }
 
-    generateType (cell: Cell) {
+    generateType (i: number, j: number) {
       const excluded: TILE_TYPE[] = [
-        this.getTypeOfTwoPrevXIfRepeated(cell),
-        this.getTypeOfTwoPrevYIfRepeated(cell),
+        this.getTypeOfTwoPrevXIfRepeated(i, j),
+        this.getTypeOfTwoPrevYIfRepeated(i, j),
       ]
 
       return getRandom(AVAILABLE_TILE_TYPES.filter(type => !excluded.includes(type)))
     }
 
-    getTypeOfTwoPrevXIfRepeated ({ point }: Cell) {
-      const prevX1 = this.getTile({ x: point.x - 1, y: point.y })
+    getTypeOfTwoPrevXIfRepeated (i: number, j: number) {
+      const prevX1 = this.getTile(i - 1, j)
       // eslint-disable-next-line no-magic-numbers
-      const prevX2 = this.getTile({ x: point.x - 2, y: point.y })
+      const prevX2 = this.getTile(i - 2, j)
 
       if (prevX1 && prevX2 && prevX1.type === prevX2.type) {
         return prevX1.type
       }
 
-      return undefined
+      return null
     }
 
-    getTypeOfTwoPrevYIfRepeated ({ point }: Cell) {
-      const prevY1 = this.getTile({ x: point.x, y: point.y - 1 })
+    getTypeOfTwoPrevYIfRepeated (i: number, j: number) {
+      const prevY1 = this.getTile(i, j - 1)
       // eslint-disable-next-line no-magic-numbers
-      const prevY2 = this.getTile({ x: point.x, y: point.y - 2 })
+      const prevY2 = this.getTile(i, j - 2)
 
       if (prevY1 && prevY2 && prevY1.type === prevY2.type) {
         return prevY1.type
       }
 
+      return null
+    }
+
+    swapTiles (a: Tile, b: Tile) {
+      const indexOfA = this.getTileIndex(a)
+      const indexOfB = this.getTileIndex(b)
+
+      if (indexOfA && indexOfB) {
+        this.tiles[indexOfA[0]][indexOfA[1]] = b
+        this.tiles[indexOfB[0]][indexOfB[1]] = a
+      }
+    }
+
+    onTileClick (tile: Tile) {
+      const selectedTile = this.getSelectedTile()
+
+      if (selectedTile !== null && selectedTile !== tile && this.isNeighbors(selectedTile, tile)) {
+        this.swapTiles(selectedTile, tile)
+        selectedTile.selected = false
+      } else {
+        this.forEachTile(tile => { tile.selected = false })
+        tile.selected = true
+      }
+    }
+
+    // eslint-disable-next-line complexity
+    isNeighbors (a: Tile, b: Tile) {
+      const indexOfA = this.getTileIndex(a)
+      const indexOfB = this.getTileIndex(b)
+
+      return indexOfA &&
+        indexOfB &&
+        (
+          (indexOfA[0] === indexOfB[0] && Math.abs(indexOfA[1] - indexOfB[1]) === 1) ||
+          (indexOfA[1] === indexOfB[1] && Math.abs(indexOfA[0] - indexOfB[0]) === 1)
+        )
+    }
+
+    getTile (i: number, j: number): Tile | null {
+      return this.tiles[i] ? this.tiles[i][j] || null : null
+    }
+
+    getTileIndex (tile: Tile): number[] | undefined {
+      for (let i = 0; i < this.tiles.length; i++) {
+        const j = this.tiles[i].indexOf(tile)
+
+        if (j !== -1) {
+          return [i, j]
+        }
+      }
+
       return undefined
     }
 
-    getTile (point: Point2D) {
-      return this.tiles.find((tile: Tile) => tile.point.x === point.x && tile.point.y === point.y)
-    }
-
-    onCellClick (cell: Cell) {
-      const selectedCell: Cell | undefined = this.ground.find((cell: Cell) => cell.selected)
-
-      if (selectedCell !== undefined && this.isNeighbors(selectedCell, cell)) {
-        this.swapTilesByCells(selectedCell, cell)
-        selectedCell.selected = false
-      } else {
-        this.ground.forEach((cell: Cell) => { cell.selected = false })
-        cell.selected = true
+    getSelectedTile (): Tile | null {
+      for (let i = 0; i < this.tiles.length; i++) {
+        for (let j = 0; j < this.tiles[i].length; j++) {
+          if (this.tiles[i][j].selected) {
+            return this.tiles[i][j]
+          }
+        }
       }
+
+      return null
     }
 
-    swapTilesByCells (a: Cell, b: Cell) {
-      const tileA = this.getTile(a.point)
-      const tileB = this.getTile(b.point)
-      if (tileA && tileB) {
-        const point = tileA.point
-        tileA.point = b.point
-        tileB.point = point
-      }
-    }
-
-    isNeighbors (a: Cell, b: Cell) {
-      return (a.point.x === b.point.x && Math.abs(a.point.y - b.point.y) === 1) ||
-        (a.point.y === b.point.y && Math.abs(a.point.x - b.point.x) === 1)
+    forEachTile (fn: (tile: Tile, i: number, j: number) => void) {
+      this.tiles.forEach((row, i) => row.forEach((tile, j) => {
+        fn(tile, i, j)
+      }))
     }
   }
 </script>
