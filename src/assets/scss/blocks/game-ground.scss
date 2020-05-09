@@ -1,0 +1,25 @@
+@import "../variables";
+
+.game-ground {
+  display: inline-grid;
+  grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-gap: 0.5vw;
+  padding: 0.5vw;
+  background-color: $gray-400;
+
+  &__cell {
+    width: 2vw;
+    height: 2vw;
+    padding: 0.5vw;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    background-color: $gray-100;
+    border-radius: 0.25vw;
+
+    &--selected {
+      background-color: $gray-300;
+    }
+  }
+}

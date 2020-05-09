@@ -1,0 +1,15 @@
+@import "variables";
+
+:root {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  min-width: 20rem;
+  background: $gray-100;
+}

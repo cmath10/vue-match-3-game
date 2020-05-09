@@ -19,19 +19,20 @@ const getEnvironment = () => {
 
 const ENV = getEnvironment()
 
+// noinspection JSUnusedGlobalSymbols
 module.exports = {
   pages: {
     index: {
       entry: './src/main.js',
     },
   },
+
   chainWebpack: config => {
     config.resolve.alias.set('assets', path.join(__dirname, '/src/assets'))
     config.resolve.alias.set('components', path.join(__dirname, '/src/components'))
     config.resolve.alias.set('entities', path.join(__dirname, '/src/entities'))
     config.resolve.alias.set('utils', path.join(__dirname, '/src/utils'))
     config.resolve.alias.set('views', path.join(__dirname, '/src/views'))
-    config.resolve.alias.set('widgets', path.join(__dirname, '/src/widgets'))
   },
 
   configureWebpack: {
@@ -46,12 +47,6 @@ module.exports = {
       filename: 'css/[name].[contenthash].css',
       chunkFilename: 'css/[name].[contenthash].css',
     } : undefined,
-
-    loaderOptions: {
-      scss: {
-        includePaths: ['node_modules'],
-      },
-    },
 
     sourceMap: true,
   },
