@@ -1,5 +1,5 @@
 <template>
-    <div class="l-game-container">
+    <l-game-container>
         <h1>Game</h1>
 
         <div class="b-game-ground">
@@ -10,47 +10,48 @@
                 :class="{ 'b-game-ground__cell--selected': cell.selected }"
                 @click="onCellClick(cell)"
             >
-                <div :class="`b-game-tile b-game-tile--${tileValue(cell)}`" />
+                <b-game-tile
+                    v-if="getTile(cell.point)"
+                    :tile="getTile(cell.point)"
+                />
             </div>
         </div>
-    </div>
+    </l-game-container>
 </template>
 
 <!--suppress JSUnusedGlobalSymbols -->
 <script lang="ts">
   import { Vue, Component } from 'vue-property-decorator'
 
+  import BGameTile from '@/components/blocks/BGameTile.vue'
+  import LGameContainer from '@/components/layout/LGameContainer.vue'
+
   import { Point2D } from '@/types/geometry'
+  import {
+    Cell,
+    Tile,
+  } from '@/types/game'
 
-  type Cell = {
-    point: Point2D
-    selected: boolean
-  }
-
-  type Tile = {
-    point: Point2D
-    value: string
-  }
+  import { TILE_TYPES } from '@/enums/game'
 
   const WIDTH = 9
   const HEIGHT = 7
 
-  const TILE_RED = 'red'
-  const TILE_BLUE = 'blue'
-  const TILE_GREEN = 'green'
-  const TILE_YELLOW = 'yellow'
-  const TILE_PURPLE = 'purple'
-
-  const TILE_ENUM = [
-    TILE_RED,
-    TILE_BLUE,
-    TILE_GREEN,
-    TILE_YELLOW,
-    TILE_PURPLE
+  const AVAILABLE_TILE_TYPES = [
+    TILE_TYPES.BLUE,
+    TILE_TYPES.GREEN,
+    TILE_TYPES.PURPLE,
+    TILE_TYPES.RED,
+    TILE_TYPES.YELLOW,
   ]
 
   @Component({
     name: 'MainView',
+
+    components: {
+      BGameTile,
+      LGameContainer,
+    },
   })
   export default class MainView extends Vue {
     ground: Cell[] = []
@@ -76,7 +77,7 @@
       this.ground.forEach((cell: Cell) => {
         this.tiles.push({
           point: cell.point,
-          value: TILE_ENUM[Math.floor(Math.random() * TILE_ENUM.length)]
+          value: AVAILABLE_TILE_TYPES[Math.floor(Math.random() * AVAILABLE_TILE_TYPES.length)]
         })
       })
     }
@@ -121,7 +122,5 @@
 
 <style lang="scss">
     @import "assets/scss/normalize";
-    @import "assets/scss/layout/l-game-container";
     @import "assets/scss/blocks/b-game-ground";
-    @import "assets/scss/blocks/b-game-tile";
 </style>
