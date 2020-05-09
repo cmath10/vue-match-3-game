@@ -1,0 +1,25 @@
+.b-game-tile {
+  width: 2.5vw;
+  height: 2.5vw;
+  border-radius: 50%;
+
+  &--red {
+    background-color: red;
+  }
+
+  &--blue {
+    background-color: blue;
+  }
+
+  &--green {
+    background-color: green;
+  }
+
+  &--yellow {
+    background-color: yellow;
+  }
+
+  &--purple {
+    background-color: purple;
+  }
+}

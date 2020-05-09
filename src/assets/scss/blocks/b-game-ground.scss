@@ -1,6 +1,6 @@
 @import "../variables";
 
-.game-ground {
+.b-game-ground {
   display: inline-grid;
   grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
@@ -9,10 +9,11 @@
   background-color: $gray-400;
 
   &__cell {
-    width: 2vw;
-    height: 2vw;
-    padding: 0.5vw;
-    text-align: center;
+    display: flex;
+    width: 4vw;
+    height: 4vw;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     user-select: none;
     background-color: $gray-100;
