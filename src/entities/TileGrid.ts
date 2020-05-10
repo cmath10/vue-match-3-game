@@ -87,19 +87,19 @@ export default class TileGrid {
     const indexOfB = this.indexOf(b)
 
     return indexOfA && indexOfB && (
-      TileGrid.isNeighborByRow(indexOfA, indexOfB) ||
-      TileGrid.isNeighborByColumn(indexOfA, indexOfB)
+      TileGrid.isNeighborsByRow(indexOfA, indexOfB) ||
+      TileGrid.isNeighborsByColumn(indexOfA, indexOfB)
     )
   }
 
-  private static isNeighborByRow (indexOfA: number[], indexOfB: number[]) {
+  private static isNeighborsByRow (indexOfA: number[], indexOfB: number[]) {
     const [ai, aj] = indexOfA
     const [bi, bj] = indexOfB
 
     return ai === bi && Math.abs(aj - bj) === 1
   }
 
-  private static isNeighborByColumn (indexOfA: number[], indexOfB: number[]) {
+  private static isNeighborsByColumn (indexOfA: number[], indexOfB: number[]) {
     const [ai, aj] = indexOfA
     const [bi, bj] = indexOfB
 
