@@ -106,10 +106,14 @@
     onTileClick (tile: Tile) {
       const selectedTile = this.grid.find(tile => tile.selected)
 
-      if (selectedTile !== null && selectedTile !== tile && this.grid.isNeighbors(selectedTile, tile)) {
-        selectedTile.selected = false
-        this.swapTiles(selectedTile, tile)
-        this.updateGrid()
+      if (selectedTile !== null) {
+        if (selectedTile === tile) {
+          tile.selected = false
+        } else if (this.grid.isNeighbors(selectedTile, tile)) {
+          selectedTile.selected = false
+          this.swapTiles(selectedTile, tile)
+          this.updateGrid()
+        }
       } else {
         this.grid.forEach(tile => { tile.selected = false })
         tile.selected = true
