@@ -104,9 +104,9 @@
       const selectedTile = this.grid.find(tile => tile.selected)
 
       if (selectedTile !== null && selectedTile !== tile && this.grid.isNeighbors(selectedTile, tile)) {
-        this.swapTiles(selectedTile, tile)
         selectedTile.selected = false
-        this.clearFilled()
+        this.swapTiles(selectedTile, tile)
+        this.updateGrid()
       } else {
         this.grid.forEach(tile => { tile.selected = false })
         tile.selected = true
@@ -124,6 +124,19 @@
         this.grid.setTile(a, bi, bj)
         this.grid.setTile(b, ai, aj)
       }
+    }
+
+    updateGrid () {
+      do {
+        this.clearFilled()
+        this.grid.shake()
+        this.grid.forEach(tile => {
+          if (tile.type === null) {
+            tile.type = getRandom(AVAILABLE_TILE_TYPES)
+          }
+        })
+        this.clearFilled()
+      } while (this.grid.find(tile => tile.type === null))
     }
 
     // eslint-disable-next-line max-lines-per-function

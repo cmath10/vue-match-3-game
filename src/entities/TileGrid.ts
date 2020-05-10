@@ -3,9 +3,13 @@ import { Tile } from '@/types/game'
 export type TilePredicate = (tile: Tile, i: number, j: number) => boolean
 
 export default class TileGrid {
+  private readonly width: number
+  private readonly height: number
   private tiles: Tile[][] = []
 
   constructor (width: number, height: number) {
+    this.width = width
+    this.height = height
     for (let i = 0; i < height; i++) {
       const row: Tile[] = []
 
@@ -56,6 +60,26 @@ export default class TileGrid {
     this.tiles.forEach((row, i) => row.forEach((tile, j) => {
       fn(tile, i, j)
     }))
+  }
+
+  // eslint-disable-next-line complexity
+  public shake (): void {
+    for (let i = this.height - 1; i >= 0; i--) {
+      for (let j = 0; j < this.width; j++) {
+        if (this.tiles[i][j].type === null) {
+          // eslint-disable-next-line max-depth
+          for (let k = i; k >= 0; k--) {
+            // eslint-disable-next-line max-depth
+            if (this.tiles[k][j].type !== null) {
+              const _tile = this.tiles[k][j]
+              this.tiles[k][j] = this.tiles[i][j]
+              this.tiles[i][j] = _tile
+              break
+            }
+          }
+        }
+      }
+    }
   }
 
   public isNeighbors (a: Tile, b: Tile) {
