@@ -11,10 +11,13 @@
                     class="b-game-ground__cell"
                     @click="onTileClick(tile)"
                 >
-                    <b-game-tile
-                        :key="i + '-' + j + '-tile'"
-                        :tile="tile"
-                    />
+                    <transition name="t-game-fade">
+                        <b-game-tile
+                            v-show="tile.type !== null"
+                            :key="i + '-' + j + '-tile'"
+                            :tile="tile"
+                        />
+                    </transition>
                 </div>
             </template>
         </div>
@@ -127,16 +130,34 @@
     }
 
     updateGrid () {
-      do {
-        this.clearFilled()
-        this.grid.shake()
-        this.grid.forEach(tile => {
-          if (tile.type === null) {
-            tile.type = getRandom(AVAILABLE_TILE_TYPES)
+      this.delay(() => { this.clearFilled() })
+        .then(() => this.delay(() => { this.grid.shake() }))
+        .then(() => this.delay(() => { this.refillGrid() }))
+        .then(() => this.delay(() => { this.clearFilled() }))
+        .then(() => this.delay(() => {
+          // eslint-disable-next-line max-nested-callbacks
+          if (this.grid.find(tile => tile.type === null)) {
+            this.updateGrid()
           }
-        })
-        this.clearFilled()
-      } while (this.grid.find(tile => tile.type === null))
+        }))
+    }
+
+    refillGrid () {
+      this.grid.forEach(tile => {
+        if (tile.type === null) {
+          tile.type = getRandom(AVAILABLE_TILE_TYPES)
+        }
+      })
+    }
+
+    delay (callback: () => void) {
+      const tick = 200
+      return new Promise(resolve => {
+        setTimeout(() => {
+          this.$nextTick(callback)
+          resolve()
+        }, tick)
+      })
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -178,4 +199,5 @@
 <style lang="scss">
     @import "assets/scss/normalize";
     @import "assets/scss/blocks/b-game-ground";
+    @import "assets/scss/transitions/t-game-fade";
 </style>

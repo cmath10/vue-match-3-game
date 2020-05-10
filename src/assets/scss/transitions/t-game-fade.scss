@@ -1,0 +1,11 @@
+.t-game-fade {
+  &-enter-active,
+  &-leave-active {
+    transition: opacity .3s;
+  }
+
+  &-enter,
+  &-leave-to {
+    opacity: 0;
+  }
+}
