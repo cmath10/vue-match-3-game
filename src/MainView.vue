@@ -40,11 +40,11 @@
   const HEIGHT = 7
 
   const AVAILABLE_TILE_TYPES = [
-    TILE_TYPE.BLUE,
-    TILE_TYPE.GREEN,
-    TILE_TYPE.PURPLE,
-    TILE_TYPE.RED,
-    TILE_TYPE.YELLOW,
+    TILE_TYPE.AIR,
+    TILE_TYPE.EARTH,
+    TILE_TYPE.FIRE,
+    TILE_TYPE.LIGHTNING,
+    TILE_TYPE.WATER,
   ]
 
   const getRandom = (array: TILE_TYPE[]) => array[Math.floor(Math.random() * array.length)]

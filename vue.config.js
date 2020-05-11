@@ -33,6 +33,24 @@ module.exports = {
     config.resolve.alias.set('entities', path.join(__dirname, '/src/entities'))
     config.resolve.alias.set('utils', path.join(__dirname, '/src/utils'))
     config.resolve.alias.set('views', path.join(__dirname, '/src/views'))
+
+    config.module
+      .rule('scss')
+      .oneOf('vue')
+      .use('resolve-url-loader')
+      .loader('resolve-url-loader')
+      .options({ keepQuery: true })
+      .before('sass-loader')
+
+    config.module
+      .rule('scss')
+      .oneOf('vue')
+      .use('sass-loader')
+      .loader('sass-loader')
+      .tap(options => ({
+        ...options,
+        sourceMap: true,
+      }))
   },
 
   configureWebpack: {

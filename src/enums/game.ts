@@ -1,7 +1,7 @@
 export enum TILE_TYPE {
-  BLUE = 'blue',
-  GREEN = 'green',
-  PURPLE = 'purple',
-  RED = 'red',
-  YELLOW = 'yellow',
+  AIR = 'air',
+  EARTH = 'earth',
+  FIRE = 'fire',
+  LIGHTNING = 'lightning',
+  WATER = 'water',
 }

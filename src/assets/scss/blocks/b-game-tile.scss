@@ -1,25 +1,25 @@
 .b-game-tile {
-  width: 2.5vw;
-  height: 2.5vw;
-  border-radius: 50%;
+  width: 3.5vw;
+  height: 3.5vw;
+  background-size: cover;
 
-  &--red {
-    background-color: red;
+  &--air {
+    background-image: url("../../images/tile-air.png");
   }
 
-  &--blue {
-    background-color: blue;
+  &--earth {
+    background-image: url("../../images/tile-earth.png");
   }
 
-  &--green {
-    background-color: green;
+  &--fire {
+    background-image: url("../../images/tile-fire.png");
   }
 
-  &--yellow {
-    background-color: yellow;
+  &--lightning {
+    background-image: url("../../images/tile-lightning.png");
   }
 
-  &--purple {
-    background-color: purple;
+  &--water {
+    background-image: url("../../images/tile-water.png");
   }
 }

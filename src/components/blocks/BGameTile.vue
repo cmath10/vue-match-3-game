@@ -19,11 +19,11 @@
     get classes () {
       return {
         'b-game-tile': true,
-        'b-game-tile--blue': this.tile.type === TILE_TYPE.BLUE,
-        'b-game-tile--green': this.tile.type === TILE_TYPE.GREEN,
-        'b-game-tile--purple': this.tile.type === TILE_TYPE.PURPLE,
-        'b-game-tile--red': this.tile.type === TILE_TYPE.RED,
-        'b-game-tile--yellow': this.tile.type === TILE_TYPE.YELLOW,
+        'b-game-tile--air': this.tile.type === TILE_TYPE.AIR,
+        'b-game-tile--earth': this.tile.type === TILE_TYPE.EARTH,
+        'b-game-tile--fire': this.tile.type === TILE_TYPE.FIRE,
+        'b-game-tile--lightning': this.tile.type === TILE_TYPE.LIGHTNING,
+        'b-game-tile--water': this.tile.type === TILE_TYPE.WATER,
       }
     }
   }
