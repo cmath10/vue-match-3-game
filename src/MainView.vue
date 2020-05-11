@@ -1,35 +1,63 @@
 <template>
-    <l-game-container>
-        <h1>Game</h1>
+    <div class="d-flex flex-column h-100">
+        <header class="bg-primary-dark">
+            <b-container>
+                <h1>Game</h1>
+            </b-container>
+        </header>
 
-        <div class="b-game-ground">
-            <template v-for="(row, i) in grid.getTileList()">
-                <div
-                    v-for="(tile, j) in row"
-                    :key="i + '-' + j + '-cell'"
-                    :class="{ 'b-game-ground__cell--selected': tile.selected }"
-                    class="b-game-ground__cell"
-                    @click="onTileClick(tile)"
-                >
-                    <transition name="t-game-fade">
-                        <b-game-tile
-                            v-show="tile.type !== null"
-                            :key="i + '-' + j + '-tile'"
-                            :tile="tile"
-                        />
-                    </transition>
-                </div>
-            </template>
-        </div>
-    </l-game-container>
+        <main class="flex-grow-1">
+            <div class="py-3">
+                <b-container class="text-center">
+                    <div class="b-game-ground">
+                        <template v-for="(row, i) in grid.getTileList()">
+                            <div
+                                v-for="(tile, j) in row"
+                                :key="i + '-' + j + '-cell'"
+                                :class="{ 'b-game-ground__cell--selected': tile.selected }"
+                                class="b-game-ground__cell"
+                                @click="onTileClick(tile)"
+                            >
+                                <transition name="t-game-fade">
+                                    <b-game-tile
+                                        v-show="tile.type !== null"
+                                        :key="i + '-' + j + '-tile'"
+                                        :tile="tile"
+                                    />
+                                </transition>
+                            </div>
+                        </template>
+                    </div>
+                </b-container>
+            </div>
+        </main>
+
+        <footer class="bg-primary-dark">
+            <b-container class="pt-4 pb-5">
+                <p>
+                    Code:
+                    <a href="https://github.com/cmath10" class="text-light">
+                        https://github.com/cmath10
+                    </a>
+                </p>
+
+                <p>
+                    Artwork:
+                    <a href="https://www.artstation.com/jackhook" class="text-light">
+                        https://www.artstation.com/jackhook
+                    </a>
+                </p>
+            </b-container>
+        </footer>
+    </div>
 </template>
 
 <!--suppress JSUnusedGlobalSymbols -->
 <script lang="ts">
   import { Vue, Component } from 'vue-property-decorator'
 
+  import { BContainer } from 'bootstrap-vue'
   import BGameTile from '@/components/blocks/BGameTile.vue'
-  import LGameContainer from '@/components/layout/LGameContainer.vue'
 
   import { Tile } from '@/types/game'
 
@@ -53,8 +81,8 @@
     name: 'MainView',
 
     components: {
+      BContainer,
       BGameTile,
-      LGameContainer,
     },
   })
   export default class MainView extends Vue {
@@ -107,15 +135,16 @@
       const selectedTile = this.grid.find(tile => tile.selected)
 
       if (selectedTile !== null) {
-        if (selectedTile === tile) {
-          tile.selected = false
-        } else if (this.grid.isNeighbors(selectedTile, tile)) {
-          selectedTile.selected = false
-          this.swapTiles(selectedTile, tile)
-          this.updateGrid()
+        if (selectedTile !== tile) {
+          if (this.grid.isNeighbors(selectedTile, tile)) {
+            this.swapTiles(selectedTile, tile)
+            this.updateGrid()
+          } else {
+            tile.selected = true
+          }
         }
+        selectedTile.selected = false
       } else {
-        this.grid.forEach(tile => { tile.selected = false })
         tile.selected = true
       }
     }
@@ -201,7 +230,10 @@
 </script>
 
 <style lang="scss">
+    @import "assets/scss/variables";
+    @import "~bootstrap-scss/bootstrap";
     @import "assets/scss/normalize";
+
     @import "assets/scss/blocks/b-game-ground";
     @import "assets/scss/transitions/t-game-fade";
 </style>
