@@ -14,3 +14,6 @@ services:
       - type: bind
         source: .
         target: /var/www/vue-match-3-game
+      - type: bind
+        source: "$SSH_AUTH_SOCK"
+        target: /ssh-auth.sock

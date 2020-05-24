@@ -74,4 +74,8 @@ module.exports = {
   },
 
   productionSourceMap: false,
+
+  publicPath: ENV === ENV_PROD
+    ? '/vue-match-3-game/'
+    : '/',
 }

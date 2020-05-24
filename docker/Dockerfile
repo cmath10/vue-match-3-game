@@ -14,4 +14,6 @@ EXPOSE 8080
 # Karma.js
 EXPOSE 9876
 
+USER node
+
 CMD ["node"]
