@@ -90,6 +90,10 @@
     evaluating = false
     updating = false
 
+    get locked () {
+      return this.evaluating || this.updating
+    }
+
     created () {
       this.init()
     }
@@ -134,7 +138,7 @@
     }
 
     onTileClick (tile: Tile) {
-      if (this.evaluating) {
+      if (this.locked) {
         return
       }
 
@@ -183,6 +187,7 @@
     }
 
     updateGrid () {
+      this.updating = true
       this.delay(() => { this.clearFilled() })
         .then(() => this.delay(() => { this.grid.shake() }))
         .then(() => this.delay(() => { this.refillGrid() }))
@@ -192,6 +197,7 @@
           if (this.grid.find(tile => tile.type === null)) {
             this.updateGrid()
           } else {
+            this.updating = false
             this.evaluating = false
           }
         }))
