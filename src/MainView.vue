@@ -13,7 +13,7 @@
                         <template v-for="(row, i) in grid.getTileList()">
                             <div
                                 v-for="(tile, j) in row"
-                                :key="i + '-' + j + '-cell'"
+                                :key="i + '-' + j + '-cell-' + tile.type"
                                 :class="{ 'b-game-ground__cell--selected': tile.selected }"
                                 class="b-game-ground__cell"
                                 @click="onTileClick(tile)"
@@ -21,7 +21,7 @@
                                 <transition name="t-game-fade">
                                     <b-game-tile
                                         v-show="tile.type !== null"
-                                        :key="i + '-' + j + '-tile'"
+                                        :key="i + '-' + j + '-tile-' + tile.type"
                                         :tile="tile"
                                     />
                                 </transition>
@@ -87,6 +87,8 @@
   })
   export default class MainView extends Vue {
     grid: TileGrid = new TileGrid(WIDTH, HEIGHT)
+    evaluating = false
+    updating = false
 
     created () {
       this.init()
@@ -132,6 +134,10 @@
     }
 
     onTileClick (tile: Tile) {
+      if (this.evaluating) {
+        return
+      }
+
       const selectedTile = this.grid.find(tile => tile.selected)
 
       if (selectedTile !== null) {
@@ -149,12 +155,17 @@
     }
 
     makeMove (a: Tile, b: Tile) {
+      this.evaluating = true
       this.swapTiles(a, b)
 
       if (this.getFilled().length) {
         this.updateGrid()
       } else {
-        this.swapTiles(a, b)
+        this.delay(() => {
+          this.swapTiles(a, b)
+          this.evaluating = false
+          this.$forceUpdate()
+        })
       }
     }
 
@@ -180,6 +191,8 @@
           // eslint-disable-next-line max-nested-callbacks
           if (this.grid.find(tile => tile.type === null)) {
             this.updateGrid()
+          } else {
+            this.evaluating = false
           }
         }))
     }
