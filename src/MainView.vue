@@ -137,8 +137,7 @@
       if (selectedTile !== null) {
         if (selectedTile !== tile) {
           if (this.grid.isNeighbors(selectedTile, tile)) {
-            this.swapTiles(selectedTile, tile)
-            this.updateGrid()
+            this.makeMove(selectedTile, tile)
           } else {
             tile.selected = true
           }
@@ -146,6 +145,16 @@
         selectedTile.selected = false
       } else {
         tile.selected = true
+      }
+    }
+
+    makeMove (a: Tile, b: Tile) {
+      this.swapTiles(a, b)
+
+      if (this.getFilled().length) {
+        this.updateGrid()
+      } else {
+        this.swapTiles(a, b)
       }
     }
 
@@ -193,8 +202,12 @@
       })
     }
 
-    // eslint-disable-next-line max-lines-per-function
     clearFilled () {
+      this.getFilled().forEach(tile => { tile.type = null })
+    }
+
+    // eslint-disable-next-line max-lines-per-function
+    getFilled (): Tile[] {
       const filled: Tile[] = []
       const add = (tile: Tile) => {
         if (!filled.includes(tile)) {
@@ -224,7 +237,7 @@
         }
       })
 
-      filled.forEach(tile => { tile.type = null })
+      return filled
     }
   }
 </script>
