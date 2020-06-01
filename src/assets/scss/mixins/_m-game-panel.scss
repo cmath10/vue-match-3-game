@@ -1,0 +1,11 @@
+@import "../variables";
+
+@mixin m-game-panel {
+  padding: 0.3rem;
+  background-color: darken($primary, 5);
+  border-radius: 0.5vw;
+  box-shadow:
+          0 0 0 3px #1e1812,
+          0 0 0 5px #cbd3a7,
+          0 0 0 7px #1e1812;
+}

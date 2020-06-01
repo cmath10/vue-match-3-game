@@ -1,0 +1,6 @@
+@import "../variables";
+@import "../mixins/m-game-panel";
+
+.b-game-objective {
+  @include m-game-panel();
+}

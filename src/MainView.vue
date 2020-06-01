@@ -9,24 +9,36 @@
         <main class="flex-grow-1">
             <div class="py-3">
                 <b-container class="text-center">
-                    <div class="b-game-ground">
-                        <template v-for="(row, i) in grid.getTileList()">
+                    <div class="d-inline-flex">
+                        <div class="b-game-objective mr-4">
                             <div
-                                v-for="(tile, j) in row"
-                                :key="i + '-' + j + '-cell-' + tile.type"
-                                :class="{ 'b-game-ground__cell--selected': tile.selected }"
-                                class="b-game-ground__cell"
-                                @click="onTileClick(tile)"
+                                v-for="(objective, index) in objectivesComputed"
+                                :key="index"
+                                class="d-flex align-items-center p-3"
                             >
-                                <transition name="t-game-fade">
-                                    <b-game-tile
-                                        v-show="tile.type !== null"
-                                        :key="i + '-' + j + '-tile-' + tile.type"
-                                        :tile="tile"
-                                    />
-                                </transition>
+                                <b-game-tile :type="objective.type" :small="true" /> &times; {{ objective.count }}
                             </div>
-                        </template>
+                        </div>
+
+                        <div class="b-game-ground">
+                            <template v-for="(row, i) in grid.getTileList()">
+                                <div
+                                    v-for="(tile, j) in row"
+                                    :key="i + '-' + j + '-cell-' + tile.type"
+                                    :class="{ 'b-game-ground__cell--selected': tile.selected }"
+                                    class="b-game-ground__cell"
+                                    @click="onTileClick(tile)"
+                                >
+                                    <transition name="t-game-fade">
+                                        <b-game-tile
+                                            v-show="tile.type !== null"
+                                            :key="i + '-' + j + '-tile-' + tile.type"
+                                            :type="tile.type"
+                                        />
+                                    </transition>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                 </b-container>
             </div>
@@ -59,7 +71,11 @@
   import { BContainer } from 'bootstrap-vue'
   import BGameTile from '@/components/blocks/BGameTile.vue'
 
-  import { Tile } from '@/types/game'
+  import {
+    Counter,
+    Objective,
+    Tile,
+  } from '@/types/game'
 
   import { TILE_TYPE } from '@/enums/game'
   import TileGrid from '@/entities/TileGrid'
@@ -75,7 +91,14 @@
     TILE_TYPE.WATER,
   ]
 
-  const getRandom = (array: TILE_TYPE[]) => array[Math.floor(Math.random() * array.length)]
+  const COUNT_SEED = 5
+  const COUNT_MULTIPLIER_MIN = 3
+  const COUNT_MULTIPLIER_MAX = 10
+
+  const random = (array: unknown[]): unknown => array[Math.floor(Math.random() * array.length)]
+  const range = (start: number, end: number): number[] => {
+    return Array(end - start + 1).fill(1).map((_, idx) => start + idx)
+  }
 
   @Component({
     name: 'MainView',
@@ -87,6 +110,8 @@
   })
   export default class MainView extends Vue {
     grid: TileGrid = new TileGrid(WIDTH, HEIGHT)
+    objectives: Objective[] = []
+    counters: Counter[] = []
     evaluating = false
     updating = false
 
@@ -94,23 +119,52 @@
       return this.evaluating || this.updating
     }
 
+    get objectivesComputed () {
+      const mapper = (o: Objective) => {
+        const counter = this.counters.find(c => c.type === o.type)
+        const collected = counter ? counter.count : 0
+
+        return {
+          type: o.type,
+          count: o.count - collected,
+        }
+      }
+
+      return this.objectives.map(mapper).filter(o => o.count > 0)
+    }
+
     created () {
       this.init()
     }
 
     init () {
+      this.objectives.push(this.generateObjective())
+      this.objectives.push(this.generateObjective())
       this.grid.forEach((tile, i, j) => {
         tile.type = this.generateType(i, j)
       })
+      AVAILABLE_TILE_TYPES.forEach(type => {
+        this.counters.push({ type, count: 0 })
+      })
     }
 
-    generateType (i: number, j: number) {
+    generateObjective (): Objective {
+      const excluded: TILE_TYPE[] = this.objectives.map(o => o.type)
+      const multiplier: number = random(range(COUNT_MULTIPLIER_MIN, COUNT_MULTIPLIER_MAX)) as number
+
+      return {
+        type: random(AVAILABLE_TILE_TYPES.filter(type => !excluded.includes(type))) as TILE_TYPE,
+        count: multiplier * COUNT_SEED
+      }
+    }
+
+    generateType (i: number, j: number): TILE_TYPE {
       const excluded: TILE_TYPE[] = [
         this.getTypeOfTwoPrevXIfRepeated(i, j),
         this.getTypeOfTwoPrevYIfRepeated(i, j),
       ]
 
-      return getRandom(AVAILABLE_TILE_TYPES.filter(type => !excluded.includes(type)))
+      return random(AVAILABLE_TILE_TYPES.filter(type => !excluded.includes(type))) as TILE_TYPE
     }
 
     getTypeOfTwoPrevXIfRepeated (i: number, j: number) {
@@ -206,7 +260,7 @@
     refillGrid () {
       this.grid.forEach(tile => {
         if (tile.type === null) {
-          tile.type = getRandom(AVAILABLE_TILE_TYPES)
+          tile.type = random(AVAILABLE_TILE_TYPES) as TILE_TYPE
         }
       })
     }
@@ -222,7 +276,15 @@
     }
 
     clearFilled () {
-      this.getFilled().forEach(tile => { tile.type = null })
+      this.getFilled().forEach(tile => {
+        const counter = this.counters.find(c => c.type === tile.type)
+
+        if (counter) {
+          counter.count++
+        }
+
+        tile.type = null
+      })
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -267,5 +329,6 @@
     @import "assets/scss/normalize";
 
     @import "assets/scss/blocks/b-game-ground";
+    @import "assets/scss/blocks/b-game-objective";
     @import "assets/scss/transitions/t-game-fade";
 </style>
