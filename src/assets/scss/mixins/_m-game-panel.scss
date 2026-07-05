@@ -2,7 +2,7 @@
 
 @mixin m-game-panel {
   padding: 0.3rem;
-  background-color: darken($primary, 5);
+  background-color: $primary-dark;
   border-radius: 0.5vw;
   box-shadow:
           0 0 0 3px #1e1812,

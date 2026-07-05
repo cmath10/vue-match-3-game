@@ -1,3 +1,5 @@
+@use "sass:color";
+
 $white:    #fff !default;
 $gray-100: #f8f9fa !default;
 $gray-200: #e9ecef !default;
@@ -11,7 +13,7 @@ $gray-900: #212529 !default;
 $black:    #000 !default;
 
 $primary: #212637;
-$primary-dark: darken($primary, 5);
+$primary-dark: color.adjust($primary, $lightness: -5%);
 
 $theme-colors: (
   "primary-dark": $primary-dark,

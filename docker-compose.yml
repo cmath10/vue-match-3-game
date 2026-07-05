@@ -5,11 +5,9 @@ services:
     environment:
       UID: ${uid}
       GID: ${gid}
-      PORT_KARMA: ${port_karma}
       PORT_VUE: ${port_vue}
     ports:
       - "${port_vue}:8080"
-      - "${port_karma}:9876"
     volumes:
       - type: bind
         source: .

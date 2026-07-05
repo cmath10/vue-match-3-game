@@ -7,7 +7,6 @@ if [[ -z "${RUNNING_CONTAINER_ID}" ]]
 then
     export uid=$(id -u)
     export gid=$(id -g)
-    export port_karma=3076
     export port_vue=3080
 
     docker-compose run --rm --service-ports node bash

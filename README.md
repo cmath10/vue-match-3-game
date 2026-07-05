@@ -2,12 +2,12 @@
 
 ## Project setup
 ```
-yarn install
+yarn install --registry https://registry.npmjs.org
 ```
 
 ### Compiles and hot-reloads for development
 ```
-yarn serve
+yarn dev
 ```
 
 ### Compiles and minifies for production
@@ -15,10 +15,12 @@ yarn serve
 yarn build
 ```
 
-### Lints and fixes files
+### Preview production build
+```
+yarn preview
+```
+
+### Lints files
 ```
 yarn lint
 ```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).

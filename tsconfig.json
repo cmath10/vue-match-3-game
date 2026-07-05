@@ -1,33 +1,38 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES2022",
     "noImplicitAny": true,
     "incremental": true,
-    "module": "esnext",
+    "module": "ESNext",
     "strict": false,
     "jsx": "preserve",
     "skipLibCheck": true,
-    "importHelpers": true,
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
+    "moduleResolution": "Bundler",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
-    "baseUrl": ".",
+    "isolatedModules": true,
+    "useDefineForClassFields": true,
     "types": [
-      "webpack-env"
+      "vite/client"
     ],
     "allowJs": true,
     "paths": {
       "@/*": [
-        "src/*"
+        "./src/*"
       ]
     },
     "lib": [
-      "esnext",
+      "ES2022",
       "dom",
-      "dom.iterable",
-      "scripthost"
+      "dom.iterable"
     ]
-  }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.vue",
+    "vite.config.ts",
+    "shims.d.ts"
+  ],
+  "references": []
 }

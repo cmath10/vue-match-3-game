@@ -3,6 +3,7 @@ node_modules
 /coverage
 /dist
 /web
+tsconfig.tsbuildinfo
 
 # local env files
 .env.local
