@@ -65,5 +65,10 @@ export default defineConfig({
 
   server: {
     port: Number(process.env.PORT_VUE) || DEFAULT_PORT,
+    strictPort: true,
+    allowedHosts: [
+      'vue-match-3-game.local',
+      'vue-match-3-game.test',
+    ],
   },
 })

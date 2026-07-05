@@ -18,6 +18,10 @@
                             >
                                 <b-game-tile :type="objective.type" :small="true" /> &times; {{ objective.count }}
                             </div>
+
+                            <div>
+                                Turns: {{ turns }}
+                            </div>
                         </div>
 
                         <div class="b-game-ground">
@@ -82,13 +86,14 @@ const WIDTH = 9
 const HEIGHT = 7
 
 const AVAILABLE_TILE_TYPES = [
-  TILE_TYPE.AIR,
-  TILE_TYPE.EARTH,
-  TILE_TYPE.FIRE,
-  TILE_TYPE.LIGHTNING,
-  TILE_TYPE.WATER,
+  TILE_TYPE.SWEETS_BARBARIS,
+  TILE_TYPE.SWEETS_COOKIE,
+  TILE_TYPE.SWEETS_LOLLIPOP,
+  TILE_TYPE.SWEETS_PILLOW,
+  TILE_TYPE.SWEETS_SOUFFLE,
 ]
 
+const COUNT_TURNS = 20
 const COUNT_SEED = 5
 const COUNT_MULTIPLIER_MIN = 3
 const COUNT_MULTIPLIER_MAX = 10
@@ -105,6 +110,7 @@ defineOptions({
 const grid = reactive(new TileGrid(WIDTH, HEIGHT)) as TileGrid
 const objectives = reactive<Objective[]>([])
 const counters = reactive<Counter[]>([])
+const turns = ref(COUNT_TURNS)
 const evaluating = ref(false)
 const updating = ref(false)
 
@@ -120,7 +126,7 @@ const objectivesComputed = computed(() => {
     }
   }
 
-  return objectives.map(mapper).filter((o: Objective) => o.count > 0)
+  return objectives.map(mapper)
 })
 
 const generateType = (i: number, j: number): TILE_TYPE => {
@@ -261,11 +267,18 @@ const updateGrid = () => {
 }
 
 const makeMove = (a: Tile, b: Tile) => {
+  if (turns.value === 0) {
+    alert('Game ended')
+
+    return
+  }
+
   evaluating.value = true
   swapTiles(a, b)
 
   if (getFilled().length) {
     updateGrid()
+    turns.value--
   } else {
     delay(() => {
       swapTiles(a, b)

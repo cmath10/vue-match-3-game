@@ -1,17 +1,23 @@
-version: "3.2"
 services:
   node:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     image: vue-match-3-game-node
+    user: node
+    command: yarn dev
+    working_dir: /var/www/vue-match-3-game
     environment:
-      UID: ${uid}
-      GID: ${gid}
-      PORT_VUE: ${port_vue}
-    ports:
-      - "${port_vue}:8080"
+      PORT_VUE: 8080
     volumes:
       - type: bind
         source: .
         target: /var/www/vue-match-3-game
-      - type: bind
-        source: "$SSH_AUTH_SOCK"
-        target: /ssh-auth.sock
+    labels:
+      traefik.port: 8080
+      traefik.enable: 'true'
+      traefik.http.routers.vue-match-3-game.rule: 'HostRegexp(`vue-match-3-game.{[^.]+}`)'
+      traefik.http.routers.vue-match-3-game.priority: 1
+      traefik.http.routers.vue-match-3-game.service: vue-match-3-game
+      traefik.http.services.vue-match-3-game.loadbalancer.server.port: '8080'
+      dev.orbstack.domains: 'vue-match-3-game.local'
