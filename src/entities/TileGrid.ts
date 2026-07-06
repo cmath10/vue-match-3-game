@@ -1,36 +1,55 @@
 import { Tile } from '@/types/game'
 
 export type TilePredicate = (tile: Tile, i: number, j: number) => boolean
+export type TilePosition = {
+  row: number
+  column: number
+}
 
 export default class TileGrid {
   private readonly width: number
   private readonly height: number
-  private tiles: Tile[][] = []
+  private tiles: Array<Array<Tile | null>> = []
 
   constructor (width: number, height: number) {
     this.width = width
     this.height = height
     for (let i = 0; i < height; i++) {
-      const row: Tile[] = []
+      const row: Array<Tile | null> = []
 
       for (let j = 0; j < width; j++) {
-        row.push({ type: null, selected: false })
+        row.push(null)
       }
 
       this.tiles.push(row)
     }
   }
 
-  public getTileList (): Tile[][] {
+  public getTileList (): Array<Array<Tile | null>> {
     return this.tiles
+  }
+
+  public getTiles (): Tile[] {
+    const tiles: Tile[] = []
+
+    this.forEach(tile => {
+      tiles.push(tile)
+    })
+
+    return tiles
   }
 
   public getTileByIndex (i: number, j: number): Tile | null {
     return this.tiles[i] ? this.tiles[i][j] || null : null
   }
 
-  public setTile (tile: Tile, i: number, j: number): void {
+  public setTile (tile: Tile | null, i: number, j: number, position?: TilePosition): void {
     this.tiles[i][j] = tile
+
+    if (tile) {
+      tile.row = position ? position.row : i
+      tile.column = position ? position.column : j
+    }
   }
 
   public indexOf (tile: Tile): number[] | null {
@@ -47,8 +66,10 @@ export default class TileGrid {
   public find (predicate: TilePredicate): Tile | null {
     for (let i = 0; i < this.tiles.length; i++) {
       for (let j = 0; j < this.tiles[i].length; j++) {
-        if (predicate(this.tiles[i][j], i, j)) {
-          return this.tiles[i][j]
+        const tile = this.tiles[i][j]
+
+        if (tile && predicate(tile, i, j)) {
+          return tile
         }
       }
     }
@@ -58,25 +79,29 @@ export default class TileGrid {
 
   public forEach (fn: (tile: Tile, i: number, j: number) => void) {
     this.tiles.forEach((row, i) => row.forEach((tile, j) => {
+      if (tile) {
+        fn(tile, i, j)
+      }
+    }))
+  }
+
+  public forEachCell (fn: (tile: Tile | null, i: number, j: number) => void) {
+    this.tiles.forEach((row, i) => row.forEach((tile, j) => {
       fn(tile, i, j)
     }))
   }
 
-  // eslint-disable-next-line complexity
   public shake (): void {
-    for (let i = this.height - 1; i >= 0; i--) {
-      for (let j = 0; j < this.width; j++) {
-        if (this.tiles[i][j].type === null) {
-          // eslint-disable-next-line max-depth
-          for (let k = i; k >= 0; k--) {
-            // eslint-disable-next-line max-depth
-            if (this.tiles[k][j].type !== null) {
-              const _tile = this.tiles[k][j]
-              this.tiles[k][j] = this.tiles[i][j]
-              this.tiles[i][j] = _tile
-              break
-            }
-          }
+    for (let j = 0; j < this.width; j++) {
+      let targetRow = this.height - 1
+
+      for (let i = this.height - 1; i >= 0; i--) {
+        const tile = this.tiles[i][j]
+
+        if (tile) {
+          this.setTile(null, i, j)
+          this.setTile(tile, targetRow, j)
+          targetRow--
         }
       }
     }

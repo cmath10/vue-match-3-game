@@ -7,7 +7,9 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "playwright:install": "playwright install chromium",
+    "test:playwright": "playwright test --config playwright.config.ts"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
@@ -16,6 +18,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.61.1",
     "@types/node": "^24.0.10",
     "@typescript-eslint/eslint-plugin": "^8.62.1",
     "@typescript-eslint/parser": "^8.62.1",

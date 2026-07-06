@@ -7,7 +7,7 @@ import vueParser from 'vue-eslint-parser'
 
 export default [
   {
-    ignores: ['dist/**', 'node_modules/**'],
+    ignores: ['artifacts/**', 'dist/**', 'node_modules/**', 'test-results/**'],
   },
   {
     files: ['*.config.{js,mjs,ts}', 'eslint.config.mjs'],
@@ -111,6 +111,16 @@ export default [
         ignore: [0, 1, -1],
         ignoreEnums: true,
       }],
+    },
+  },
+  {
+    files: ['tests/playwright/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-magic-numbers': 'off',
+      'complexity': 'off',
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
+      'max-nested-callbacks': 'off',
     },
   },
 ]

@@ -25,23 +25,27 @@
                         </div>
 
                         <div class="b-game-ground">
-                            <template v-for="(row, i) in grid.getTileList()">
+                            <div class="b-game-ground__cells">
                                 <div
-                                    v-for="(tile, j) in row"
-                                    :key="i + '-' + j + '-cell-' + tile.type"
-                                    :class="{ 'b-game-ground__cell--selected': tile.selected }"
+                                    v-for="cell in cells"
+                                    :key="cell.key"
+                                    :class="{ 'b-game-ground__cell--selected': cell.tile?.selected }"
                                     class="b-game-ground__cell"
+                                />
+                            </div>
+
+                            <div class="b-game-ground__tiles">
+                                <b-game-tile
+                                    v-for="tile in activeTiles"
+                                    :key="tile.id"
+                                    :class="{ 'b-game-ground__tile--selected': tile.selected }"
+                                    :data-tile-id="tile.id"
+                                    :style="getTileStyle(tile)"
+                                    :type="tile.type"
+                                    class="b-game-ground__tile"
                                     @click="onTileClick(tile)"
-                                >
-                                    <transition name="t-game-fade">
-                                        <b-game-tile
-                                            v-if="tile.type !== null"
-                                            :key="i + '-' + j + '-tile-' + tile.type"
-                                            :type="tile.type"
-                                        />
-                                    </transition>
-                                </div>
-                            </template>
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -70,18 +74,12 @@
 
 <script lang="ts" setup>
 import { computed, nextTick, reactive, ref } from 'vue'
-
 import BGameTile from '@/components/blocks/BGameTile.vue'
-
-import type {
-  Counter,
-  Objective,
-  Tile,
-} from '@/types/game'
-
+import type { Counter, Objective, Tile } from '@/types/game'
 import { TILE_TYPE } from '@/enums/game'
 import TileGrid from '@/entities/TileGrid'
 
+type Cell = { key: string; tile: Tile | null }
 const WIDTH = 9
 const HEIGHT = 7
 
@@ -97,24 +95,25 @@ const COUNT_TURNS = 20
 const COUNT_SEED = 5
 const COUNT_MULTIPLIER_MIN = 3
 const COUNT_MULTIPLIER_MAX = 10
+const ANIMATION_DELAY = 320
 
 const random = <T>(array: T[]): T => array[Math.floor(Math.random() * array.length)]
 const range = (start: number, end: number): number[] => {
   return Array(end - start + 1).fill(1).map((_, idx) => start + idx)
 }
 
-defineOptions({
-  name: 'MainView',
-})
+defineOptions({ name: 'MainView' })
 
 const grid = reactive(new TileGrid(WIDTH, HEIGHT)) as TileGrid
 const objectives = reactive<Objective[]>([])
 const counters = reactive<Counter[]>([])
 const turns = ref(COUNT_TURNS)
 const evaluating = ref(false)
-const updating = ref(false)
+const nextTileId = ref(0)
 
-const locked = computed(() => evaluating.value || updating.value)
+const locked = computed(() => evaluating.value)
+const activeTiles = computed(() => grid.getTiles())
+const cells = computed(() => getCells())
 const objectivesComputed = computed(() => {
   const mapper = (o: Objective) => {
     const counter = counters.find((c: Counter) => c.type === o.type)
@@ -128,6 +127,26 @@ const objectivesComputed = computed(() => {
 
   return objectives.map(mapper)
 })
+
+const createTile = (type: TILE_TYPE, row: number, column: number): Tile => (
+  { id: nextTileId.value++, type, selected: false, row, column }
+)
+
+const getTileStyle = (tile: Tile) => {
+  return {
+    transform: `translate(calc(${tile.column} * (var(--cell-size) + var(--cell-gap)) + var(--tile-offset)), calc(${tile.row} * (var(--cell-size) + var(--cell-gap)) + var(--tile-offset)))`,
+  }
+}
+
+const getCells = (): Cell[] => {
+  const cells: Cell[] = []
+
+  grid.forEachCell((tile: Tile | null, i: number, j: number) => {
+    cells.push({ key: `${i}-${j}`, tile })
+  })
+
+  return cells
+}
 
 const generateType = (i: number, j: number): TILE_TYPE => {
   const excluded: Array<TILE_TYPE | null> = [
@@ -186,14 +205,15 @@ const swapTiles = (a: Tile, b: Tile) => {
 }
 
 const delay = (callback: () => void) => {
-  const tick = 200
   return new Promise<void>(resolve => {
     setTimeout(() => {
-      nextTick(callback)
+      callback()
       resolve()
-    }, tick)
+    }, ANIMATION_DELAY)
   })
 }
+
+const nextAnimationFrame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
 
 // eslint-disable-next-line max-lines-per-function
 const getFilled = (): Tile[] => {
@@ -231,39 +251,69 @@ const getFilled = (): Tile[] => {
 
 const clearFilled = () => {
   getFilled().forEach((tile: Tile) => {
+    const index = grid.indexOf(tile)
     const counter = counters.find((c: Counter) => c.type === tile.type)
 
     if (counter) {
       counter.count++
     }
 
-    tile.type = null
-  })
-}
+    tile.selected = false
 
-const refillGrid = () => {
-  grid.forEach((tile: Tile) => {
-    if (tile.type === null) {
-      tile.type = random(AVAILABLE_TILE_TYPES)
+    if (index) {
+      const [i, j] = index
+      grid.setTile(null, i, j)
     }
   })
 }
 
-const updateGrid = () => {
-  updating.value = true
-  delay(() => { clearFilled() })
-    .then(() => delay(() => { grid.shake() }))
-    .then(() => delay(() => { refillGrid() }))
-    .then(() => delay(() => { clearFilled() }))
-    .then(() => delay(() => {
-      // eslint-disable-next-line max-nested-callbacks
-      if (grid.find((tile: Tile) => tile.type === null)) {
-        updateGrid()
-      } else {
-        updating.value = false
-        evaluating.value = false
+const refillGrid = () => {
+  for (let j = 0; j < WIDTH; j++) {
+    let spawnRow = -1
+
+    for (let i = HEIGHT - 1; i >= 0; i--) {
+      if (grid.getTileByIndex(i, j) === null) {
+        spawnTile(i, j, spawnRow)
+        spawnRow--
       }
-    }))
+    }
+  }
+}
+
+const spawnTile = (i: number, j: number, spawnRow: number) => {
+  const tile = createTile(random(AVAILABLE_TILE_TYPES), spawnRow, j)
+
+  grid.setTile(tile, i, j, {
+    row: spawnRow,
+    column: j,
+  })
+
+  void moveSpawnedTileToCell(tile, i, j)
+}
+
+const moveSpawnedTileToCell = async (tile: Tile, i: number, j: number) => {
+  await nextTick()
+  await nextAnimationFrame()
+  await nextAnimationFrame()
+
+  const currentTile = grid.getTileByIndex(i, j)
+
+  if (currentTile?.id === tile.id) {
+    moveTileToCell(currentTile, i, j)
+  }
+}
+
+const moveTileToCell = (tile: Tile, i: number, j: number) => {
+  tile.row = i
+  tile.column = j
+}
+
+const updateGrid = () => {
+  while (getFilled().length) {
+    clearFilled()
+    grid.shake()
+    refillGrid()
+  }
 }
 
 const makeMove = (a: Tile, b: Tile) => {
@@ -277,14 +327,23 @@ const makeMove = (a: Tile, b: Tile) => {
   swapTiles(a, b)
 
   if (getFilled().length) {
-    updateGrid()
-    turns.value--
+    applySuccessfulMove()
   } else {
-    delay(() => {
-      swapTiles(a, b)
-      evaluating.value = false
-    })
+    revertFailedMove(a, b)
   }
+}
+
+const applySuccessfulMove = () => {
+  updateGrid()
+  turns.value--
+  evaluating.value = false
+}
+
+const revertFailedMove = (a: Tile, b: Tile) => {
+  delay(() => {
+    swapTiles(a, b)
+    evaluating.value = false
+  })
 }
 
 const onTileClick = (tile: Tile) => {
@@ -295,24 +354,30 @@ const onTileClick = (tile: Tile) => {
   const selectedTile = grid.find((tile: Tile) => tile.selected)
 
   if (selectedTile !== null) {
-    if (selectedTile !== tile) {
-      if (grid.isNeighbors(selectedTile, tile)) {
-        makeMove(selectedTile, tile)
-      } else {
-        tile.selected = true
-      }
-    }
-    selectedTile.selected = false
+    handleSelectedTileClick(selectedTile, tile)
   } else {
     tile.selected = true
   }
 }
 
+const handleSelectedTileClick = (selectedTile: Tile, tile: Tile) => {
+  if (selectedTile !== tile) {
+    if (grid.isNeighbors(selectedTile, tile)) {
+      makeMove(selectedTile, tile)
+    } else {
+      tile.selected = true
+    }
+  }
+
+  selectedTile.selected = false
+}
+
 const init = () => {
-  objectives.push(generateObjective())
-  objectives.push(generateObjective())
-  grid.forEach((tile: Tile, i: number, j: number) => {
-    tile.type = generateType(i, j)
+  objectives.push(generateObjective(), generateObjective())
+  grid.forEachCell((tile: Tile | null, i: number, j: number) => {
+    if (tile === null) {
+      grid.setTile(createTile(generateType(i, j), i, j), i, j)
+    }
   })
   AVAILABLE_TILE_TYPES.forEach(type => {
     counters.push({ type, count: 0 })
@@ -326,7 +391,6 @@ init()
 @import "assets/scss/variables";
 @import "bootstrap/scss/bootstrap";
 @import "assets/scss/normalize";
-
 @import "assets/scss/blocks/b-game-ground";
 @import "assets/scss/blocks/b-game-objective";
 @import "assets/scss/transitions/t-game-fade";

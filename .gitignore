@@ -3,6 +3,9 @@ node_modules
 /coverage
 /dist
 /web
+/artifacts
+/playwright-report
+/test-results
 tsconfig.tsbuildinfo
 
 # local env files

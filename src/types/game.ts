@@ -11,6 +11,9 @@ export type Objective = {
 }
 
 export type Tile = {
-  type: TILE_TYPE | null
+  id: number
+  type: TILE_TYPE
   selected: boolean
+  row: number
+  column: number
 }

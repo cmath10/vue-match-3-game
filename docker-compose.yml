@@ -21,3 +21,18 @@ services:
       traefik.http.routers.vue-match-3-game.service: vue-match-3-game
       traefik.http.services.vue-match-3-game.loadbalancer.server.port: '8080'
       dev.orbstack.domains: 'vue-match-3-game.local'
+
+  playwright:
+    build:
+      context: .
+      dockerfile: docker/playwright/Dockerfile
+    user: "${UID:-1000}:${GID:-1000}"
+    working_dir: /var/www/vue-match-3-game
+    environment:
+      PLAYWRIGHT_BASE_URL: http://node:8080
+    volumes:
+      - type: bind
+        source: .
+        target: /var/www/vue-match-3-game
+    ipc: host
+    init: true
