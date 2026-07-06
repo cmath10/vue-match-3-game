@@ -1,83 +1,73 @@
 <template>
-    <div class="d-flex flex-column h-100">
-        <header class="bg-primary-dark">
-            <div class="container">
-                <h1>Game</h1>
-            </div>
-        </header>
+    <div class="b-game-layout d-flex flex-column flex-lg-row">
+        <aside class="b-game-layout__menu bg-primary-dark p-4 d-flex flex-column">
+            <b-game-menu
+                :counters="counters"
+                :objectives="objectives"
+                :turns="turns"
+                @new-game="startNewGame"
+            />
+        </aside>
 
-        <main class="flex-grow-1">
-            <div class="py-3">
-                <div class="container text-center">
-                    <div class="d-inline-flex">
-                        <div class="b-game-objective me-4">
-                            <div
-                                v-for="(objective, index) in objectivesComputed"
-                                :key="index"
-                                class="d-flex align-items-center p-3"
-                            >
-                                <b-game-tile :type="objective.type" :small="true" /> &times; {{ objective.count }}
-                            </div>
+        <main class="b-game-layout__field flex-grow-1 d-flex flex-column p-3 p-lg-4">
+            <div class="b-game-layout__board flex-grow-1 d-flex align-items-center justify-content-center">
+                <div class="b-game-ground">
+                    <div class="b-game-ground__cells">
+                        <div
+                            v-for="cell in cells"
+                            :key="cell.key"
+                            :class="{ 'b-game-ground__cell--selected': cell.tile?.selected }"
+                            class="b-game-ground__cell"
+                        />
+                    </div>
 
-                            <div>
-                                Turns: {{ turns }}
-                            </div>
-                        </div>
-
-                        <div class="b-game-ground">
-                            <div class="b-game-ground__cells">
-                                <div
-                                    v-for="cell in cells"
-                                    :key="cell.key"
-                                    :class="{ 'b-game-ground__cell--selected': cell.tile?.selected }"
-                                    class="b-game-ground__cell"
-                                />
-                            </div>
-
-                            <div class="b-game-ground__tiles">
-                                <b-game-tile
-                                    v-for="tile in activeTiles"
-                                    :key="tile.id"
-                                    :class="{ 'b-game-ground__tile--selected': tile.selected }"
-                                    :data-tile-id="tile.id"
-                                    :style="getTileStyle(tile)"
-                                    :type="tile.type"
-                                    class="b-game-ground__tile"
-                                    @click="onTileClick(tile)"
-                                />
-                            </div>
-                        </div>
+                    <div class="b-game-ground__tiles">
+                        <b-game-tile
+                            v-for="tile in activeTiles"
+                            :key="tile.id"
+                            :class="{ 'b-game-ground__tile--selected': tile.selected }"
+                            :data-tile-id="tile.id"
+                            :style="getTileStyle(tile)"
+                            :type="tile.type"
+                            class="b-game-ground__tile"
+                            @click="onTileClick(tile)"
+                        />
                     </div>
                 </div>
             </div>
+
+            <footer class="b-game-layout__footer pt-3 mt-3">
+                <div class="d-flex flex-column flex-sm-row gap-2 gap-sm-4 justify-content-center">
+                    <span>
+                        Code:
+                        <a href="https://github.com/cmath10" class="b-game-layout__link">
+                            https://github.com/cmath10
+                        </a>
+                    </span>
+
+                    <span>
+                        Artwork:
+                        <a href="https://www.artstation.com/jackhook" class="b-game-layout__link">
+                            https://www.artstation.com/jackhook
+                        </a>
+                    </span>
+                </div>
+            </footer>
         </main>
-
-        <footer class="bg-primary-dark">
-            <div class="container pt-4 pb-5">
-                <p>
-                    Code:
-                    <a href="https://github.com/cmath10" class="text-light">
-                        https://github.com/cmath10
-                    </a>
-                </p>
-
-                <p>
-                    Artwork:
-                    <a href="https://www.artstation.com/jackhook" class="text-light">
-                        https://www.artstation.com/jackhook
-                    </a>
-                </p>
-            </div>
-        </footer>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, reactive, ref } from 'vue'
-import BGameTile from '@/components/blocks/BGameTile.vue'
 import type { Counter, Objective, Tile } from '@/types/game'
-import { TILE_TYPE } from '@/enums/game'
+
+import { computed, nextTick, reactive, ref } from 'vue'
+
+import BGameMenu from '@/components/blocks/BGameMenu.vue'
+import BGameTile from '@/components/blocks/BGameTile.vue'
+
 import TileGrid from '@/entities/TileGrid'
+
+import { TILE_TYPE } from '@/enums/game'
 
 type Cell = { key: string; tile: Tile | null }
 const WIDTH = 9
@@ -109,24 +99,12 @@ const objectives = reactive<Objective[]>([])
 const counters = reactive<Counter[]>([])
 const turns = ref(COUNT_TURNS)
 const evaluating = ref(false)
+const gameVersion = ref(0)
 const nextTileId = ref(0)
 
 const locked = computed(() => evaluating.value)
 const activeTiles = computed(() => grid.getTiles())
 const cells = computed(() => getCells())
-const objectivesComputed = computed(() => {
-  const mapper = (o: Objective) => {
-    const counter = counters.find((c: Counter) => c.type === o.type)
-    const collected = counter ? counter.count : 0
-
-    return {
-      type: o.type,
-      count: o.count - collected,
-    }
-  }
-
-  return objectives.map(mapper)
-})
 
 const createTile = (type: TILE_TYPE, row: number, column: number): Tile => (
   { id: nextTileId.value++, type, selected: false, row, column }
@@ -315,25 +293,37 @@ const makeMove = async (a: Tile, b: Tile) => {
     return
   }
 
+  const version = gameVersion.value
+
   evaluating.value = true
   swapTiles(a, b)
 
   if (getFilled().length) {
-    await applySuccessfulMove()
+    await applySuccessfulMove(version)
   } else {
-    await revertFailedMove(a, b)
+    await revertFailedMove(a, b, version)
   }
 }
 
-const applySuccessfulMove = async () => {
+const applySuccessfulMove = async (version: number) => {
   await waitAnimation()
+
+  if (version !== gameVersion.value) {
+    return
+  }
+
   updateGrid()
   turns.value--
   evaluating.value = false
 }
 
-const revertFailedMove = async (a: Tile, b: Tile) => {
+const revertFailedMove = async (a: Tile, b: Tile, version: number) => {
   await waitAnimation()
+
+  if (version !== gameVersion.value) {
+    return
+  }
+
   swapTiles(a, b)
   evaluating.value = false
 }
@@ -364,26 +354,46 @@ const handleSelectedTileClick = (selectedTile: Tile, tile: Tile) => {
   selectedTile.selected = false
 }
 
-const init = () => {
-  objectives.push(generateObjective(), generateObjective())
-  grid.forEachCell((tile: Tile | null, i: number, j: number) => {
-    if (tile === null) {
-      grid.setTile(createTile(generateType(i, j), i, j), i, j)
-    }
-  })
+const initObjectives = () => {
+  objectives.push(generateObjective())
+  objectives.push(generateObjective())
+}
+
+const initCounters = () => {
   AVAILABLE_TILE_TYPES.forEach(type => {
     counters.push({ type, count: 0 })
   })
 }
 
-init()
+const fillGrid = () => {
+  grid.forEachCell((tile: Tile | null, i: number, j: number) => {
+    if (tile === null) {
+      grid.setTile(createTile(generateType(i, j), i, j), i, j)
+    }
+  })
+}
+
+const startNewGame = () => {
+  gameVersion.value++
+  evaluating.value = false
+  turns.value = COUNT_TURNS
+  objectives.splice(0)
+  counters.splice(0)
+  grid.clear()
+
+  initObjectives()
+  fillGrid()
+  initCounters()
+}
+
+startNewGame()
 </script>
 
 <style lang="scss">
 @import "assets/scss/variables";
 @import "bootstrap/scss/bootstrap";
 @import "assets/scss/normalize";
+@import "assets/scss/blocks/b-game-layout";
 @import "assets/scss/blocks/b-game-ground";
-@import "assets/scss/blocks/b-game-objective";
 @import "assets/scss/transitions/t-game-fade";
 </style>

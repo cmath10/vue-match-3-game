@@ -16,5 +16,6 @@ $primary: #181321;
 $primary-dark: color.adjust($primary, $lightness: -5%);
 
 $theme-colors: (
+  "light": $gray-100,
   "primary-dark": $primary-dark,
 );

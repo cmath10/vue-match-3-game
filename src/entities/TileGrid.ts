@@ -91,6 +91,12 @@ export default class TileGrid {
     }))
   }
 
+  public clear (): void {
+    this.forEachCell((_, i, j) => {
+      this.setTile(null, i, j)
+    })
+  }
+
   public shake (): void {
     for (let j = 0; j < this.width; j++) {
       let targetRow = this.height - 1

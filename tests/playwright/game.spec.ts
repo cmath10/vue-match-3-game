@@ -80,6 +80,17 @@ const getTiles = async (page: Page): Promise<TileSnapshot[]> => {
   }, BOARD_WIDTH)
 }
 
+const getObjectiveTypes = async (page: Page): Promise<string[]> => {
+  return page.locator('.b-game-menu__objective .b-game-tile').evaluateAll((elements) => {
+    return elements.map((element) => {
+      return element.className.toString()
+        .split(/\s+/)
+        .find((name: string) => name.startsWith('b-game-tile--') && name !== 'b-game-tile--small')
+        ?.replace('b-game-tile--', '') || ''
+    })
+  })
+}
+
 const getBoard = (tiles: TileSnapshot[]): string[][] => {
   const board = Array.from({ length: BOARD_HEIGHT }, () => Array.from({ length: BOARD_WIDTH }, () => ''))
 
@@ -200,6 +211,10 @@ test('valid moves keep animated tiles inside the board', async ({ page }, testIn
   await seedMathRandom(page)
   await page.goto('/')
   await expect(page.locator('.b-game-ground')).toBeVisible()
+
+  const objectiveTypes = await getObjectiveTypes(page)
+
+  expect(new Set(objectiveTypes).size).toBe(objectiveTypes.length)
   await testInfo.attach('initial-board', {
     body: await page.screenshot(),
     contentType: 'image/png',
@@ -234,8 +249,17 @@ test('valid moves keep animated tiles inside the board', async ({ page }, testIn
     contentType: 'image/png',
   })
 
+  await expect(page.locator('.b-game-menu__turns-value')).toHaveText('19')
   await expectTilesInsideGround(page)
   await expect(page.locator('.b-game-ground__tile')).toHaveCount(BOARD_WIDTH * BOARD_HEIGHT)
+
+  await page.getByRole('button', { name: 'New game' }).click()
+  await expect(page.locator('.b-game-menu__turns-value')).toHaveText('20')
+  await expect(page.locator('.b-game-ground__tile')).toHaveCount(BOARD_WIDTH * BOARD_HEIGHT)
+
+  const newGameObjectiveTypes = await getObjectiveTypes(page)
+
+  expect(new Set(newGameObjectiveTypes).size).toBe(newGameObjectiveTypes.length)
 
   await makeValidMove(page)
   await page.waitForTimeout(800)

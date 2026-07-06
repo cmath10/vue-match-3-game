@@ -4,12 +4,16 @@
 .b-game-ground {
   @include m-game-panel();
 
-  --cell-size: 4rem;
-  --tile-size: 3.5rem;
   --cell-gap: 0.2rem;
-  --tile-offset: calc((var(--cell-size) - var(--tile-size)) / 2);
   --tile-transition-duration: 0.32s;
   --panel-padding: 0.3rem;
+  --cell-horizontal-gaps: calc(var(--cell-gap) + var(--cell-gap) + var(--cell-gap) + var(--cell-gap) + var(--cell-gap) + var(--cell-gap) + var(--cell-gap) + var(--cell-gap));
+  --cell-vertical-gaps: calc(var(--cell-gap) + var(--cell-gap) + var(--cell-gap) + var(--cell-gap) + var(--cell-gap) + var(--cell-gap));
+  --cell-size-by-width: calc((var(--game-board-available-width) - var(--cell-horizontal-gaps) - var(--panel-padding) - var(--panel-padding)) / 9);
+  --cell-size-by-height: calc((var(--game-board-available-height) - var(--cell-vertical-gaps) - var(--panel-padding) - var(--panel-padding)) / 7);
+  --cell-size: clamp(1rem, min(var(--cell-size-by-width), var(--cell-size-by-height), 6rem), 6rem);
+  --tile-size: calc(var(--cell-size) * 0.875);
+  --tile-offset: calc((var(--cell-size) - var(--tile-size)) / 2);
 
   position: relative;
   display: inline-block;
@@ -46,6 +50,8 @@
     position: absolute;
     top: 0;
     left: 0;
+    width: var(--tile-size);
+    height: var(--tile-size);
     cursor: pointer;
     transition:
       transform var(--tile-transition-duration) cubic-bezier(0.22, 1, 0.36, 1),

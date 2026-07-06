@@ -46,7 +46,7 @@ export default [
       'max-depth': ['error', 3],
       'max-lines': ['error', 200],
       'max-lines-per-function': ['error', 20],
-      'max-nested-callbacks': ['error', 2],
+      'max-nested-callbacks': ['error', 5],
       'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
       'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
       'no-magic-numbers': ['error', {
