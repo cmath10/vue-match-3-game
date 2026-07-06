@@ -1,0 +1,2453 @@
+{
+  "schemaVersion": 1,
+  "width": 8,
+  "height": 8,
+  "cases": [
+    {
+      "name": "accepted move 1",
+      "board": [
+        "AEAEAEAB",
+        "CBEEACEC",
+        "CAEDCBBC",
+        "EACAEBBD",
+        "CDACEDCE",
+        "EDCECCDA",
+        "DAABDBEA",
+        "AADAADAE"
+      ],
+      "move": {
+        "from": [
+          7,
+          5
+        ],
+        "to": [
+          7,
+          6
+        ]
+      },
+      "refill": "AEABDEDCDAAEABCEAECADEEBEEDAEECEEBDDADAADCCCCDCCEDEEDBBABCABECBABADBBCECBDCDADECAEDDEBEECBCBBBEECEBCABBDEBBBBECABDDDBCCEBABCDEEBAEDBAEEDCEBEEDADADBAADBBAABBBDEDDAEBDBCCACDDDCABDDBEDDABCAEECCEAAEAAAACDCDADABBBDBACDCBDCDDBAEBEDACECBECDDDCAEDCEAEBEDAEDDCCDBBEECBBBCCCECEBABABEBEAECCDAEEECCECEACECCAABAABDEDCEDBDDBBBCACCBEAC",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "AEAAEAAB",
+          "CBEEAEEC",
+          "CAEEACBC",
+          "EACDCBBD",
+          "CDAAEBCE",
+          "EDCCEDDA",
+          "DAAECCEA",
+          "AADBDBDE"
+        ],
+        "cleared": {
+          "A": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 2",
+      "board": [
+        "EDDBDCAC",
+        "DDCABADA",
+        "CBBCBEBA",
+        "ABEECABE",
+        "EDDADEED",
+        "ECECDBBA",
+        "DBEABBCC",
+        "CCDBAEEB"
+      ],
+      "move": {
+        "from": [
+          3,
+          2
+        ],
+        "to": [
+          4,
+          2
+        ]
+      },
+      "refill": "AEADCADCDECDCEDEBDEBAEABCABDECEAEEEAAEDBDCCDDEABAABCBBDCCCECBEACEBCDDCCDDCCAEDDEBBCADDAEDEDAABBABADEEEAEECBCDBCEBCBECCDACDCDDDBDCBCABBEACECDACACECEAABADDDCCBDBADCCDAECBCDABCEBADACDCBDDDDACABDDBCBDEDEAAADADBACADDACDDCBEDBEEABCDBACEDDBABDECBDCECBBAECDCDCEDABCDCDECACEBAEDABACEDBBCCDEBAAAEDACDCCBCBBECABEDCBACDCECDEDCECEBBA",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "EDABDCAC",
+          "DDEABADA",
+          "CBACBEBA",
+          "ABDECABE",
+          "EDCADEED",
+          "ECBCDBBA",
+          "DBDABBCC",
+          "CCDBAEEB"
+        ],
+        "cleared": {
+          "E": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 3",
+      "board": [
+        "BAACADDE",
+        "BDBECBAA",
+        "EABAEABC",
+        "DDADBCBD",
+        "ADBBECEE",
+        "AEBADEBC",
+        "BCEBBCBB",
+        "BADCCBDE"
+      ],
+      "move": {
+        "from": [
+          1,
+          5
+        ],
+        "to": [
+          1,
+          6
+        ]
+      },
+      "refill": "BCBBDCAEBCBDBEBBDAEABCDBEDDCABEEBBCCECBECEBECCEAAABDACEECBEEDBCCCBDEDEBBABDBACEDCEEEEDABEAAEDECEAAECEBCDBABEEEADBEAEABAEACEAECCEDDABDDEACDEDABDBECCDECEABEEBEBCACAABCDDDACBCECDADDACABECCBCBBCADABDEBABEADBDBDCAEAEBBCCDBADAEBDEBCAEDBCCEABACADDDCEBCBECAAABBACDDCCDECDBCEEAEDEABDCDAEBABBDEADDBBAEBBDEDADDCADEBDDDDBDDDBBBCCCAC",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "BAACADBE",
+          "BDBECACA",
+          "EABAEABC",
+          "DDADBCDD",
+          "ADBBECEE",
+          "AEBADEBC",
+          "BCEBBCBB",
+          "BADCCBDE"
+        ],
+        "cleared": {
+          "B": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 4",
+      "board": [
+        "AAEABACB",
+        "CBCCDADA",
+        "CCEACBCE",
+        "AEBCBCDA",
+        "BDCACEBC",
+        "EBABCCEE",
+        "ADCEEDCA",
+        "ADBBEDCA"
+      ],
+      "move": {
+        "from": [
+          3,
+          3
+        ],
+        "to": [
+          3,
+          4
+        ]
+      },
+      "refill": "ABDEACCBCCCCEBCEEDDBCADADDDEEEEBECDBABADABCDDEBAEDECEEABECCDBEDEECCAECBEDACCAABBBDECDCACDCDAEBEDCBDCAACCACDCBBEADDEEAABADBECDBCADEACECDEEBDECEBCADDBBDAEACBEBADDEDEADAACBCDAEEEAABEECBAEDEDCCDDBAEBABEBDEBBBACBEAECAEDEBCCDACEBBDDEEBCCBDBCECCDABEBEBCCBDBCCABAACEADBAEEDCEDDCDDDEDCAABEDCCCBEBCAADBAEADCDBCABDCCACDDBEAEBCCCDED",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "AAEAEACB",
+          "CBCCDADA",
+          "CCEABBCE",
+          "AEBBACDA",
+          "BDCABEBC",
+          "EBABDCEE",
+          "ADCEEDCA",
+          "ADBBEDCA"
+        ],
+        "cleared": {
+          "C": 4
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 5",
+      "board": [
+        "ADBDDBCC",
+        "EDAADBBE",
+        "ACBCECDA",
+        "EEABDABA",
+        "ADAEAEAD",
+        "ACCBACAB",
+        "CDDBCBDE",
+        "EEAECACB"
+      ],
+      "move": {
+        "from": [
+          0,
+          1
+        ],
+        "to": [
+          0,
+          2
+        ]
+      },
+      "refill": "DEEDDEBDAAABCCDBCACBAAEBBBBBDBCBEAEDDEADDBBBCBCBCABCDECAEAECDAEBDABABDACECBBDBCABEEECDECCBBABCDBCEAAABAEBBAAAECDBCBCDDDCCBECCEADCBADCDEAEBCDDBADCBCABCECBEDBACBDAAAAAABEDECEECDBABCADCEEDBCBCEDADCBDBBADBDAAAACACBBBCDEAEEAACDDCBDAEACBECDDACECEDDABBABDDCDACBCCBCCDAEEACCCADDADEACEBDBACDACDBEAAEAABBCDEBADBBCBDEBEEEBDEADECBAD",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "ABDEEBCC",
+          "EDAADBBE",
+          "ACBCECDA",
+          "EEABDABA",
+          "ADAEAEAD",
+          "ACCBACAB",
+          "CDDBCBDE",
+          "EEAECACB"
+        ],
+        "cleared": {
+          "D": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 6",
+      "board": [
+        "EAEBABAC",
+        "DBDBABDB",
+        "BEDCBAAD",
+        "CBBEDEAE",
+        "CECDEDCB",
+        "ACABBEAA",
+        "DBCECCBE",
+        "CBADBBEE"
+      ],
+      "move": {
+        "from": [
+          2,
+          3
+        ],
+        "to": [
+          2,
+          4
+        ]
+      },
+      "refill": "BECCBEBCBDCCBBAEACEBCDBEBEEBECEBBEEDDCBEAEABCCBAAEBCEAADCBBACDADEEBAEECACDCBEBADEECDDCBEBCACBDBDDDBEADEEEDCEBDACEAAAAEEEECBACDCADDDEADEDDBCABACBAEBAECCDECDACCBCDEDDDAADBCEAECECDEEBEAAABDDDBADECCEDABDDBDEBEAAABBEEACDEAEBDCCEAEDABAAADCDAECACCDBABAECBBCBBDADAEEBBBBEDABDEEBBCCECCAEACCDEDBEBABEDDDDAEACAEADAEBDCACBACECAEACAB",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "EAECABAC",
+          "DBDEABDB",
+          "BEDBCAAD",
+          "CBBEDEAE",
+          "CECDEDCB",
+          "ACABBEAA",
+          "DBCECCBE",
+          "CBADBBEE"
+        ],
+        "cleared": {
+          "B": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 7",
+      "board": [
+        "ACDBCBCC",
+        "ADCECBAE",
+        "DDBEBDCE",
+        "CBCCEDEC",
+        "EADECAEA",
+        "CAAEDEAA",
+        "BEECEABC",
+        "BECBCEAD"
+      ],
+      "move": {
+        "from": [
+          6,
+          2
+        ],
+        "to": [
+          6,
+          3
+        ]
+      },
+      "refill": "AEDDACCBEEDEBEBBEDEEBEDEEEACAECAABCADCABCBBEEABCCAEACBDDABDBEBCBEDACAECBCDBEBECBBBDDEDBABEDABEDCEDCDDAEDAAEDDECDDDCCDEDDCDEDDBAECEEDCADEAEDEEDDEDEABABCDBCBCDCACDCDEAADBAACDECBCEDEEDAEAAECDABCCADCCCCAAEBBEDDEEBDBECBDEDBAAAEDCADADDCCBDBAACCEEDBBEADBBEAACEAADCEACBCBECCAEBADDECDDACBBDBDDABCCEBCBCAADCAEDDCDADECDABEEEEBCCEAC",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "ACDDCBCC",
+          "ADCECBAE",
+          "DDBABDCE",
+          "CBCBEDEC",
+          "EADECAEA",
+          "CAAEDEAA",
+          "BECCEABC",
+          "BECBCEAD"
+        ],
+        "cleared": {
+          "E": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 8",
+      "board": [
+        "ACDABCCB",
+        "CCABBCAE",
+        "DBEDDEDC",
+        "ADEBBECC",
+        "BECCEDEA",
+        "DCCDAEBC",
+        "DCEEDBEE",
+        "BEBDDEDE"
+      ],
+      "move": {
+        "from": [
+          2,
+          4
+        ],
+        "to": [
+          3,
+          4
+        ]
+      },
+      "refill": "ADBAAADEBADAABAAEDAEADAEABCDDCDDAECDDCCABBDEBBADDDCDDEBCBBDDCDBBDDBECABDBBDCABBADCDCECAEBCBAEAEEEDEBCBEEBCAAAEBCDBBCBADBCCCAAECBBACCCABABEBDCDCDADABDDABCCBCDBEEDCDACBCABCCEBEEEBADBCBCBEABACDEDDBADADACEDBCEEDEBAECDEBDDEEEABCEBBCACEDEBEBBCECDCBCDEBDCBCABDAEBCEDDAABDECCBECDEECACCDCBCCCDCDABABCBECBDAEEACCDDBDCEBECBCEDCCECA",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "ACDABCCB",
+          "CCABDCAE",
+          "DBEDAEDC",
+          "ADEBDECC",
+          "BECCEDEA",
+          "DCCDAEBC",
+          "DCEEDBEE",
+          "BEBDDEDE"
+        ],
+        "cleared": {
+          "B": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 9",
+      "board": [
+        "BBDADCEA",
+        "AEDACDCC",
+        "CDEDEDDC",
+        "EBDABADB",
+        "EDEBEBAB",
+        "DEBECACA",
+        "BBCDBBCA",
+        "DEAACDDC"
+      ],
+      "move": {
+        "from": [
+          5,
+          0
+        ],
+        "to": [
+          5,
+          1
+        ]
+      },
+      "refill": "BDEBDEEAEAAADDBEAEBEAAABDABEBDCAEDDACBAEEDBEDCDBCADCEEEDAEDABEEBBAECCDACCAEEAAECCCBAEABEBDDCACACEAABCDBACDDCBBEBEDEEACDCDDCCDCBADBDDDDBACDAECAAABEACABAABDDEDACCBCABBDDDADBECAEEEDAAEEABDEBBAAEDEBAAACAADBBAAADEDCCAEAABEACDDBBECDEDADAECBBBEBAAABABACCAEBEBACCBAEAABCDAECEAEBECDDADECEABBCDABBEAEABDDCADAEDCBDDBBEDABAEACCBBACA",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "EBDADCEA",
+          "DEDACDCC",
+          "BDEDEDDC",
+          "BBDABADB",
+          "ADEBEBAB",
+          "CDBECACA",
+          "BBCDBBCA",
+          "DEAACDDC"
+        ],
+        "cleared": {
+          "E": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 10",
+      "board": [
+        "DBBEBECA",
+        "DDBDEBBE",
+        "CDEBCCED",
+        "DACBBCBE",
+        "BAAEBEEB",
+        "ABBADBDA",
+        "CDDEEBEB",
+        "DEEBADEA"
+      ],
+      "move": {
+        "from": [
+          3,
+          0
+        ],
+        "to": [
+          3,
+          1
+        ]
+      },
+      "refill": "DBEECBBBDDEAABEADAABDEBBCBDEAEACAACAEBBABAEECAEEECABAAEAACCEADCEDBAEADCBCBDACBDBDABCDCCEBABEABBCEBEBEDDCADDCEAEAEDCDCBECEDEBCDCCAEBAECABCADAAEAADEDBBCAEEBEAEBCCAABDDCAEEACCCDACAECDEAEEAABCAADAEEAEDEAECDAAEADBEDBECABDECDBEECDDBACCEACBCBBADBCCDBDBCBBDAECBDCBCABAACBEAEDACACDDBDABADAEDCBCDBBAECBAABDDBCDDCBECDECECEABCDBCCBA",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "DEBEBECA",
+          "DBBDEBBE",
+          "CDEBCCED",
+          "ABCBBCBE",
+          "BAAEBEEB",
+          "ABBADBDA",
+          "CDDEEBEB",
+          "DEEBADEA"
+        ],
+        "cleared": {
+          "D": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 11",
+      "board": [
+        "EEBBEDCB",
+        "ADAAEEBD",
+        "BBEDBBEE",
+        "CBBEEDAB",
+        "AABEBAEC",
+        "BAEDBBCC",
+        "EEACEACD",
+        "CECCEBEC"
+      ],
+      "move": {
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          1,
+          1
+        ]
+      },
+      "refill": "DEAECBEABCDDEEECEADCEDEEAABAEBAADECDAACDECBDDABECCECEEEAADBDEAEBEAEDEBDABCDDAACBEAADBBADADDAAAACEAAAEBCEBADABCDCDECDAEBDDCAEBDAECCABCDCAEADEDDCEAEAABEBCCCBDDEAEAEBCEBDAACDBDBACEBEBACCDDCDAECCCEEBDEEBADEBABCDEEDCDCBCBDECCEEECCBDCCDDCDCCCBEABDAAACCBBEBDDEBAACEEACCDDECBDADAABAAEDCACCDABABABBCEECEDCEECEEBBCBAAEEBCBEEDAEACD",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "EDEAEDCB",
+          "DEBBEEBD",
+          "BBEDBBEE",
+          "CBBEEDAB",
+          "AABEBAEC",
+          "BAEDBBCC",
+          "EEACEACD",
+          "CECCEBEC"
+        ],
+        "cleared": {
+          "A": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 12",
+      "board": [
+        "BECABDCE",
+        "ABACCEDE",
+        "AAECDDEB",
+        "ECABADDE",
+        "EACBECED",
+        "CBDDBBCC",
+        "ABCEACDD",
+        "CADEDDAE"
+      ],
+      "move": {
+        "from": [
+          1,
+          6
+        ],
+        "to": [
+          2,
+          6
+        ]
+      },
+      "refill": "AACBCBBEDBDEDCECEABCECCADCEDEADEBCDBDBCECBBCEEDCBACBBAAEADCECACEACECAAACACCDBAECBBCDACDAEDCDCEBCDBEADEBACAEBCBBDAABDADEBEBEEABEDAADBEAEEBBCAADBDCCDBCBAAABEDDDBBBEEADDBCAADEECBABCBADABBEBBADBEEEDCCCADCBEDCCEAEBCAEAACABCABEECBDCABDDAEEADEAACDDADEADECAEACEDBBDADAEDDCAEEEBCCDEBECBBDDAACACCCCBABCCCABDBAEBBCEAABBAAEADACEBDBD",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "BECAACCB",
+          "ABACBABE",
+          "AAECCDCB",
+          "ECABADDE",
+          "EACBECED",
+          "CBDDBBCC",
+          "ABCEACDD",
+          "CADEDDAE"
+        ],
+        "cleared": {
+          "E": 3,
+          "D": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 13",
+      "board": [
+        "CCAACCAD",
+        "CECDAEDE",
+        "BEBACCAD",
+        "ACCABEEC",
+        "CEBBEECE",
+        "DABBAABE",
+        "EDCCEECB",
+        "EBDBCCEC"
+      ],
+      "move": {
+        "from": [
+          0,
+          3
+        ],
+        "to": [
+          1,
+          3
+        ]
+      },
+      "refill": "BAEDCEBDDDCCAACAEEBDCBAEBDCDDECDCAADEDDEAECDEDECCEABEDDAEDEDDBEDDBEADCABBCEBEEBEAEADEBACABACADCECDABDDDAEAADADEBBDBCCECDBDCABBCDDCAADBBDDBEBABABBEDBDBCAEAACBDCDCDDBBAACBAACBCDDADAECCBDEAEAADEBAEECBAAEDABBADEEBBCCBCEABACDBCBBECCEECBCAEBADABBEDAABCCAEBABEAEBDBBDCACADBCBBAEAECBECBEABBEDABCECBACCBACEECDEEEEDCBCEDCDDAEEEDBE",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "CCAECCAD",
+          "CECAAEDE",
+          "BEBBCCAD",
+          "ACCDBEEC",
+          "CEBBEECE",
+          "DABBAABE",
+          "EDCCEECB",
+          "EBDBCCEC"
+        ],
+        "cleared": {
+          "A": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 14",
+      "board": [
+        "ECBCACEE",
+        "BBDCCADA",
+        "CACBBCEE",
+        "CADEABEB",
+        "ADADAEBE",
+        "BCDEEBCD",
+        "ADECBBDB",
+        "BACACDAC"
+      ],
+      "move": {
+        "from": [
+          0,
+          4
+        ],
+        "to": [
+          1,
+          4
+        ]
+      },
+      "refill": "DEDBDEDDEBEAECDBADCDEABACEDEECDCCCECABBCBCDCCAEEAEDAEDDACDDBDADBADCDEDCDBEAECDBBDCDAACECDBBEEABCCEEBDCBEDDBBEDBBCBADAABEACEBACCDACCEDCEEEBBCBAADAEECBBCCBEDBCBBBAAEBADEDBEDCBCABAACECEBDBDAADCDECABBAAEEBEDDAEACBDEBDBECEBACAEEDBCDCBCEBEECEADDEDDDAECDBBCBCDCCBCCEABEBCBCDEDBBCDADACABAADEBACBCBCBEECCEDBCBADBCEADBBDDEACCEEBAB",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "ECBDEDEE",
+          "BBDCAADA",
+          "CACBBCEE",
+          "CADEABEB",
+          "ADADAEBE",
+          "BCDEEBCD",
+          "ADECBBDB",
+          "BACACDAC"
+        ],
+        "cleared": {
+          "C": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 15",
+      "board": [
+        "EECCEDCB",
+        "CAACDABB",
+        "DEDEBBAE",
+        "CDAADEDB",
+        "EAAEAEBA",
+        "EBBEDAAD",
+        "BCAAEAEA",
+        "BBCDBEBA"
+      ],
+      "move": {
+        "from": [
+          5,
+          2
+        ],
+        "to": [
+          6,
+          2
+        ]
+      },
+      "refill": "ABACAEDDEAEDDBDDBBAADEDDEDABCECDAEADABCEAEABCDDCDBAEEACECADBADEEBEEABCDBABBBBCDBADAABCAEBBADEDCDCEDDBECEBCAEACCAABBCBEABDCCDBBCCDABAEBBACACCAADECADDDCDEDCEEDEEAEDCECCAEEDDDEABDABABCEDBBDDBCDBBBBBBBCAECCDCEAABDBCCAADDCBCDDEDDDEDEABABCEDBBBAAACABEDCEECDEDECDCEEBEBEEAEADCCBAAEACEDCAADBCEEDEBEBCDCBEBCDDCEEEBBEBEDAACBAEEABD",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "EEACEDCB",
+          "CABCDABB",
+          "DEAEBBAE",
+          "CDCADEDB",
+          "EAAEAEBA",
+          "EBDEDAAD",
+          "BCBAEAEA",
+          "BBCDBEBA"
+        ],
+        "cleared": {
+          "A": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 16",
+      "board": [
+        "DEBABBEC",
+        "ADBDBADD",
+        "AEAEDDCC",
+        "BBACCBEE",
+        "BCDEADAE",
+        "EACBCABD",
+        "DACECCAB",
+        "BDDABDCA"
+      ],
+      "move": {
+        "from": [
+          6,
+          0
+        ],
+        "to": [
+          7,
+          0
+        ]
+      },
+      "refill": "EBEBCEDBABDABBEEDCDBBBEADACCCDDADABEAAAEDCABDCDDDCCADBBCDABDBDECAEABEDDEDABBECBEDEDBEDBBEDCAEEECCEEBCBDCEACCBDCEACEDBADBDEDECDADEAECBCDAADEEEAEDACCBEEAABBABEDCAAEACBCDDABEDCAEABECCABDECAAEBAECAEBBBDAEBEBBBBABBBEAAECCCCCDEAEECDAAABEEADBCADDDAADCECDDEDCCECDBDAACDCABEADCEEADADBBCCBEBABEECBCCACADACAEEEADDAABACCABECADEDBEEB",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "EBEABBEC",
+          "DEBDBADD",
+          "ADBEDDCC",
+          "AEACCBEE",
+          "BBAEADAE",
+          "BCDBCABD",
+          "EACECCAB",
+          "BACABDCA"
+        ],
+        "cleared": {
+          "D": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 17",
+      "board": [
+        "EEBAABBE",
+        "EBBCEDBD",
+        "BACADBDC",
+        "ADACABBE",
+        "EBACCEDE",
+        "EBCBCABB",
+        "ADACECEC",
+        "ECCBEABA"
+      ],
+      "move": {
+        "from": [
+          2,
+          6
+        ],
+        "to": [
+          3,
+          6
+        ]
+      },
+      "refill": "EAEBABEAADBBDAAEBDDDCCECBDCCBCACECBDCAEDADEDBEDBDDBCCEADEAADCEDBDDCDAEDCCAAAADDABBEADABEADCCAEBEECDABBBEDAAEBCEAEBECAAEDAACBABDCBEEEBABCECAEEEADBCCBECCACECABABEBCCDAEBBAECBECEACBAAEEBCCBCEEBBBDAAABDEECCEAEEDCDCACCBBAEADDACDCBABABDCCCDCBAEBBBADDBAEDABDEADABDDAABEBAEECDCCCEDCCBBEECDDEACCCECCBEDCBBECEEBDEADDCDAAABEDBBECCD",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "EEBAABEE",
+          "EBBCEDAD",
+          "BACADBEC",
+          "ADACABDE",
+          "EBACCEDE",
+          "EBCBCABB",
+          "ADACECEC",
+          "ECCBEABA"
+        ],
+        "cleared": {
+          "B": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 18",
+      "board": [
+        "DBECCBEE",
+        "BDBBDCCA",
+        "CDDBDBBE",
+        "EECEBDCB",
+        "EEBBACED",
+        "DCBBCCAA",
+        "EAEACEBD",
+        "CDEDABAE"
+      ],
+      "move": {
+        "from": [
+          0,
+          0
+        ],
+        "to": [
+          0,
+          1
+        ]
+      },
+      "refill": "CEBAECEDDACBCECABBCBAEDEDCCDDAACCBEDAACCCDABBDEBCBBABECDCECADBACBBAEBACADDEDEEEBDECEBBAEDBEBDBBDCBCEDDBDEDAACDDEABEBAEAACCDDDDEDBBAACDAEBDABBABCCADECDBAADCAEABADECBCCCAAAACAACDBCADCBBEDDDBDABCDEAEBCBAECBEEDEBADCEEADAEDBEBDADBADACACCEAACCEBEBDCDCADEBCDDBDACDCAAACEAABDBDCACDACCBCABDDCBABCDAECEEABDCEEEDBEADADECEDCAECCBADB",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "BBECCBEE",
+          "BEBBDCCA",
+          "CCDBDBBE",
+          "EECEBDCB",
+          "EEBBACED",
+          "DCBBCCAA",
+          "EAEACEBD",
+          "CDEDABAE"
+        ],
+        "cleared": {
+          "D": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 19",
+      "board": [
+        "BBDAEACB",
+        "BDADEAEC",
+        "CBCCDDEC",
+        "BEADDCBD",
+        "DBEBBDAD",
+        "CEDBCDBA",
+        "DDBCEBBE",
+        "EBCECEDC"
+      ],
+      "move": {
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          1,
+          1
+        ]
+      },
+      "refill": "AABCDCCBEBAECEECBCACBBBEBCECBADDDDEECCCAAAAACBCABAEDABCBCABECCEAEECCACDAEECBADCCDEDDEABDBCCEDDAABACDADCEBEEEDBDEAEEDBEECBECCBAAEBBBCBBDAEDCEDEADDDDCECBDDDBBBAAAADBCBDCCBAEDDCCABDADDCDCECCEAEECDBAAECBDCAEACEEDDDBEEEDABECCBEBDEBEEBDBACACAACADACDABAAECEAEBAABDAACDADEDADCEBCCDABECCECCBBBDCAABBBBECCCCDBDDAADADACECAECAAEDACB",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "BBDAEACB",
+          "DAADEAEC",
+          "CACCDDEC",
+          "BEADDCBD",
+          "DBEBBDAD",
+          "CEDBCDBA",
+          "DDBCEBBE",
+          "EBCECEDC"
+        ],
+        "cleared": {
+          "B": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 20",
+      "board": [
+        "DDEAAEDD",
+        "DDBDBABB",
+        "ACCAECED",
+        "DEBBEDAA",
+        "AAEECCBB",
+        "ABEDEDBA",
+        "CACEDCCD",
+        "DDECCDBE"
+      ],
+      "move": {
+        "from": [
+          3,
+          1
+        ],
+        "to": [
+          4,
+          1
+        ]
+      },
+      "refill": "BCAEDCDCBBCEEADBCDDACDEBDDAAACCDDBBCCDCEEAACBDDAEEECBBEBCECCADDCEDCCDDCBBBABEABCABBDDDECAACACBEBECABCBEABCEDEABCACCABAAADCEACBECADCAEEBBCBEADBDEECDCCEBEBACEECDADBBABDAACDDDBCBEDADBEEECABEEBAAECAABCDADEBCECDEADEBACCCABEABBBCBBAEBEEDCDCEACBACDDBDDCAABCCBDBDEADDDACEABDBBADBCBEACEAAEEBBCCCBBCCCABBBECCAAEBDEBDCDAABBDBDEDDAD",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "DBCAAEDD",
+          "DDEABABB",
+          "ADBDECED",
+          "DCCAEDAA",
+          "AABBCCBB",
+          "ABEDEDBA",
+          "CACEDCCD",
+          "DDECCDBE"
+        ],
+        "cleared": {
+          "E": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 21",
+      "board": [
+        "DEDCBCDC",
+        "ADBDECAE",
+        "EDEDABED",
+        "DACECAEB",
+        "DADEADCD",
+        "EDDBDCAA",
+        "CDEBCEBE",
+        "CBBEAECD"
+      ],
+      "move": {
+        "from": [
+          2,
+          0
+        ],
+        "to": [
+          2,
+          1
+        ]
+      },
+      "refill": "DBAEEEEBCAABECABABDDBBBEBBDECEABBDCBECABCBBDCBBEDCADEDBACEDDCECCCEBDACBAECAABDDDBEDEDDECDBCACABABDAECBBDEEECECEACADCAECBEADAECBBDEAEBCCBEEDEACBEDACBAEEBBEBBBBBBABABECCAAEAEBBDBEEADBCAECCBEADDABBDECCEEECCCBDECDEBEBBEDBAEAAABADAEECACDDCEDBBCEDBDEBDADBCBBAAACDDCDDADBDBDEDCBDBBADBBBCACDCDBDDEBEADBDADACAAACCEBDEACEABDAEABAC",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "AEDCBCDC",
+          "BDBDECAE",
+          "DEEDABED",
+          "DACECAEB",
+          "AADEADCD",
+          "EDDBDCAA",
+          "CDEBCEBE",
+          "CBBEAECD"
+        ],
+        "cleared": {
+          "D": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 22",
+      "board": [
+        "BCEBABBA",
+        "DBECBBCC",
+        "CEBBCEBB",
+        "DEDACABE",
+        "BADDEDAD",
+        "ACBCEECD",
+        "BABEACDB",
+        "DAEACEBA"
+      ],
+      "move": {
+        "from": [
+          2,
+          5
+        ],
+        "to": [
+          2,
+          6
+        ]
+      },
+      "refill": "CBBCDEEDBACCADDDBAEACDEADBDBBADEDCADEDADDCAABBBBEAAECDDBBDADCDEAEBBBBDBDEDBACAADBBDBCADEEAEEAECECCBADAEECCCECCDACBEECDEBDABECDCDDAEBCADABAECEBCCDEDEDCDDDCEBDBDDABDBCACCBEAEEBDDECBCDCEBCEECEDABBDDADBCBDBACEBCAEADECCACEDBADBEDCBEDEBEDDADABBEEEAECABBBEAEBCCEDBDDCBBDAEBCAACABBBBAEDABADDEEEBDABECACBEBEACCACDBCBACAEDAADECDCB",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "BCEBABBA",
+          "DBECBBCC",
+          "CEBBCCEB",
+          "DEDACABE",
+          "BADDEDAD",
+          "ACBCEECD",
+          "BABEACDB",
+          "DAEACEBA"
+        ],
+        "cleared": {
+          "B": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 23",
+      "board": [
+        "CDDCDBDC",
+        "BADBEBBC",
+        "EDBADEAB",
+        "BBCEBBDC",
+        "EAACECCD",
+        "BDBCDEDB",
+        "DCAEEDAC",
+        "ECDCDAEE"
+      ],
+      "move": {
+        "from": [
+          2,
+          1
+        ],
+        "to": [
+          2,
+          2
+        ]
+      },
+      "refill": "ABCEBCADEBCEEADABEABDEECEBEEBBBBBDCCBEBAACEDBCBDEDACDDECDEEEEDDCDDCBCEEAEADDDBCCAACCBEDCDDEDDAEBCDAEDDAABEABDABDBDBCCAECBCECAAEBDEADEABCCCBBAADBCDBDEBDBEAEBAABADCCBCDEDECCEBAADDDDCDDDBDBCDDEBDCBEBCADBCEDCBDDDCDECBECABBDCBCEBDDBDEDCBAECBCCAEAAEAEABDEACCEADDACADEDECECAEDCDAEBEDCCDCBEADEAEDDDAAEACBDCEBDBDBEBECDDBBACAABBBD",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "CDCCDBDC",
+          "BABBEBBC",
+          "EBAADEAB",
+          "BBCEBBDC",
+          "EAACECCD",
+          "BDBCDEDB",
+          "DCAEEDAC",
+          "ECDCDAEE"
+        ],
+        "cleared": {
+          "D": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 24",
+      "board": [
+        "EABACCEE",
+        "AACDACCA",
+        "BBDECBDD",
+        "EEBECACB",
+        "ADBBDAED",
+        "BAACECEC",
+        "AADDEBDB",
+        "DEDECACD"
+      ],
+      "move": {
+        "from": [
+          5,
+          0
+        ],
+        "to": [
+          5,
+          1
+        ]
+      },
+      "refill": "CABCDEEBECBBDCEDEBBDCCDEBBBCCECCCCEBDEBBADAECAADDCEADEEDCACDAABEADADDAECEEADBCDDAEABDEAEEEDBCDBEABAAEADCEBDABBAABECBECCEEEBCADBDECEAEBDAAABBEACEACECABBCBCCADEACBEECEAECADDCEDBCCDBEBEEBDADDABBAEAEDEEBDDDABEBCCBACDBCAAABAEAACDDCEEAABDCAEDDDAADCEABAECEBEACEAEECBBDEDDCDDECABACADEBCADCACCCCDEEACEBCACBEECAABBDDDCACBCBAEABABA",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "BABACCEE",
+          "AACDACCA",
+          "CBDECBDD",
+          "EEBECACB",
+          "ADBBDAED",
+          "BBACECEC",
+          "EADDEBDB",
+          "DEDECACD"
+        ],
+        "cleared": {
+          "A": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 25",
+      "board": [
+        "EDECAEDB",
+        "AEBCBDBA",
+        "CBEBBCBB",
+        "ADCDEEAA",
+        "EACDECEE",
+        "CCABDDCC",
+        "EADEEABD",
+        "EDAAEEDC"
+      ],
+      "move": {
+        "from": [
+          3,
+          5
+        ],
+        "to": [
+          4,
+          5
+        ]
+      },
+      "refill": "ABABEBABAEABCEBAAEDDDABDEDAECACECABBDEEDBBADDECDCCCECAEEECEECBDEDDABAEDDEEBACAACDBEDEDAEEDDEBBACEADCDAECDCAEDEBACEDBACBBBAAEAAAEDCACEECCBDDDAEEDCCBEDDBEBAAADDBAEEEBEBDAEEACBCBAABBCCABDDBEABCABDAABDAECBDBAADBBDADDAEDCDDDBBAAECDABDBCEEDBCDEEAAEBCABBEDBACDCEDEEEDCCBBABDDDABEAEADDDCBEAACDCACCBCBABECBADBEEDBDEAABCECEEEAEECC",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "EDECABAB",
+          "AEBCAEDB",
+          "CBEBBDBA",
+          "ADCDBCBB",
+          "EACDECAA",
+          "CCABDDCC",
+          "EADEEABD",
+          "EDAAEEDC"
+        ],
+        "cleared": {
+          "E": 4
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 26",
+      "board": [
+        "ADEBAADB",
+        "ADECEDAE",
+        "BEDCDDEB",
+        "EDABBABD",
+        "DBBDBACB",
+        "DCDDCCDC",
+        "BBCCDBBA",
+        "ADADECCA"
+      ],
+      "move": {
+        "from": [
+          3,
+          6
+        ],
+        "to": [
+          3,
+          7
+        ]
+      },
+      "refill": "CECAADBCEBDEBCADCBDCAEADEBCDAAEEBEBEADCCCEDDDACAECEAAACEBBADECECDBCDDBDADBEADCCEEBBCAEDABDBCACDAEAEECADAEADEDDAADDAEDDEEAEDEEDBCBECDACCBCEDBDBECEECEDBCCEEEACEACABEECDAEDABCEBABECDDCBDEDECBECAEBBCBAAABEDBBCECCBDAECCDECDBDACEDBCACADEDAEBEAEBAACCAAAADDABEEDBDBBADCBBBDCADDDCBBDEACEDBECAAEADAAADEEBACDBEAEBECEBDDDECECAACEDCE",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "ADEBAADC",
+          "ADECEDAE",
+          "BEDCDDEC",
+          "EDABBADB",
+          "DBBDBACE",
+          "DCDDCCDC",
+          "BBCCDBBA",
+          "ADADECCA"
+        ],
+        "cleared": {
+          "B": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 27",
+      "board": [
+        "AEDBBDBE",
+        "EDCCABCC",
+        "BCCADBAC",
+        "BCEACDEE",
+        "DDEEBBDC",
+        "BAAEADDC",
+        "CEEBCCBD",
+        "ABDCEEBB"
+      ],
+      "move": {
+        "from": [
+          5,
+          2
+        ],
+        "to": [
+          6,
+          2
+        ]
+      },
+      "refill": "AACDDCEBEDACEAEBBBBBACBBBEADDEADCEEEACECCADAAECBDABABABBCADAAECDADCBCADDCCCBCEBABCAEDDECCBAECECCCEACDDEABABEEEACACDECEDDBCEDEBDEAEEAEECDEBEAEDAACDBEACCCBEBDAEADCEDBABEACDDEDADDEEBECAAADDEBDAECEDBDEDAEBDEDCEDCEBCCDBBCBAEEBDBCDBDBBACECCCEECAEABDEDEDBDEBCBBDCBBCDDECEDACECBDABCCCCABBCCCBABABAEAEDCCDCCEBBBEACCABCCDEDECCEAAA",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "AECBBDBE",
+          "EDACABCC",
+          "BCAADBAC",
+          "BCDACDEE",
+          "DDCEBBDC",
+          "BACEADDC",
+          "CEABCCBD",
+          "ABDCEEBB"
+        ],
+        "cleared": {
+          "E": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 28",
+      "board": [
+        "BDBEDCCA",
+        "DBCCDABD",
+        "ABCCADAB",
+        "CEBAEEBE",
+        "ACDBACAA",
+        "AEDCDBBA",
+        "EEBACBEE",
+        "ABCAEEDC"
+      ],
+      "move": {
+        "from": [
+          6,
+          0
+        ],
+        "to": [
+          7,
+          0
+        ]
+      },
+      "refill": "CDAEEEAAACCDDAAEDADCEBBABCCBDDDBAADDCADEEDDAEDCCACBACBDDADDCDBBBAABBEEDABEEACEDBBEDCAEEACEDEDBBECEECABCDDBBBBBBCEBEEBEECBCCDEDCDCDDBEBEEACECADBCADEEDCCBAEADEBEACEAADCEBBEDABBABDCDAEEDBEDEBCCABDDCCBCCCACBDAABCBCECCEDEDECCBCCEDDECCCCBCBCEEBCECDADAAADDBDDBBBCDABAEDEADAEABCBBACABBEDACABDEDECCCDCECCEDEDECDADAAAACDBAEADBEBAA",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "ADBEDCCA",
+          "DBCCDABD",
+          "CBCCADAB",
+          "BEBAEEBE",
+          "DCDBACAA",
+          "AEDCDBBA",
+          "CEBACBEE",
+          "EBCAEEDC"
+        ],
+        "cleared": {
+          "A": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 29",
+      "board": [
+        "CEDACEDC",
+        "EEDCADBD",
+        "ABAECAEE",
+        "DAEEBBCB",
+        "EADAADDE",
+        "CDBDBEBD",
+        "CDEDDEDB",
+        "DBEECDEB"
+      ],
+      "move": {
+        "from": [
+          4,
+          2
+        ],
+        "to": [
+          5,
+          2
+        ]
+      },
+      "refill": "BEEACAABCAECBBCCAADBEAECEDDCCBDEEDCEBADABBBBDCBDEAABEBCDABEADAEBAEAABBAEAACEDBCBDECCEADCBACBDDADEABCAAEDCDAEABCBCAACCDEDBAEABBBADBCECCBDDAABCDDDABBCCBCCECBDADCCBCBCEDBBEDDCDBDADEDCAECACCDDCBBCEBCCAADEDCDCACBCCBCBDDDBABAECCBAECCEAEADBABBABBDBBBCEAAACEABACAAAAECDCBEBADDCDBCCCBCECCEACABACACBBCDBAAAABCBCCCACBBBDDDCCACDDCEA",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "CBEECEDC",
+          "EEDAADBD",
+          "AEDCCAEE",
+          "DBAEBBCB",
+          "EAEEADDE",
+          "CABABEBD",
+          "CDEDDEDB",
+          "DBEECDEB"
+        ],
+        "cleared": {
+          "D": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 30",
+      "board": [
+        "CCDDAEDB",
+        "CCEECCDA",
+        "EDEEAEAA",
+        "EDCABDDE",
+        "DADCBDDA",
+        "CDAECAAD",
+        "BCDEEACD",
+        "CCBACCBE"
+      ],
+      "move": {
+        "from": [
+          2,
+          0
+        ],
+        "to": [
+          2,
+          1
+        ]
+      },
+      "refill": "DDABCDCCDCAECEBDDCBBEAEEEDAACDBCAECABBAEDBDDBADDBEABABABBDCBDDBDEAEEAAEAADCEEBEADCCCEBCEEAECACDDABACEAAEDEAECCACDDACDDBECABBECADECEDCDCEECAEBCBCEAEAEDAEEEBCAEADECEBACDDADCBAABBBDDCAABAACBCECAAAABCBBADEDBEEBBEACADBCEADDCBBAECDCCBBEADCAAEAABBEABEBBCAAEEECDDBEEDBDCCEBDEABACBCBBBCCCCCDEEDCACCCAAECBBDEAAEECAEEDBBECEEBABAABB",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "CDDAAEDB",
+          "CCDDCCDA",
+          "DCEEAEAA",
+          "EDCABDDE",
+          "DADCBDDA",
+          "CDAECAAD",
+          "BCDEEACD",
+          "CCBACCBE"
+        ],
+        "cleared": {
+          "E": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 31",
+      "board": [
+        "CECDCCAA",
+        "CDDAABAD",
+        "BBCABCDC",
+        "EEADDACB",
+        "ACAEEACE",
+        "DBDCCEDD",
+        "DCEAEEBB",
+        "AABDABEB"
+      ],
+      "move": {
+        "from": [
+          0,
+          2
+        ],
+        "to": [
+          0,
+          3
+        ]
+      },
+      "refill": "EBDDADCDAECBAEEDDEDDACCCADACDCCDCACEEBEBCBABEEEDAACCACECACAACEDBBCAEEBEAAADABDADDDAAEEDDBDDBBACAAEACAEBEBEDECADDBADDDABEBEDAADCDDEACCCAEACEABBDCECBEBDECBDEDDACEBBEADCEDABECCBDBCCABAABEBBBDBDBEADADCADEBCBDBADCDDBBAEEAEBCDBDEDCCAEAADEEBDABECDDEBDACBDBACEEAADCBBDEADBCDDABACBEBECBAAEDDBECEACDDDBDCEDCBEBEEACDDDACECECACEBBAE",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "CEDEBDAA",
+          "CDDAABAD",
+          "BBCABCDC",
+          "EEADDACB",
+          "ACAEEACE",
+          "DBDCCEDD",
+          "DCEAEEBB",
+          "AABDABEB"
+        ],
+        "cleared": {
+          "C": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 32",
+      "board": [
+        "AACBEAAD",
+        "DAAEACAB",
+        "DCCADABA",
+        "CBAECDEB",
+        "BEDACDEE",
+        "CBCABBCD",
+        "ADCDCBEA",
+        "EBEEAACD"
+      ],
+      "move": {
+        "from": [
+          1,
+          4
+        ],
+        "to": [
+          1,
+          5
+        ]
+      },
+      "refill": "CBECDCADBCDCADEECDCEBCBEBDDABDCDEBBECDAACCEDBBBEDDACCDBCDBEACABBCAEACAAAEACEEEECDAABBAAEBAEACBEDEBCBBEBBBEAAABBCADCEEBABDDECBDAABDEEABEDAECBEEAAEAECECCAEDDABEEEDDDAACBDEBBBEEEBAAAABCDDAEEBBEAABBCEDBBBBDDCBDEADEACBEBACBBBEBDBADBDEDDCAEEBEDCBBACAABDEDEACDEBBDADBECDAEEAECDAACCABEBDACACCBADEECABDCECBCEDDDECBACBCEBDDEBEACCE",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "AACBEEAD",
+          "DAAECBAB",
+          "DCCADCBA",
+          "CBAECDEB",
+          "BEDACDEE",
+          "CBCABBCD",
+          "ADCDCBEA",
+          "EBEEAACD"
+        ],
+        "cleared": {
+          "A": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 33",
+      "board": [
+        "EECBCEEB",
+        "DBACCDCC",
+        "BEADAEDC",
+        "CBDCBAAB",
+        "BBDBACCE",
+        "AABDABBC",
+        "EADADEAB",
+        "BDEECBAC"
+      ],
+      "move": {
+        "from": [
+          1,
+          5
+        ],
+        "to": [
+          1,
+          6
+        ]
+      },
+      "refill": "CBABBBEBDCBDAEEBCBCCCAABCEBDACBCBDBBCCEBBADBDBBBABEDBECBACEBEEDBEEBEEBEEDAAAEBCCBCBDAEEABCAECDDDBAADDABBBAEABDDDEBBCCBACEAEDACABDBADDACADBBECEACADBABCCCACEEDBEAACDEEDBACEEBEDBEDEAEABAEDADECAECACBECBABABACCAAAEDDECBABBCBCAAEDADADEDCDDACDCEDCDEBEDABCDDBACCBCCAEBBEAECBCADADCDEBAEEEDCBBCAEADDCDEECBCDCEBDEBCABBCDCDBACDDABEE",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "EECCBAEB",
+          "DBABCEDC",
+          "BEADAEDC",
+          "CBDCBAAB",
+          "BBDBACCE",
+          "AABDABBC",
+          "EADADEAB",
+          "BDEECBAC"
+        ],
+        "cleared": {
+          "C": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 34",
+      "board": [
+        "CBCDBACB",
+        "BAABADAE",
+        "ABEAAEEB",
+        "AABADDAD",
+        "DDBCCBBD",
+        "BDAEECAC",
+        "CBADDADC",
+        "DABDDBBA"
+      ],
+      "move": {
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          2,
+          0
+        ]
+      },
+      "refill": "BADACDCAEDEBCDCDABCDBDEBDBECEECCAADECBAAADBEADBBCCEEECDACBADBBAEDEAEDDBDAEEDEADAEDCBBECCCAEBDAEBBEBCCCACAACDCCBACEECDCCDCAECBDDCDAACDCBBAEACBABCDCBEACECBDEBABEEEEEBEAADBEDDABABAEACBBEBDABDEBCCDEECCDBEDCCDDBADBCCCDEEDABDDBACBBDEDEDCBDDABBBBECDECDDACDADBBCCEBBBCDDACAADEBDDBBEDACCBCECDBBAADAABADEEADABACBABEADEDCECCACDADAA",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "BADDBACB",
+          "CBCBADAE",
+          "BBEAAEEB",
+          "AABADDAD",
+          "DDBCCBBD",
+          "BDAEECAC",
+          "CBADDADC",
+          "DABDDBBA"
+        ],
+        "cleared": {
+          "A": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 35",
+      "board": [
+        "CACCDCAD",
+        "AECCECBD",
+        "CABAAEEB",
+        "CCAEBCAC",
+        "DAAEBDEB",
+        "DBCCDAAD",
+        "EEDEEAEE",
+        "EEBBECAD"
+      ],
+      "move": {
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          1,
+          1
+        ]
+      },
+      "refill": "EAADECABCECBDADAADEABCEEAEBEBBEBEEBCCBEDEADAABCDACCBBDADDACEBEABBCEDDAAAEEBCDABCDAABBEBCEADEEBEDBBEABDDBBDDCDAAEDCDDEDDDECDCEDAEDCABAEEDACBDBEDBCBABDBBDCABADCBECDCEECADBEDBCDBDACCBEEBDCACDACECBEECCABDABAEEEDEEEDCBCDABCBBEACCDEAAAAAAAAACAEAAABBDEBEDCEACEECEEEDADADCDEEABCEEDECAEBDDDBCACBEDBCEECADBCADBCCEBAEBACCEEBEDCCDEE",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "CACCDCAD",
+          "EACCECBD",
+          "CEBAAEEB",
+          "CCAEBCAC",
+          "DAAEBDEB",
+          "DBCCDAAD",
+          "EEDEEAEE",
+          "EEBBECAD"
+        ],
+        "cleared": {
+          "A": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 36",
+      "board": [
+        "EAECDEAD",
+        "BAEABCDE",
+        "CEDEACCA",
+        "ECCABDBE",
+        "DDEBABBE",
+        "BEABCEEA",
+        "ABCCAEBB",
+        "ADECAACA"
+      ],
+      "move": {
+        "from": [
+          3,
+          5
+        ],
+        "to": [
+          4,
+          5
+        ]
+      },
+      "refill": "BCABAEBABEECAEDEABEDABAABDCCEDEECDCBAEEBDEEDBBEEDBBCBDEEBDDECACEBBEEBCCAACBCABBEEDEABAAAEBDDBDCCAABEECAADDABDBCBDEDEACBDEBCDAADEDDDCABAAACBEAECECDDAADADDEAEABDBBCABBEBCACBBDCACECDCDAABDCEBEEBCDBEBDBBDDACEDCCCDEBACDEDDBCCAEDECBCDACADDDAADEBEBBDDCDBBDAAEDCEBECACEABEDEEDBEAABCBAEAAECCDBACDDCEECCDEBEDECEBCDCAEEEBEEEDDECECB",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "EAECBCAD",
+          "BAEADEAE",
+          "CEDEBCDA",
+          "ECCAACCE",
+          "DDEBADBE",
+          "BEABCEEA",
+          "ABCCAEBB",
+          "ADECAACA"
+        ],
+        "cleared": {
+          "B": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "accepted move 37",
+      "board": [
+        "AEBEADDE",
+        "EBADACEA",
+        "BDBCDADD",
+        "EACEDABE",
+        "DAAEECCA",
+        "BCCBEBAB",
+        "BDEBCABC",
+        "EBCEECBB"
+      ],
+      "move": {
+        "from": [
+          5,
+          6
+        ],
+        "to": [
+          5,
+          7
+        ]
+      },
+      "refill": "DAAEABBBCDBADCDEBCABDECADBDABABEBAAEBBAACDDBDBDBBABDBCDDDBBDEDEEABCEBEDBADABBBAACEADCECBDCBAAEEAEBAECCDBECEBAAAEACBDBDBBBBBABCABCDBBEDBECDAEEDCCADBBBEACAADEEDDCDEEEEADEECDBCEBAEABCBECBABECABADEAEABCEEDAABEABEEDBECCDABAEBBBEBBEABBCECBDEECADBEEBCCABDEEBCAABEACDCCABEEEBCDAEEADCDABCDBAECDDACEBACDADBDCAACCCDEDBCAEEECDDCDCCC",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "AEBEADAE",
+          "EBADACAA",
+          "BDBCDADD",
+          "EACEDADE",
+          "DAAEECEA",
+          "BCCBEBDA",
+          "BDEBCABC",
+          "EBCEECCB"
+        ],
+        "cleared": {
+          "B": 3
+        },
+        "cascades": 1
+      }
+    },
+    {
+      "name": "cascade move 1",
+      "board": [
+        "EEDBCACC",
+        "BAEEDBAE",
+        "EDDACCAE",
+        "ACDBACDD",
+        "EACDDADD",
+        "ADDCADBC",
+        "CCACAEED",
+        "EBCECEAD"
+      ],
+      "move": {
+        "from": [
+          0,
+          1
+        ],
+        "to": [
+          1,
+          1
+        ]
+      },
+      "refill": "DDCBBACEAAAEDADDCBAAABEEABDEEDDEBACCCEDBCBACCDAEAEEDBAAECACAADADBECEDABCCECBACCECBACBBEDAADBECEBCDCCABBDCEEBAADBBBADDACBAEECAABEDECAAAACDDCBEDCBABCBEADBEEEBBCBACEECDEDDBADEEDCCBABACCCAAEBEACDDEBBBBCCABEECACDDABDCAAEDCEACEEBBCBCBBDCEBEABAACABCCAEEDEDECCDBDCABDBADECCCCBCABCBAAEBBBBEDAABBEADABEAEBDCEBAAABEEADEDBBEEBDBBBDA",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "EDEAEDCC",
+          "BAABDBAE",
+          "EDBACCAE",
+          "ACBBACDD",
+          "EACDDADD",
+          "ADDCADBC",
+          "CCACAEED",
+          "EBCECEAD"
+        ],
+        "cleared": {
+          "E": 3,
+          "D": 4,
+          "C": 3,
+          "A": 3
+        },
+        "cascades": 4
+      }
+    },
+    {
+      "name": "cascade move 2",
+      "board": [
+        "BEDCEDEE",
+        "DBCBAEDC",
+        "DCCDEBEC",
+        "BDBCDAAE",
+        "AACDBEDA",
+        "BCDDEDBC",
+        "CCBAEEAE",
+        "BEABCBCD"
+      ],
+      "move": {
+        "from": [
+          2,
+          3
+        ],
+        "to": [
+          3,
+          3
+        ]
+      },
+      "refill": "DADEEEABECAECCEBBAACCDBADCCEEAADEDDBABAADCAEEDCAADDACCCEEBDEBBEADCDEBBDABEEBDEEDBBBEEDDEAECDAAEACBADEACADCCDACECADEABAEBDACDAAEDBBDBECBBDACADACADDEADECBECCBCBAAAECDBBABDDBEBCDEECAEDCDBCBDBBBDBDCDEABACAADAAEDCBCCDAEEBECDCCDDAACBBBEABCCBEEBDDAEBACBBDCABCAEBEBDEDCDDCDADEEBEDBBBDCCBDADECAADCBEBDDEABDCCBCCDBBBDEBBECCEDCEEDC",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "BDAEEDEE",
+          "DEDBAEDC",
+          "DBCAEBEC",
+          "BDBDDAAE",
+          "AACCBEDA",
+          "BCDBEDBC",
+          "CCBAEEAE",
+          "BEABCBCD"
+        ],
+        "cleared": {
+          "C": 3,
+          "D": 3,
+          "E": 3
+        },
+        "cascades": 2
+      }
+    },
+    {
+      "name": "cascade move 3",
+      "board": [
+        "AAEECBBC",
+        "DACAABCA",
+        "DDBDACCD",
+        "CADCEEBB",
+        "EBDBABAC",
+        "AEAEDDEC",
+        "CCBEDCDA",
+        "EABDBCDC"
+      ],
+      "move": {
+        "from": [
+          3,
+          4
+        ],
+        "to": [
+          4,
+          4
+        ]
+      },
+      "refill": "BABDEDBACCCEDBEADADCEBDCCADDBBADCCDCABEDBBEAAEDEEAEECDCDBBCADAEBCDDBBADEEDCEAABADCABADCBADEAACBAECDBCABCADDCAECECEBBEDAAEBDDDEBDACAECBBBDBDADACADEDEAADBCDDBDCCDEBBDEADACDEAAAEABDDCDBBEDBDADDEBBAAAADCABCCDAEECDADECCAEAAEDCAACACECDCEEEBBBCBBCDAEACBCADADBADEEBBCDEABBDACABCBEDDADECCCCDEABBDBCEEACCBCCEADDDABCEECADAEDABCDAAE",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "AAEEDEDC",
+          "DACAABCA",
+          "DDBDBCCD",
+          "CADCCEBB",
+          "EBDBEBAC",
+          "AEAEDDEC",
+          "CCBEDCDA",
+          "EABDBCDC"
+        ],
+        "cleared": {
+          "A": 3,
+          "B": 3
+        },
+        "cascades": 2
+      }
+    },
+    {
+      "name": "cascade move 4",
+      "board": [
+        "CABDDCCA",
+        "BBCACCBE",
+        "AECCAEEC",
+        "ADECEECB",
+        "EDDADBEA",
+        "BAACBCCD",
+        "BBCCEEDC",
+        "CBBDDEEA"
+      ],
+      "move": {
+        "from": [
+          6,
+          2
+        ],
+        "to": [
+          7,
+          2
+        ]
+      },
+      "refill": "EEDCCBEAEACCADCADACDABDABACCAAACBBDDBCCBEEDBCEDABDDCDABAAACDEDEDBBDDBEEECBEAACCABDAEBAEDCDBEEDEEAEEBEBEABEDAABCECAADBCCAEDDDBDBCDADBCEEBBCCADCACBCADEECABAABEBCAEABCADADBBCECAEEDCAEDDDACBAAECABADBCCEDAAAEADAACDAADBACDCDADEADDABCEADABBEABEDCACCCCEBBBEBCDDECDECDECADBBBEECDCEBABBDAADCBDCEDDECBDEDBDECBCACDEAAEEAEECDBEABEBCE",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "EECCBCCA",
+          "CABACCBE",
+          "BBCCAEEC",
+          "AECCEECB",
+          "ADEADBEA",
+          "EDDCBCCD",
+          "BAACEEDC",
+          "CBCDDEEA"
+        ],
+        "cleared": {
+          "B": 3,
+          "D": 3
+        },
+        "cascades": 2
+      }
+    },
+    {
+      "name": "cascade move 5",
+      "board": [
+        "BBDDCAEC",
+        "CBCACEEB",
+        "BDABACDA",
+        "DECCBBEE",
+        "ECEEBCCB",
+        "DDADCBAA",
+        "ABCEBDDB",
+        "CECACBAB"
+      ],
+      "move": {
+        "from": [
+          2,
+          3
+        ],
+        "to": [
+          3,
+          3
+        ]
+      },
+      "refill": "ECCCBEAECECCDEABCAEACAEBDAEAEBCEAECDCEEBCCCADCBCDACECAECDCDEACEDBBDBEBEDCECEDECDDADDEBBBCDBCDCCDBACAEDEBCBCABADBDEBCCEBCADDCEDCDCACEADCDACCDBEBEBECDAACCCABDEAEBCEACDBBACBBEAEEDBAABDDCAABEDADDDBACDBDBABABBAACCABDECBCDAADCEBEBDABCBEBDDBBDEBBAEDEDEEAACDEDBCCCBCEEBDBBEBCEADDACEBABDABEBEBCEBACDCCECDAECDAEEBCDBBBBDAAABAAEBAA",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "BBDEECEC",
+          "CBCDBAEB",
+          "BDAACEDA",
+          "DECCACEE",
+          "ECEEBCCB",
+          "DDADCBAA",
+          "ABCEBDDB",
+          "CECACBAB"
+        ],
+        "cleared": {
+          "B": 3,
+          "C": 3
+        },
+        "cascades": 2
+      }
+    },
+    {
+      "name": "cascade move 6",
+      "board": [
+        "ABBADCCD",
+        "CEACBABD",
+        "CCACCEBC",
+        "BDCBCACA",
+        "AEBDEEDA",
+        "ECBBDCCB",
+        "BBCBDCDC",
+        "DCDEAABD"
+      ],
+      "move": {
+        "from": [
+          4,
+          3
+        ],
+        "to": [
+          4,
+          4
+        ]
+      },
+      "refill": "BEECECCBEDCEBBBEBBCEECDCBEDCACCAEDAADECBABACBACADAEDBCCEDDAABBACABDBDBADDECCCCBECAAECCCBEDDADEBDBBDDDDDAABADECDAADBCBAAEBBEDBECCAEBEBACADADADAADBBEDBCAEEACCABDDECACABEBABCDEEBAAAACBCECEBECCCDCAEBADEBCEEAECACADACBCADCDAABCDBEACADEBDBEEBDEDEEDBAAACACDECCBDBEEADECEDAECDDEDECCEDDDDDCAEADCEDCDEDEDABAEBEEEEBADEBBECBCECDDECCD",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "ABCBBCED",
+          "CEBABECD",
+          "CCACEABC",
+          "BDACDEBA",
+          "AECBBACA",
+          "ECBEDEDB",
+          "BBCBCCDC",
+          "DCDEAABD"
+        ],
+        "cleared": {
+          "D": 3,
+          "C": 6,
+          "B": 6,
+          "E": 3
+        },
+        "cascades": 6
+      }
+    },
+    {
+      "name": "cascade move 7",
+      "board": [
+        "AACADBEC",
+        "CCDACAAD",
+        "BEDCCDBE",
+        "ABEBEEAC",
+        "EDAEEDCA",
+        "BEDCBCDC",
+        "EBBEEAEB",
+        "BBEACEBE"
+      ],
+      "move": {
+        "from": [
+          0,
+          2
+        ],
+        "to": [
+          1,
+          2
+        ]
+      },
+      "refill": "CAACBCBCBDCAADEDCDECEEEBDDACCBBDCAEAABEDCAAEAABCEBCBDDADBBEADCBBEEEDBCBCCDCBDAEBCAAABBEBCCCCAEDAABECADBBECBCBADAAAEBBECBBEDCDEEEECCCCCCECCDEEBCDAEDAECDAEADDCACADBADDBACAAAECEBCDCABDAEDEDBBEBDBCBACCDDBBBBBBDEACEBACBBBAAAAEBCDDDCBABCBBACCBDEEBBABDDBCBEBEBCBCCAABBDDDDEBECCEEABAEDEBACEACACDCBBECECCABDEEDEEEABCBACCCCEBEBBEA",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "CCBCDBEC",
+          "AADACAAD",
+          "BEDCCDBE",
+          "ABEBEEAC",
+          "EDAEEDCA",
+          "BEDCBCDC",
+          "EBBEEAEB",
+          "BBEACEBE"
+        ],
+        "cleared": {
+          "C": 3,
+          "A": 3
+        },
+        "cascades": 2
+      }
+    },
+    {
+      "name": "cascade move 8",
+      "board": [
+        "BECCEAAE",
+        "AABCEADB",
+        "CEEDBDEE",
+        "BDDACDCA",
+        "BAADDCED",
+        "CCAEEAEE",
+        "EABCACDE",
+        "EDABEBDC"
+      ],
+      "move": {
+        "from": [
+          3,
+          5
+        ],
+        "to": [
+          4,
+          5
+        ]
+      },
+      "refill": "ADDAEABABEDACEACECEDCBEAADAAEEDBAABCADDEADBABBCDCCBDECEDABEDEABCADACAAECDBDDBEBADBCACDEDECAEBCEBEAECEEEBBDEBCEAAEABEEBDCDAADADBCCBAEEBBEAEDACABEBBECEEABEAECBCBECDEAAAAABAADBAECEBCDCADBDBDCDDECDABDACCADABCEABDCDCACAEDEBEAADDEEBDECECACAECACDCBEACBBDCCCADDDCBBDDAABACBDBDCDABECCBBBBBDBACEDAABBEEECCAEDDECECAECCAEAAAECCADDEE",
+      "expected": {
+        "accepted": true,
+        "board": [
+          "BAEADACE",
+          "ABBDDEDB",
+          "CECAECEE",
+          "BABCEECA",
+          "BEECBDED",
+          "CCAEEACE",
+          "EABCACAE",
+          "EDABEBAC"
+        ],
+        "cleared": {
+          "C": 3,
+          "D": 9,
+          "A": 6,
+          "E": 3
+        },
+        "cascades": 3
+      }
+    },
+    {
+      "name": "rejected non-neighbor move 1",
+      "board": [
+        "EDECDEAD",
+        "ADADBADD",
+        "ECEBEEDB",
+        "AABAAEAD",
+        "DBCBCCBB",
+        "AADBAEBE",
+        "EADDEBEA",
+        "BBEBEACA"
+      ],
+      "move": {
+        "from": [
+          0,
+          0
+        ],
+        "to": [
+          0,
+          2
+        ]
+      },
+      "refill": "EAABCEAACDEEDCAABEEADAECEEDBDAAA",
+      "expected": {
+        "accepted": false,
+        "board": [
+          "EDECDEAD",
+          "ADADBADD",
+          "ECEBEEDB",
+          "AABAAEAD",
+          "DBCBCCBB",
+          "AADBAEBE",
+          "EADDEBEA",
+          "BBEBEACA"
+        ],
+        "cleared": {},
+        "cascades": 0
+      }
+    },
+    {
+      "name": "rejected non-neighbor move 2",
+      "board": [
+        "BABDDCEA",
+        "BBDEDEBE",
+        "EDADCEEC",
+        "BBADDBCA",
+        "ABBCCDAA",
+        "CEDDBADB",
+        "AEEAEACC",
+        "BCDCEDBD"
+      ],
+      "move": {
+        "from": [
+          1,
+          1
+        ],
+        "to": [
+          3,
+          1
+        ]
+      },
+      "refill": "DECDCDBDACAACBCBCBBBDABBDCABEABE",
+      "expected": {
+        "accepted": false,
+        "board": [
+          "BABDDCEA",
+          "BBDEDEBE",
+          "EDADCEEC",
+          "BBADDBCA",
+          "ABBCCDAA",
+          "CEDDBADB",
+          "AEEAEACC",
+          "BCDCEDBD"
+        ],
+        "cleared": {},
+        "cascades": 0
+      }
+    },
+    {
+      "name": "rejected non-neighbor move 3",
+      "board": [
+        "AEBBDEBC",
+        "CCDDEEDD",
+        "ECAEEAAD",
+        "EAEABEEA",
+        "AEDCBEAC",
+        "DDAADDBD",
+        "ABCEEAAD",
+        "EEDCDEBA"
+      ],
+      "move": {
+        "from": [
+          2,
+          2
+        ],
+        "to": [
+          4,
+          4
+        ]
+      },
+      "refill": "DECCADAEADDACBDACDBBDCEEEEDAEABD",
+      "expected": {
+        "accepted": false,
+        "board": [
+          "AEBBDEBC",
+          "CCDDEEDD",
+          "ECAEEAAD",
+          "EAEABEEA",
+          "AEDCBEAC",
+          "DDAADDBD",
+          "ABCEEAAD",
+          "EEDCDEBA"
+        ],
+        "cleared": {},
+        "cascades": 0
+      }
+    },
+    {
+      "name": "rejected non-neighbor move 4",
+      "board": [
+        "CDDACBDD",
+        "AEBCDCBC",
+        "ADEEABAC",
+        "CBADAEEA",
+        "EBCBBCEA",
+        "EECAACAC",
+        "AAEDBECE",
+        "DADBEABB"
+      ],
+      "move": {
+        "from": [
+          7,
+          7
+        ],
+        "to": [
+          5,
+          7
+        ]
+      },
+      "refill": "ADDCCCDCADECEBAAABDECCEEEBCBEDEC",
+      "expected": {
+        "accepted": false,
+        "board": [
+          "CDDACBDD",
+          "AEBCDCBC",
+          "ADEEABAC",
+          "CBADAEEA",
+          "EBCBBCEA",
+          "EECAACAC",
+          "AAEDBECE",
+          "DADBEABB"
+        ],
+        "cleared": {},
+        "cascades": 0
+      }
+    },
+    {
+      "name": "rejected non-neighbor move 5",
+      "board": [
+        "ECCDABED",
+        "BCAEDBAC",
+        "EBEAACAB",
+        "DBEADEEA",
+        "BCACBACD",
+        "DDADBCAC",
+        "ACBEDACB",
+        "DDECBDDE"
+      ],
+      "move": {
+        "from": [
+          6,
+          0
+        ],
+        "to": [
+          6,
+          3
+        ]
+      },
+      "refill": "BEBECDDEAAACEDCACBECDDEEAAAADAAC",
+      "expected": {
+        "accepted": false,
+        "board": [
+          "ECCDABED",
+          "BCAEDBAC",
+          "EBEAACAB",
+          "DBEADEEA",
+          "BCACBACD",
+          "DDADBCAC",
+          "ACBEDACB",
+          "DDECBDDE"
+        ],
+        "cleared": {},
+        "cascades": 0
+      }
+    },
+    {
+      "name": "rejected adjacent move 1",
+      "board": [
+        "CAEAADDB",
+        "CDABEDAD",
+        "ECEAECDD",
+        "ECADDAEC",
+        "CDACEEBB",
+        "EACDEEDB",
+        "CEABDBCA",
+        "BCCEEBBD"
+      ],
+      "move": {
+        "from": [
+          5,
+          4
+        ],
+        "to": [
+          5,
+          5
+        ]
+      },
+      "refill": "CECCCCAECDBDCBDBACDBECDCABBECCDC",
+      "expected": {
+        "accepted": false,
+        "board": [
+          "CAEAADDB",
+          "CDABEDAD",
+          "ECEAECDD",
+          "ECADDAEC",
+          "CDACEEBB",
+          "EACDEEDB",
+          "CEABDBCA",
+          "BCCEEBBD"
+        ],
+        "cleared": {},
+        "cascades": 0
+      }
+    },
+    {
+      "name": "rejected adjacent move 2",
+      "board": [
+        "ABAECDCA",
+        "ECEEAEAC",
+        "CABBDCCA",
+        "BCDBDAAE",
+        "DBCCBACA",
+        "BAACDCBD",
+        "DEABAEBB",
+        "BCBCAACC"
+      ],
+      "move": {
+        "from": [
+          3,
+          2
+        ],
+        "to": [
+          4,
+          2
+        ]
+      },
+      "refill": "DADAECCABEEEBBCCDAECEEDEADADDBCC",
+      "expected": {
+        "accepted": false,
+        "board": [
+          "ABAECDCA",
+          "ECEEAEAC",
+          "CABBDCCA",
+          "BCDBDAAE",
+          "DBCCBACA",
+          "BAACDCBD",
+          "DEABAEBB",
+          "BCBCAACC"
+        ],
+        "cleared": {},
+        "cascades": 0
+      }
+    },
+    {
+      "name": "rejected adjacent move 3",
+      "board": [
+        "CCDDEEBD",
+        "EAEAEAAE",
+        "BCDBCDEE",
+        "ACCBCECA",
+        "ADBEDDEA",
+        "BCEECDED",
+        "EEBDCCAB",
+        "DEACDDAB"
+      ],
+      "move": {
+        "from": [
+          4,
+          4
+        ],
+        "to": [
+          4,
+          5
+        ]
+      },
+      "refill": "BCACECDCCACBBCABEABCEBBBEBEABDEC",
+      "expected": {
+        "accepted": false,
+        "board": [
+          "CCDDEEBD",
+          "EAEAEAAE",
+          "BCDBCDEE",
+          "ACCBCECA",
+          "ADBEDDEA",
+          "BCEECDED",
+          "EEBDCCAB",
+          "DEACDDAB"
+        ],
+        "cleared": {},
+        "cascades": 0
+      }
+    },
+    {
+      "name": "rejected adjacent move 4",
+      "board": [
+        "DBCECCAC",
+        "CDBABACC",
+        "BBEACBAA",
+        "BDDCBDCB",
+        "CCECCEEC",
+        "EAEAEDEB",
+        "CADCACCB",
+        "DECBECEA"
+      ],
+      "move": {
+        "from": [
+          3,
+          6
+        ],
+        "to": [
+          3,
+          7
+        ]
+      },
+      "refill": "CDCCBADDDBEBCAEDECACDADAECAEACDA",
+      "expected": {
+        "accepted": false,
+        "board": [
+          "DBCECCAC",
+          "CDBABACC",
+          "BBEACBAA",
+          "BDDCBDCB",
+          "CCECCEEC",
+          "EAEAEDEB",
+          "CADCACCB",
+          "DECBECEA"
+        ],
+        "cleared": {},
+        "cascades": 0
+      }
+    },
+    {
+      "name": "rejected adjacent move 5",
+      "board": [
+        "DBDBEDAA",
+        "AEADDBEE",
+        "DABCEDEC",
+        "DBCACCDA",
+        "ACDBEDAE",
+        "EDDEEBBD",
+        "CAEEDABB",
+        "CCDBBAAC"
+      ],
+      "move": {
+        "from": [
+          5,
+          3
+        ],
+        "to": [
+          5,
+          4
+        ]
+      },
+      "refill": "ABEBABDBBECBEABAAAADCACCCBBCEDCB",
+      "expected": {
+        "accepted": false,
+        "board": [
+          "DBDBEDAA",
+          "AEADDBEE",
+          "DABCEDEC",
+          "DBCACCDA",
+          "ACDBEDAE",
+          "EDDEEBBD",
+          "CAEEDABB",
+          "CCDBBAAC"
+        ],
+        "cleared": {},
+        "cascades": 0
+      }
+    },
+    {
+      "name": "rejected adjacent move 6",
+      "board": [
+        "BECEEDAE",
+        "DBBEADED",
+        "CBABBADB",
+        "ADBACDEB",
+        "DCCEDDBC",
+        "ECCDECEE",
+        "AEBCDDAC",
+        "BABCEBAB"
+      ],
+      "move": {
+        "from": [
+          3,
+          6
+        ],
+        "to": [
+          3,
+          7
+        ]
+      },
+      "refill": "BABBBADADDCEBBAAEBBABEBBEAEDEBDC",
+      "expected": {
+        "accepted": false,
+        "board": [
+          "BECEEDAE",
+          "DBBEADED",
+          "CBABBADB",
+          "ADBACDEB",
+          "DCCEDDBC",
+          "ECCDECEE",
+          "AEBCDDAC",
+          "BABCEBAB"
+        ],
+        "cleared": {},
+        "cascades": 0
+      }
+    },
+    {
+      "name": "rejected adjacent move 7",
+      "board": [
+        "CDBABEDB",
+        "ECDAEADE",
+        "EADBCBBC",
+        "DEEDDAAD",
+        "EADBDBEC",
+        "CCEBCCED",
+        "CEBDACDA",
+        "DDCDBADD"
+      ],
+      "move": {
+        "from": [
+          6,
+          4
+        ],
+        "to": [
+          7,
+          4
+        ]
+      },
+      "refill": "DBDEDAEDBCECDACAEACDBCDBBBDEEEDE",
+      "expected": {
+        "accepted": false,
+        "board": [
+          "CDBABEDB",
+          "ECDAEADE",
+          "EADBCBBC",
+          "DEEDDAAD",
+          "EADBDBEC",
+          "CCEBCCED",
+          "CEBDACDA",
+          "DDCDBADD"
+        ],
+        "cleared": {},
+        "cascades": 0
+      }
+    },
+    {
+      "name": "rejected adjacent move 8",
+      "board": [
+        "EAACBEDC",
+        "CEDECECE",
+        "BECAABAC",
+        "EABDDACE",
+        "CECBCDEE",
+        "BDDCDDAD",
+        "CACDEBED",
+        "ABBCEAAE"
+      ],
+      "move": {
+        "from": [
+          4,
+          3
+        ],
+        "to": [
+          4,
+          4
+        ]
+      },
+      "refill": "AEEABEDAEDAEDDEDAEEDBEDBDEBEADBB",
+      "expected": {
+        "accepted": false,
+        "board": [
+          "EAACBEDC",
+          "CEDECECE",
+          "BECAABAC",
+          "EABDDACE",
+          "CECBCDEE",
+          "BDDCDDAD",
+          "CACDEBED",
+          "ABBCEAAE"
+        ],
+        "cleared": {},
+        "cascades": 0
+      }
+    },
+    {
+      "name": "rejected adjacent move 9",
+      "board": [
+        "BABCDCED",
+        "CACBAADA",
+        "ABBDECEB",
+        "EEDBAABB",
+        "BEACBBDC",
+        "CCADBACE",
+        "DDBDAEAC",
+        "BCDCBEBC"
+      ],
+      "move": {
+        "from": [
+          1,
+          6
+        ],
+        "to": [
+          2,
+          6
+        ]
+      },
+      "refill": "DABBAACDAABECBCABBEDBAAAEBCBDEED",
+      "expected": {
+        "accepted": false,
+        "board": [
+          "BABCDCED",
+          "CACBAADA",
+          "ABBDECEB",
+          "EEDBAABB",
+          "BEACBBDC",
+          "CCADBACE",
+          "DDBDAEAC",
+          "BCDCBEBC"
+        ],
+        "cleared": {},
+        "cascades": 0
+      }
+    },
+    {
+      "name": "rejected adjacent move 10",
+      "board": [
+        "CECDBEDD",
+        "BBDBCDCC",
+        "CACAEABC",
+        "EBCCACBE",
+        "BADABEEA",
+        "CCEDBBCD",
+        "CEDEAACD",
+        "DDCEDBBA"
+      ],
+      "move": {
+        "from": [
+          4,
+          0
+        ],
+        "to": [
+          4,
+          1
+        ]
+      },
+      "refill": "ECEABCECBBAAEBDECEAAEAEBCBCBEAAD",
+      "expected": {
+        "accepted": false,
+        "board": [
+          "CECDBEDD",
+          "BBDBCDCC",
+          "CACAEABC",
+          "EBCCACBE",
+          "BADABEEA",
+          "CCEDBBCD",
+          "CEDEAACD",
+          "DDCEDBBA"
+        ],
+        "cleared": {},
+        "cascades": 0
+      }
+    }
+  ]
+}

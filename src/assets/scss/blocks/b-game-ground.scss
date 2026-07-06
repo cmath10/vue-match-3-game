@@ -5,7 +5,7 @@
   @include m-game-panel();
 
   --cell-gap: 0.2rem;
-  --tile-transition-duration: 0.32s;
+  --tile-transition-duration: 0.48s;
   --panel-padding: 0.3rem;
   --cell-horizontal-gaps: calc(var(--cell-gap) + var(--cell-gap) + var(--cell-gap) + var(--cell-gap) + var(--cell-gap) + var(--cell-gap) + var(--cell-gap) + var(--cell-gap));
   --cell-vertical-gaps: calc(var(--cell-gap) + var(--cell-gap) + var(--cell-gap) + var(--cell-gap) + var(--cell-gap) + var(--cell-gap));

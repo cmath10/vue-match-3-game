@@ -66,6 +66,14 @@ import BGameMenu from '@/components/blocks/BGameMenu.vue'
 import BGameTile from '@/components/blocks/BGameTile.vue'
 
 import TileGrid from '@/entities/TileGrid'
+import {
+  collapseBoard,
+  findMatchedPositions,
+  findMoveMatchedPositions,
+  isNeighborPosition,
+  type Board,
+  type Position,
+} from '@/entities/Match3Engine'
 
 import { TILE_TYPE } from '@/enums/game'
 
@@ -85,7 +93,7 @@ const COUNT_TURNS = 20
 const COUNT_SEED = 5
 const COUNT_MULTIPLIER_MIN = 3
 const COUNT_MULTIPLIER_MAX = 10
-const ANIMATION_DELAY = 320
+const ANIMATION_DELAY = 480
 
 const random = <T>(array: T[]): T => array[Math.floor(Math.random() * array.length)]
 const range = (start: number, end: number): number[] => {
@@ -110,30 +118,14 @@ const createTile = (type: TILE_TYPE, row: number, column: number): Tile => (
   { id: nextTileId.value++, type, selected: false, row, column }
 )
 
-const getTileStyle = (tile: Tile) => {
-  return {
-    transform: `translate(calc(${tile.column} * (var(--cell-size) + var(--cell-gap)) + var(--tile-offset)), calc(${tile.row} * (var(--cell-size) + var(--cell-gap)) + var(--tile-offset)))`,
-  }
-}
+const getTileStyle = (tile: Tile) => ({
+  transform: `translate(calc(${tile.column} * (var(--cell-size) + var(--cell-gap)) + var(--tile-offset)), calc(${tile.row} * (var(--cell-size) + var(--cell-gap)) + var(--tile-offset)))`,
+})
 
-const getCells = (): Cell[] => {
-  const cells: Cell[] = []
+const getCells = (): Cell[] => grid.getTileList()
+  .flatMap((row, i) => row.map((tile, j) => ({ key: `${i}-${j}`, tile })))
 
-  grid.forEachCell((tile: Tile | null, i: number, j: number) => {
-    cells.push({ key: `${i}-${j}`, tile })
-  })
-
-  return cells
-}
-
-const generateType = (i: number, j: number): TILE_TYPE => {
-  const excluded: Array<TILE_TYPE | null> = [
-    getTypeOfTwoPrevXIfRepeated(i, j),
-    getTypeOfTwoPrevYIfRepeated(i, j),
-  ]
-
-  return random(AVAILABLE_TILE_TYPES.filter(type => !excluded.includes(type)))
-}
+const generateType = (i: number, j: number): TILE_TYPE => random(AVAILABLE_TILE_TYPES.filter(type => !createsMatch(type, i, j)))
 
 const generateObjective = (): Objective => {
   const excluded: TILE_TYPE[] = objectives.map((o: Objective) => o.type)
@@ -143,30 +135,6 @@ const generateObjective = (): Objective => {
     type: random(AVAILABLE_TILE_TYPES.filter(type => !excluded.includes(type))),
     count: multiplier * COUNT_SEED,
   }
-}
-
-function getTypeOfTwoPrevXIfRepeated (i: number, j: number): TILE_TYPE | null {
-  const prevY1 = grid.getTileByIndex(i, j - 1)
-  // eslint-disable-next-line no-magic-numbers
-  const prevY2 = grid.getTileByIndex(i, j - 2)
-
-  if (prevY1 && prevY2 && prevY1.type === prevY2.type) {
-    return prevY1.type
-  }
-
-  return null
-}
-
-function getTypeOfTwoPrevYIfRepeated (i: number, j: number): TILE_TYPE | null {
-  const prevX1 = grid.getTileByIndex(i - 1, j)
-  // eslint-disable-next-line no-magic-numbers
-  const prevX2 = grid.getTileByIndex(i - 2, j)
-
-  if (prevX1 && prevX2 && prevX1.type === prevX2.type) {
-    return prevX1.type
-  }
-
-  return null
 }
 
 const swapTiles = (a: Tile, b: Tile) => {
@@ -185,42 +153,51 @@ const swapTiles = (a: Tile, b: Tile) => {
 const waitAnimation = () => new Promise<void>(resolve => setTimeout(resolve, ANIMATION_DELAY))
 const nextAnimationFrame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
 
-// eslint-disable-next-line max-lines-per-function
-const getFilled = (): Tile[] => {
-  const filled: Tile[] = []
-  const add = (tile: Tile) => {
-    if (!filled.includes(tile)) {
-      filled.push(tile)
-    }
-  }
+const getTileTypeBoard = (): Board<TILE_TYPE> => grid.getTileList().map(row => row.map(tile => tile?.type ?? null))
 
-  // eslint-disable-next-line complexity
-  grid.forEach((tile: Tile, i: number, j: number) => {
-    const byX1 = grid.getTileByIndex(i + 1, j)
-    // eslint-disable-next-line no-magic-numbers
-    const byX2 = grid.getTileByIndex(i + 2, j)
-    const byY1 = grid.getTileByIndex(i, j + 1)
-    // eslint-disable-next-line no-magic-numbers
-    const byY2 = grid.getTileByIndex(i, j + 2)
+const getTileIdBoard = (): Board<string> => grid.getTileList().map(row => row.map(tile => tile?.id.toString() ?? null))
 
-    if (byX1 && byX2 && tile.type === byX1.type && byX1.type === byX2.type) {
-      add(tile)
-      add(byX1)
-      add(byX2)
-    }
+const createsMatch = (type: TILE_TYPE, i: number, j: number): boolean => {
+  const board = getTileTypeBoard()
 
-    if (byY1 && byY2 && tile.type === byY1.type && byY1.type === byY2.type) {
-      add(tile)
-      add(byY1)
-      add(byY2)
-    }
-  })
+  board[i][j] = type
 
-  return filled
+  return findMatchedPositions(board).some(position => position.row === i && position.column === j)
 }
 
-const clearFilled = () => {
-  getFilled().forEach((tile: Tile) => {
+const getFilledTiles = (): Tile[] => {
+  return findMatchedPositions(getTileTypeBoard())
+    .map(({ row, column }) => grid.getTileByIndex(row, column))
+    .filter((tile): tile is Tile => tile !== null)
+}
+
+const getMoveFilledTiles = (a: Tile, b: Tile): Tile[] => {
+  const positionA = getTilePosition(a)
+  const positionB = getTilePosition(b)
+
+  if (positionA === null || positionB === null) {
+    return []
+  }
+
+  return findMoveMatchedPositions(getTileTypeBoard(), positionA, positionB)
+    .map(({ row, column }) => grid.getTileByIndex(row, column))
+    .filter((tile): tile is Tile => tile !== null)
+}
+
+const getTilePosition = (tile: Tile): Position | null => {
+  const index = grid.indexOf(tile)
+  return index ? { row: index[0], column: index[1] } : null
+}
+
+const areNeighborTiles = (a: Tile, b: Tile): boolean => {
+  const positionA = getTilePosition(a)
+  const positionB = getTilePosition(b)
+
+  return positionA !== null && positionB !== null && isNeighborPosition(positionA, positionB)
+}
+
+const clearTiles = (tiles: Tile[]) => {
+  tiles.forEach((tile: Tile) => {
     const index = grid.indexOf(tile)
     const counter = counters.find((c: Counter) => c.type === tile.type)
 
@@ -250,8 +227,24 @@ const refillGrid = () => {
   }
 }
 
+const collapseGrid = () => {
+  const tilesById = new Map(grid.getTiles().map(tile => [tile.id.toString(), tile]))
+  const collapsedBoard = collapseBoard(getTileIdBoard())
+
+  grid.clear()
+  collapsedBoard.forEach((row, i) => row.forEach((tileId, j) => {
+    if (tileId !== null) {
+      const tile = tilesById.get(tileId)
+
+      if (tile) {
+        grid.setTile(tile, i, j)
+      }
+    }
+  }))
+}
+
 const spawnTile = (i: number, j: number, spawnRow: number) => {
-  const tile = createTile(random(AVAILABLE_TILE_TYPES), spawnRow, j)
+  const tile = createTile(generateType(i, j), spawnRow, j)
 
   grid.setTile(tile, i, j, {
     row: spawnRow,
@@ -274,15 +267,23 @@ const moveSpawnedTileToCell = async (tile: Tile, i: number, j: number) => {
 }
 
 const moveTileToCell = (tile: Tile, i: number, j: number) => {
-  tile.row = i
-  tile.column = j
+  tile.row = i; tile.column = j
 }
 
-const updateGrid = () => {
-  while (getFilled().length) {
-    clearFilled()
-    grid.shake()
+const updateGrid = async (version: number, matchedTiles: Tile[]) => {
+  let tilesToClear = matchedTiles
+
+  while (tilesToClear.length) {
+    clearTiles(tilesToClear)
+    collapseGrid()
     refillGrid()
+    await waitAnimation()
+
+    if (version !== gameVersion.value) {
+      return
+    }
+
+    tilesToClear = getFilledTiles()
   }
 }
 
@@ -298,21 +299,28 @@ const makeMove = async (a: Tile, b: Tile) => {
   evaluating.value = true
   swapTiles(a, b)
 
-  if (getFilled().length) {
-    await applySuccessfulMove(version)
+  const matchedTiles = getMoveFilledTiles(a, b)
+
+  if (matchedTiles.length) {
+    await applySuccessfulMove(version, matchedTiles)
   } else {
     await revertFailedMove(a, b, version)
   }
 }
 
-const applySuccessfulMove = async (version: number) => {
+const applySuccessfulMove = async (version: number, matchedTiles: Tile[]) => {
   await waitAnimation()
 
   if (version !== gameVersion.value) {
     return
   }
 
-  updateGrid()
+  await updateGrid(version, matchedTiles)
+
+  if (version !== gameVersion.value) {
+    return
+  }
+
   turns.value--
   evaluating.value = false
 }
@@ -344,7 +352,7 @@ const onTileClick = (tile: Tile) => {
 
 const handleSelectedTileClick = (selectedTile: Tile, tile: Tile) => {
   if (selectedTile !== tile) {
-    if (grid.isNeighbors(selectedTile, tile)) {
+    if (areNeighborTiles(selectedTile, tile)) {
       void makeMove(selectedTile, tile)
     } else {
       tile.selected = true
@@ -354,16 +362,8 @@ const handleSelectedTileClick = (selectedTile: Tile, tile: Tile) => {
   selectedTile.selected = false
 }
 
-const initObjectives = () => {
-  objectives.push(generateObjective())
-  objectives.push(generateObjective())
-}
-
-const initCounters = () => {
-  AVAILABLE_TILE_TYPES.forEach(type => {
-    counters.push({ type, count: 0 })
-  })
-}
+const initObjectives = () => objectives.push(generateObjective(), generateObjective())
+const initCounters = () => AVAILABLE_TILE_TYPES.forEach(type => counters.push({ type, count: 0 }))
 
 const fillGrid = () => {
   grid.forEachCell((tile: Tile | null, i: number, j: number) => {
@@ -380,7 +380,6 @@ const startNewGame = () => {
   objectives.splice(0)
   counters.splice(0)
   grid.clear()
-
   initObjectives()
   fillGrid()
   initCounters()
