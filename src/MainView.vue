@@ -204,15 +204,7 @@ const swapTiles = (a: Tile, b: Tile) => {
   }
 }
 
-const delay = (callback: () => void) => {
-  return new Promise<void>(resolve => {
-    setTimeout(() => {
-      callback()
-      resolve()
-    }, ANIMATION_DELAY)
-  })
-}
-
+const waitAnimation = () => new Promise<void>(resolve => setTimeout(resolve, ANIMATION_DELAY))
 const nextAnimationFrame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
 
 // eslint-disable-next-line max-lines-per-function
@@ -316,7 +308,7 @@ const updateGrid = () => {
   }
 }
 
-const makeMove = (a: Tile, b: Tile) => {
+const makeMove = async (a: Tile, b: Tile) => {
   if (turns.value === 0) {
     alert('Game ended')
 
@@ -327,23 +319,23 @@ const makeMove = (a: Tile, b: Tile) => {
   swapTiles(a, b)
 
   if (getFilled().length) {
-    applySuccessfulMove()
+    await applySuccessfulMove()
   } else {
-    revertFailedMove(a, b)
+    await revertFailedMove(a, b)
   }
 }
 
-const applySuccessfulMove = () => {
+const applySuccessfulMove = async () => {
+  await waitAnimation()
   updateGrid()
   turns.value--
   evaluating.value = false
 }
 
-const revertFailedMove = (a: Tile, b: Tile) => {
-  delay(() => {
-    swapTiles(a, b)
-    evaluating.value = false
-  })
+const revertFailedMove = async (a: Tile, b: Tile) => {
+  await waitAnimation()
+  swapTiles(a, b)
+  evaluating.value = false
 }
 
 const onTileClick = (tile: Tile) => {
@@ -363,7 +355,7 @@ const onTileClick = (tile: Tile) => {
 const handleSelectedTileClick = (selectedTile: Tile, tile: Tile) => {
   if (selectedTile !== tile) {
     if (grid.isNeighbors(selectedTile, tile)) {
-      makeMove(selectedTile, tile)
+      void makeMove(selectedTile, tile)
     } else {
       tile.selected = true
     }

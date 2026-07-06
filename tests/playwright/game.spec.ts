@@ -168,11 +168,13 @@ const expectTilesInsideGround = async (page: Page) => {
   }
 }
 
-const makeValidMove = async (page: Page) => {
+const makeValidMove = async (page: Page): Promise<Move> => {
   const move = findValidMove(await getTiles(page))
 
   await clickTile(page, move.from)
   await clickTile(page, move.to)
+
+  return move
 }
 
 const waitForNewTiles = async (page: Page, existingIds: Set<string>) => {
@@ -180,6 +182,18 @@ const waitForNewTiles = async (page: Page, existingIds: Set<string>) => {
     return [...document.querySelectorAll('.b-game-ground__tile')]
       .some(element => !ids.includes(element.getAttribute('data-tile-id') || ''))
   }, [...existingIds])
+}
+
+const expectSwapAnimationStarted = async (page: Page, move: Move) => {
+  const tiles = await getTiles(page)
+  const movedTile = tiles.find(tile => tile.id === move.from.id)
+
+  expect(movedTile).toBeDefined()
+
+  const startDistance = Math.hypot(move.from.x - move.to.x, move.from.y - move.to.y)
+  const currentDistance = Math.hypot(movedTile!.x - move.to.x, movedTile!.y - move.to.y)
+
+  expect(currentDistance).toBeLessThan(startDistance)
 }
 
 test('valid moves keep animated tiles inside the board', async ({ page }, testInfo) => {
@@ -193,7 +207,13 @@ test('valid moves keep animated tiles inside the board', async ({ page }, testIn
 
   const initialTileIds = new Set((await getTiles(page)).map(tile => tile.id))
 
-  await makeValidMove(page)
+  const firstMove = await makeValidMove(page)
+  await page.waitForTimeout(80)
+  await expectSwapAnimationStarted(page, firstMove)
+  await testInfo.attach('during-swap', {
+    body: await page.screenshot(),
+    contentType: 'image/png',
+  })
   await waitForNewTiles(page, initialTileIds)
 
   const ground = await page.locator('.b-game-ground').boundingBox()
