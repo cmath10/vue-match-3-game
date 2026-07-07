@@ -32,23 +32,23 @@
                             @click="onTileClick(tile)"
                         />
                     </div>
+
+                    <b-game-result-overlay
+                        v-if="gameResult"
+                        :result="gameResult"
+                        @play-again="startNewGame"
+                    />
                 </div>
             </div>
 
             <footer class="b-game-layout__footer">
                 <div class="b-game-layout__footer-panel">
                     <span>
-                        Code:
-                        <a href="https://github.com/cmath10" class="b-game-layout__link">
-                            https://github.com/cmath10
-                        </a>
+                        Code: <a href="https://github.com/cmath10" class="b-game-layout__link">https://github.com/cmath10</a>
                     </span>
 
                     <span>
-                        Artwork:
-                        <a href="https://www.artstation.com/jackhook" class="b-game-layout__link">
-                            https://www.artstation.com/jackhook
-                        </a>
+                        Artwork: <a href="https://www.artstation.com/jackhook" class="b-game-layout__link">https://www.artstation.com/jackhook</a>
                     </span>
                 </div>
             </footer>
@@ -58,12 +58,11 @@
 
 <script lang="ts" setup>
 import type { Counter, Objective, Tile } from '@/types/game'
-
 import { computed, nextTick, reactive, ref } from 'vue'
-
 import BGameMenu from '@/components/blocks/BGameMenu.vue'
+import BGameResultOverlay from '@/components/blocks/BGameResultOverlay.vue'
 import BGameTile from '@/components/blocks/BGameTile.vue'
-
+import { getGameResult, type GameResult } from '@/entities/Match3GameResult'
 import TileGrid from '@/entities/TileGrid'
 import {
   collapseBoard,
@@ -74,7 +73,6 @@ import {
   type Position,
 } from '@/entities/Match3Engine'
 import { generateObjectives } from '@/entities/Match3Objectives'
-
 import { TILE_TYPE } from '@/enums/game'
 
 type Cell = { key: string }
@@ -101,10 +99,11 @@ const objectives = reactive<Objective[]>([])
 const counters = reactive<Counter[]>([])
 const turns = ref(COUNT_TURNS)
 const evaluating = ref(false)
+const gameResult = ref<GameResult | null>(null)
 const gameVersion = ref(0)
 const nextTileId = ref(0)
 
-const locked = computed(() => evaluating.value)
+const locked = computed(() => evaluating.value || gameResult.value !== null)
 const activeTiles = computed(() => grid.getTiles())
 const cells = computed(() => getCells())
 
@@ -272,12 +271,6 @@ const updateGrid = async (version: number, matchedTiles: Tile[]) => {
 }
 
 const makeMove = async (a: Tile, b: Tile) => {
-  if (turns.value === 0) {
-    alert('Game ended')
-
-    return
-  }
-
   const version = gameVersion.value
 
   evaluating.value = true
@@ -306,7 +299,12 @@ const applySuccessfulMove = async (version: number, matchedTiles: Tile[]) => {
   }
 
   turns.value--
+  updateGameResult()
   evaluating.value = false
+}
+
+const updateGameResult = () => {
+  gameResult.value = getGameResult(objectives, counters, turns.value)
 }
 
 const revertFailedMove = async (a: Tile, b: Tile, version: number) => {
@@ -362,6 +360,7 @@ const fillGrid = () => {
 const startNewGame = () => {
   gameVersion.value++
   evaluating.value = false
+  gameResult.value = null
   turns.value = COUNT_TURNS
   objectives.splice(0)
   counters.splice(0)
