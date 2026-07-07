@@ -1,21 +1,21 @@
 <template>
-    <div class="b-game-menu d-flex flex-column flex-grow-1">
-        <h1 class="h2 mb-0">
+    <div class="b-game-menu">
+        <h1 class="b-game-menu__title">
             Game
         </h1>
 
-        <div class="d-flex flex-column gap-4 mt-4">
+        <div class="b-game-menu__objectives">
             <div
                 v-for="(objective, index) in objectivesComputed"
                 :key="index"
-                class="b-game-menu__objective d-flex align-items-center gap-3"
+                class="b-game-menu__objective"
             >
                 <b-game-tile :type="objective.type" :small="true" />
                 <span>&times; {{ objective.count }}</span>
             </div>
         </div>
 
-        <div class="b-game-menu__turns mt-auto pt-4">
+        <div class="b-game-menu__turns">
             <div class="b-game-menu__turns-label">
                 Turns
             </div>
@@ -23,15 +23,15 @@
             <div class="b-game-menu__turns-value">
                 {{ turns }}
             </div>
-
-            <button
-                class="btn btn-outline-light mt-3"
-                type="button"
-                @click="emit('new-game')"
-            >
-                New game
-            </button>
         </div>
+
+        <button
+            class="b-game-menu__button btn btn-outline-light"
+            type="button"
+            @click="emit('new-game')"
+        >
+            New game
+        </button>
     </div>
 </template>
 

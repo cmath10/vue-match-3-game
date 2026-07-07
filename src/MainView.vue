@@ -1,6 +1,6 @@
 <template>
-    <div class="b-game-layout d-flex flex-column flex-lg-row">
-        <aside class="b-game-layout__menu p-4 d-flex flex-column">
+    <div class="b-game-layout">
+        <aside class="b-game-layout__menu">
             <b-game-menu
                 :counters="counters"
                 :objectives="objectives"
@@ -9,8 +9,8 @@
             />
         </aside>
 
-        <main class="b-game-layout__field flex-grow-1 d-flex flex-column p-3 p-lg-4">
-            <div class="b-game-layout__board flex-grow-1 d-flex align-items-center justify-content-center">
+        <main class="b-game-layout__field">
+            <div class="b-game-layout__board">
                 <div class="b-game-ground">
                     <div class="b-game-ground__cells">
                         <div
@@ -35,8 +35,8 @@
                 </div>
             </div>
 
-            <footer class="b-game-layout__footer mt-3">
-                <div class="b-game-layout__footer-panel d-flex flex-column flex-sm-row gap-2 gap-sm-4 justify-content-center">
+            <footer class="b-game-layout__footer">
+                <div class="b-game-layout__footer-panel">
                     <span>
                         Code:
                         <a href="https://github.com/cmath10" class="b-game-layout__link">

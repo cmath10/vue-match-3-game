@@ -3,48 +3,66 @@
 
 .b-game-layout {
   --game-menu-inline-size: 18rem;
-  --game-menu-block-size: clamp(17rem, 38dvh, 21.5rem);
-  --game-field-padding-x: 1rem;
-  --game-field-padding-y: 1rem;
-  --game-footer-block-size: 6rem;
+  --game-menu-block-size: clamp(6.75rem, 18dvh, 9rem);
+  --game-field-padding-x: clamp(0.75rem, 3vw, 1rem);
+  --game-field-padding-y: 0.75rem;
+  --game-footer-block-size: clamp(3.5rem, 9dvh, 4.75rem);
+  --game-footer-gap: 0.75rem;
   --game-board-available-width: calc(100vw - var(--game-field-padding-x) - var(--game-field-padding-x));
-  --game-board-available-height: calc(100dvh - var(--game-menu-block-size) - var(--game-field-padding-y) - var(--game-field-padding-y) - var(--game-footer-block-size));
+  --game-board-available-height: calc(100dvh - var(--game-menu-block-size) - var(--game-field-padding-y) - var(--game-field-padding-y) - var(--game-footer-block-size) - var(--game-footer-gap));
 
+  display: flex;
+  flex-direction: column;
   height: 100dvh;
   overflow: hidden;
 
   &__menu {
     flex: 0 0 var(--game-menu-block-size);
     min-height: 0;
+    padding: clamp(0.75rem, 2.5dvh, 1rem);
     background:
       linear-gradient(180deg, rgba($game-menu-bg, 0.98), rgba($game-menu-bg-dark, 1)),
       $game-menu-bg;
-    border-right: 1px solid rgba($white, 0.08);
+    border-bottom: 1px solid rgba($white, 0.08);
   }
 
   &__field {
     position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
     min-width: 0;
     min-height: 0;
+    padding: var(--game-field-padding-y) var(--game-field-padding-x);
     background:
       linear-gradient(rgba($primary, 0.28), rgba($primary-dark, 0.52)),
       url("../../images/game-field-background.png") center / cover no-repeat;
   }
 
   &__board {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
     min-height: 0;
   }
 
   &__footer {
     flex: 0 0 auto;
+    margin-top: var(--game-footer-gap);
     color: rgba($white, 0.78);
   }
 
   &__footer-panel {
     @include m-game-glass-panel();
 
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    justify-content: center;
     width: 100%;
-    padding: 0.85rem 1rem;
+    padding: 0.75rem 1rem;
+    text-align: center;
   }
 
   &__link {
@@ -63,24 +81,62 @@
   }
 }
 
+@media (orientation: landscape) and (max-width: 991.98px) {
+  .b-game-layout {
+    --game-menu-inline-size: clamp(11rem, 24vw, 14rem);
+    --game-field-padding-x: 0.75rem;
+    --game-field-padding-y: 0.75rem;
+    --game-footer-block-size: 5rem;
+    --game-board-available-width: calc(100vw - var(--game-menu-inline-size) - var(--game-field-padding-x) - var(--game-field-padding-x));
+    --game-board-available-height: calc(100dvh - var(--game-field-padding-y) - var(--game-field-padding-y) - var(--game-footer-block-size) - var(--game-footer-gap));
+
+    flex-direction: row;
+
+    &__menu {
+      flex-basis: var(--game-menu-inline-size);
+      padding: 0.875rem;
+      border-right: 1px solid rgba($white, 0.08);
+      border-bottom: 0;
+    }
+
+    &__footer-panel {
+      padding: 0.6rem 0.875rem;
+    }
+  }
+}
+
 @media (min-width: 992px) {
   .b-game-layout {
     --game-field-padding-x: 1.5rem;
     --game-field-padding-y: 1.5rem;
     --game-footer-block-size: 4rem;
+    --game-footer-gap: 1rem;
     --game-board-available-width: calc(100vw - var(--game-menu-inline-size) - var(--game-field-padding-x) - var(--game-field-padding-x));
-    --game-board-available-height: calc(100dvh - var(--game-field-padding-y) - var(--game-field-padding-y) - var(--game-footer-block-size));
+    --game-board-available-height: calc(100dvh - var(--game-field-padding-y) - var(--game-field-padding-y) - var(--game-footer-block-size) - var(--game-footer-gap));
+
+    flex-direction: row;
 
     &__menu {
       flex-basis: var(--game-menu-inline-size);
+      padding: 1.5rem;
+      border-right: 1px solid rgba($white, 0.08);
+      border-bottom: 0;
     }
   }
 }
 
-@media (max-width: 575.98px) and (max-height: 650px) {
+@media (max-width: 575.98px) and (orientation: portrait) {
   .b-game-layout {
+    --game-menu-block-size: clamp(6.25rem, 17dvh, 7.75rem);
+    --game-footer-block-size: 4.25rem;
+    --game-footer-gap: 0.625rem;
+
     &__menu {
-      padding: 1rem !important;
+      padding: 0.75rem;
+    }
+
+    &__footer-panel {
+      padding: 0.625rem 0.75rem;
     }
   }
 }
