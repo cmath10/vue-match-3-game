@@ -3,16 +3,7 @@
         :class="{
             'b-game-tile': true,
             'b-game-tile--small': small,
-            'b-game-tile--air': type === TILE_TYPE.ELEMENT_AIR,
-            'b-game-tile--earth': type === TILE_TYPE.ELEMENT_EARTH,
-            'b-game-tile--fire': type === TILE_TYPE.ELEMENT_FIRE,
-            'b-game-tile--lightning': type === TILE_TYPE.ELEMENT_LIGHTNING,
-            'b-game-tile--water': type === TILE_TYPE.ELEMENT_WATER,
-            'b-game-tile--sweets-barbaris': type === TILE_TYPE.SWEETS_BARBARIS,
-            'b-game-tile--sweets-cookie': type === TILE_TYPE.SWEETS_COOKIE,
-            'b-game-tile--sweets-lollipop': type === TILE_TYPE.SWEETS_LOLLIPOP,
-            'b-game-tile--sweets-pillow': type === TILE_TYPE.SWEETS_PILLOW,
-            'b-game-tile--sweets-souffle': type === TILE_TYPE.SWEETS_SOUFFLE,
+            [`b-game-tile--${type}`]: true,
         }"
     />
 </template>

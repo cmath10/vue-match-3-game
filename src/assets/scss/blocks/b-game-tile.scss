@@ -2,6 +2,7 @@
   display: inline-block;
   width: 3.5rem;
   height: 3.5rem;
+  background-image: var(--tile-background);
   background-size: cover;
 
   &--small {
@@ -9,43 +10,28 @@
     height: 2rem;
   }
 
-  &--air {
-    background-image: url("../../images/tile-air.png");
-  }
-
-  &--earth {
-    background-image: url("../../images/tile-earth.png");
-  }
-
-  &--fire {
-    background-image: url("../../images/tile-fire.png");
-  }
-
-  &--lightning {
-    background-image: url("../../images/tile-lightning.png");
-  }
-
-  &--water {
-    background-image: url("../../images/tile-water.png");
-  }
-
   &--sweets-barbaris {
-    background-image: url("../../images/tile-sweets-barbaris.png");
+    --tile-background: url("../../images/tile-sweets-barbaris.png");
+    --tile-selected-background: url("../../images/tile-sweets-barbaris-selected.png");
   }
 
   &--sweets-cookie {
-    background-image: url("../../images/tile-sweets-cookie.png");
+    --tile-background: url("../../images/tile-sweets-cookie.png");
+    --tile-selected-background: url("../../images/tile-sweets-cookie-selected.png");
   }
 
   &--sweets-lollipop {
-    background-image: url("../../images/tile-sweets-lollipop.png");
+    --tile-background: url("../../images/tile-sweets-lollipop.png");
+    --tile-selected-background: url("../../images/tile-sweets-lollipop-selected.png");
   }
 
   &--sweets-pillow {
-    background-image: url("../../images/tile-sweets-pillow.png");
+    --tile-background: url("../../images/tile-sweets-pillow.png");
+    --tile-selected-background: url("../../images/tile-sweets-pillow-selected.png");
   }
 
   &--sweets-souffle {
-    background-image: url("../../images/tile-sweets-souffle.png");
+    --tile-background: url("../../images/tile-sweets-souffle.png");
+    --tile-selected-background: url("../../images/tile-sweets-souffle-selected.png");
   }
 }

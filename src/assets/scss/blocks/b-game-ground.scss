@@ -1,8 +1,8 @@
 @import "../variables";
-@import "../mixins/m-game-panel";
+@import "../mixins/m-game-glass-panel";
 
 .b-game-ground {
-  @include m-game-panel();
+  @include m-game-glass-panel();
 
   --cell-gap: 0.2rem;
   --tile-transition-duration: 0.48s;
@@ -17,6 +17,7 @@
 
   position: relative;
   display: inline-block;
+  padding: var(--panel-padding);
   overflow: hidden;
 
   &__cells {
@@ -32,13 +33,12 @@
     height: var(--cell-size);
     align-items: center;
     justify-content: center;
+    border: 1px solid rgba($white, 0.08);
+    border-radius: 0.35rem;
+    background: rgba($white, 0.025);
     cursor: pointer;
     user-select: none;
     background-size: cover;
-
-    &--selected {
-      filter: brightness(150%);
-    }
   }
 
   &__tiles {
@@ -55,11 +55,10 @@
     cursor: pointer;
     transition:
       transform var(--tile-transition-duration) cubic-bezier(0.22, 1, 0.36, 1),
-      opacity var(--tile-transition-duration) ease,
-      filter var(--tile-transition-duration) ease;
+      opacity var(--tile-transition-duration) ease;
 
     &--selected {
-      filter: brightness(150%);
+      background-image: var(--tile-selected-background);
     }
   }
 }

@@ -1,6 +1,6 @@
 <template>
     <div class="b-game-layout d-flex flex-column flex-lg-row">
-        <aside class="b-game-layout__menu bg-primary-dark p-4 d-flex flex-column">
+        <aside class="b-game-layout__menu p-4 d-flex flex-column">
             <b-game-menu
                 :counters="counters"
                 :objectives="objectives"
@@ -16,7 +16,6 @@
                         <div
                             v-for="cell in cells"
                             :key="cell.key"
-                            :class="{ 'b-game-ground__cell--selected': cell.tile?.selected }"
                             class="b-game-ground__cell"
                         />
                     </div>
@@ -36,8 +35,8 @@
                 </div>
             </div>
 
-            <footer class="b-game-layout__footer pt-3 mt-3">
-                <div class="d-flex flex-column flex-sm-row gap-2 gap-sm-4 justify-content-center">
+            <footer class="b-game-layout__footer mt-3">
+                <div class="b-game-layout__footer-panel d-flex flex-column flex-sm-row gap-2 gap-sm-4 justify-content-center">
                     <span>
                         Code:
                         <a href="https://github.com/cmath10" class="b-game-layout__link">
@@ -77,7 +76,7 @@ import {
 
 import { TILE_TYPE } from '@/enums/game'
 
-type Cell = { key: string; tile: Tile | null }
+type Cell = { key: string }
 const WIDTH = 9
 const HEIGHT = 7
 
@@ -123,7 +122,7 @@ const getTileStyle = (tile: Tile) => ({
 })
 
 const getCells = (): Cell[] => grid.getTileList()
-  .flatMap((row, i) => row.map((tile, j) => ({ key: `${i}-${j}`, tile })))
+  .flatMap((row, i) => row.map((_, j) => ({ key: `${i}-${j}` })))
 
 const generateType = (i: number, j: number): TILE_TYPE => random(AVAILABLE_TILE_TYPES.filter(type => !createsMatch(type, i, j)))
 
