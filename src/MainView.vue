@@ -112,7 +112,7 @@ const gameVersion = ref(0)
 const nextTileId = ref(0)
 
 const locked = computed(() => evaluating.value || gameResult.value !== null)
-const activeTiles = computed(() => grid.getTiles())
+const activeTiles = computed(() => grid.getTiles().sort((a, b) => a.id - b.id))
 const cells = computed(() => getCells())
 
 const createTile = (type: BoardTileType, row: number, column: number): Tile => (

@@ -4,6 +4,7 @@ import type { Page } from '@playwright/test'
 type TileSnapshot = {
   id: string
   type: string
+  blocked: boolean
   row: number
   column: number
   x: number
@@ -19,6 +20,13 @@ type Move = {
 
 const BOARD_WIDTH = 9
 const BOARD_HEIGHT = 7
+const MATCHABLE_TILE_TYPES = new Set([
+  'sweets-barbaris',
+  'sweets-cookie',
+  'sweets-lollipop',
+  'sweets-pillow',
+  'sweets-souffle',
+])
 const seedMathRandom = async (page: Page) => {
   await page.addInitScript(() => {
     let seed = 42
@@ -61,6 +69,7 @@ const getTiles = async (page: Page): Promise<TileSnapshot[]> => {
       const rect = element.getBoundingClientRect()
       const cell = getNearestCell(rect)
       const className = element.className.toString()
+      const classNames = className.split(/\s+/)
       const type = className
         .split(/\s+/)
         .find((name: string) => name.startsWith('b-game-tile--') && name !== 'b-game-tile--small')
@@ -69,6 +78,7 @@ const getTiles = async (page: Page): Promise<TileSnapshot[]> => {
       return {
         id: element.getAttribute('data-tile-id') || '',
         type,
+        blocked: classNames.some((name: string) => name.startsWith('b-game-tile--blocker-')),
         row: cell.row,
         column: cell.column,
         x: rect.x,
@@ -95,7 +105,7 @@ const getBoard = (tiles: TileSnapshot[]): string[][] => {
   const board = Array.from({ length: BOARD_HEIGHT }, () => Array.from({ length: BOARD_WIDTH }, () => ''))
 
   tiles.forEach(tile => {
-    board[tile.row][tile.column] = tile.type
+    board[tile.row][tile.column] = MATCHABLE_TILE_TYPES.has(tile.type) ? tile.type : ''
   })
 
   return board
@@ -138,14 +148,18 @@ const findValidMove = (tiles: TileSnapshot[]): Move => {
     ].filter((candidate): candidate is TileSnapshot => Boolean(candidate))
 
     for (const candidate of candidates) {
-      board[tile.row][tile.column] = candidate.type
-      board[candidate.row][candidate.column] = tile.type
+      if (tile.blocked || candidate.blocked) {
+        continue
+      }
+
+      board[tile.row][tile.column] = MATCHABLE_TILE_TYPES.has(candidate.type) ? candidate.type : ''
+      board[candidate.row][candidate.column] = MATCHABLE_TILE_TYPES.has(tile.type) ? tile.type : ''
 
       const isValid = hasMatchAt(board, tile.row, tile.column) ||
         hasMatchAt(board, candidate.row, candidate.column)
 
-      board[tile.row][tile.column] = tile.type
-      board[candidate.row][candidate.column] = candidate.type
+      board[tile.row][tile.column] = MATCHABLE_TILE_TYPES.has(tile.type) ? tile.type : ''
+      board[candidate.row][candidate.column] = MATCHABLE_TILE_TYPES.has(candidate.type) ? candidate.type : ''
 
       if (isValid) {
         return { from: tile, to: candidate }
@@ -154,6 +168,34 @@ const findValidMove = (tiles: TileSnapshot[]): Move => {
   }
 
   throw new Error('Cannot find a valid move on the seeded board')
+}
+
+const findVerticalValidMove = (tiles: TileSnapshot[]): Move => {
+  const board = getBoard(tiles)
+  const byPosition = new Map(tiles.map(tile => [`${tile.row}-${tile.column}`, tile]))
+
+  for (const tile of tiles) {
+    const candidate = byPosition.get(`${tile.row + 1}-${tile.column}`)
+
+    if (!candidate || tile.blocked || candidate.blocked) {
+      continue
+    }
+
+    board[tile.row][tile.column] = MATCHABLE_TILE_TYPES.has(candidate.type) ? candidate.type : ''
+    board[candidate.row][candidate.column] = MATCHABLE_TILE_TYPES.has(tile.type) ? tile.type : ''
+
+    const isValid = hasMatchAt(board, tile.row, tile.column) ||
+      hasMatchAt(board, candidate.row, candidate.column)
+
+    board[tile.row][tile.column] = MATCHABLE_TILE_TYPES.has(tile.type) ? tile.type : ''
+    board[candidate.row][candidate.column] = MATCHABLE_TILE_TYPES.has(candidate.type) ? candidate.type : ''
+
+    if (isValid) {
+      return { from: tile, to: candidate }
+    }
+  }
+
+  throw new Error('Cannot find a vertical valid move on the seeded board')
 }
 
 const clickTile = async (page: Page, tile: TileSnapshot) => {
@@ -205,6 +247,7 @@ const expectSwapAnimationStarted = async (page: Page, move: Move) => {
   const currentDistance = Math.hypot(movedTile!.x - move.to.x, movedTile!.y - move.to.y)
 
   expect(currentDistance).toBeLessThan(startDistance)
+  expect(currentDistance).toBeGreaterThan(1)
 }
 
 test('valid moves keep animated tiles inside the board', async ({ page }, testInfo) => {
@@ -265,4 +308,17 @@ test('valid moves keep animated tiles inside the board', async ({ page }, testIn
   await page.waitForTimeout(800)
   await expectTilesInsideGround(page)
   await expect(page.locator('.b-game-ground__tile')).toHaveCount(BOARD_WIDTH * BOARD_HEIGHT)
+})
+
+test('vertical valid moves animate before settling', async ({ page }) => {
+  await seedMathRandom(page)
+  await page.goto('/')
+  await expect(page.locator('.b-game-ground')).toBeVisible()
+
+  const move = findVerticalValidMove(await getTiles(page))
+
+  await clickTile(page, move.from)
+  await clickTile(page, move.to)
+  await page.waitForTimeout(80)
+  await expectSwapAnimationStarted(page, move)
 })
