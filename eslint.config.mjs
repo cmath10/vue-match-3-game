@@ -10,7 +10,7 @@ export default [
     ignores: ['artifacts/**', 'dist/**', 'node_modules/**', 'test-results/**'],
   },
   {
-    files: ['*.config.{js,mjs,ts}', 'eslint.config.mjs'],
+    files: ['*.config.{js,mjs,ts}', 'eslint.config.mjs', 'scripts/**/*.mjs'],
     languageOptions: {
       globals: {
         ...globals.node,

@@ -9,6 +9,7 @@
     "preview": "vite preview --host 0.0.0.0",
     "lint": "eslint .",
     "playwright:install": "playwright install chromium",
+    "release:tag": "node scripts/release-tag.mjs",
     "test:playwright": "playwright test --config playwright.config.ts"
   },
   "dependencies": {
