@@ -31,6 +31,7 @@ export default defineConfig({
     ...devices['Desktop Chrome'],
     baseURL,
     headless: true,
+    locale: 'en-US',
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
     video: 'retain-on-failure',

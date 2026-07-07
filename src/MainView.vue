@@ -44,11 +44,11 @@
             <footer class="b-game-layout__footer">
                 <div class="b-game-layout__footer-panel">
                     <span>
-                        Code: <a href="https://github.com/cmath10" class="b-game-layout__link">https://github.com/cmath10</a>
+                        {{ t('footer.code') }} <a href="https://github.com/cmath10" class="b-game-layout__link">https://github.com/cmath10</a>
                     </span>
 
                     <span>
-                        Artwork: <a href="https://www.artstation.com/jackhook" class="b-game-layout__link">https://www.artstation.com/jackhook</a>
+                        {{ t('footer.artwork') }} <a href="https://www.artstation.com/jackhook" class="b-game-layout__link">https://www.artstation.com/jackhook</a>
                     </span>
                 </div>
             </footer>
@@ -59,6 +59,7 @@
 <script lang="ts" setup>
 import type { Counter, Objective, Tile } from '@/types/game'
 import { computed, nextTick, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import BGameMenu from '@/components/blocks/BGameMenu.vue'
 import BGameResultOverlay from '@/components/blocks/BGameResultOverlay.vue'
 import BGameTile from '@/components/blocks/BGameTile.vue'
@@ -93,6 +94,8 @@ const ANIMATION_DELAY = 480
 const random = <T>(array: T[]): T => array[Math.floor(Math.random() * array.length)]
 
 defineOptions({ name: 'MainView' })
+
+const { t } = useI18n()
 
 const grid = reactive(new TileGrid(WIDTH, HEIGHT)) as TileGrid
 const objectives = reactive<Objective[]>([])

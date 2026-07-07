@@ -1,8 +1,27 @@
 <template>
     <div class="b-game-menu">
         <h1 class="b-game-menu__title">
-            Game
+            {{ t('app.title') }}
         </h1>
+
+        <div
+            :aria-label="t('menu.language')"
+            class="b-game-menu__language"
+            role="group"
+        >
+            <button
+                v-for="option in localeOptions"
+                :key="option.code"
+                :aria-label="option.label"
+                :aria-pressed="locale === option.code"
+                :class="{ 'b-game-menu__language-button--active': locale === option.code }"
+                class="b-game-menu__language-button"
+                type="button"
+                @click="setLocale(option.code)"
+            >
+                {{ option.flag }}
+            </button>
+        </div>
 
         <div class="b-game-menu__objectives">
             <div
@@ -21,7 +40,7 @@
 
         <div class="b-game-menu__turns">
             <div class="b-game-menu__turns-label">
-                Turns
+                {{ t('menu.turns') }}
             </div>
 
             <div class="b-game-menu__turns-value">
@@ -34,7 +53,7 @@
             type="button"
             @click="emit('new-game')"
         >
-            New game
+            {{ t('menu.newGame') }}
         </button>
     </div>
 </template>
@@ -43,8 +62,10 @@
 import type { Counter, Objective } from '@/types/game'
 
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import BGameTile from '@/components/blocks/BGameTile.vue'
+import { localeOptions, setLocale } from '@/i18n'
 
 const props = defineProps<{
   objectives: Objective[]
@@ -56,6 +77,8 @@ const emit = defineEmits<{
 }>()
 
 defineOptions({ name: 'BGameMenu' })
+
+const { locale, t } = useI18n()
 
 const countersByType = computed(() => {
   const countersByType = new Map<Counter['type'], number>()

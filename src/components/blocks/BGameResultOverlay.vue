@@ -2,7 +2,7 @@
     <div class="b-game-ground__result">
         <div class="b-game-ground__result-content">
             <div class="b-game-ground__result-title">
-                {{ result === 'win' ? 'You win!' : 'Game over' }}
+                {{ result === 'win' ? t('result.win') : t('result.lose') }}
             </div>
 
             <button
@@ -10,13 +10,15 @@
                 type="button"
                 @click="emit('play-again')"
             >
-                Play again
+                {{ t('result.playAgain') }}
             </button>
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
+import { useI18n } from 'vue-i18n'
+
 defineProps<{
   result: 'win' | 'lose'
 }>()
@@ -27,4 +29,6 @@ const emit = defineEmits<{
 defineOptions({
   name: 'BGameResultOverlay',
 })
+
+const { t } = useI18n()
 </script>
