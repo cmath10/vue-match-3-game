@@ -361,7 +361,10 @@ const handleSelectedTileClick = (selectedTile: Tile, tile: Tile) => {
   selectedTile.selected = false
 }
 
-const initObjectives = () => objectives.push(generateObjective(), generateObjective())
+const initObjectives = () => {
+  objectives.push(generateObjective())
+  objectives.push(generateObjective())
+}
 const initCounters = () => AVAILABLE_TILE_TYPES.forEach(type => counters.push({ type, count: 0 }))
 
 const fillGrid = () => {
