@@ -1,13 +1,26 @@
 .b-game-tile {
+  position: relative;
   display: inline-block;
   width: 3.5rem;
   height: 3.5rem;
   background-image: var(--tile-background);
+  background-position: center;
+  background-repeat: no-repeat;
   background-size: cover;
 
   &--small {
     width: 2rem;
     height: 2rem;
+  }
+
+  &::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    pointer-events: none;
   }
 
   &--sweets-barbaris {
@@ -33,5 +46,36 @@
   &--sweets-souffle {
     --tile-background: url("../../images/tile-sweets-souffle.png");
     --tile-selected-background: url("../../images/tile-sweets-souffle-selected.png");
+  }
+
+  &--special-mug {
+    --tile-background: url("../../images/tile-special-mug.png");
+    --tile-selected-background: url("../../images/tile-special-mug.png");
+
+    background-size: contain;
+  }
+
+  &--special-package {
+    --tile-background: url("../../images/tile-blocker-package.png");
+    --tile-selected-background: url("../../images/tile-blocker-package.png");
+
+    background-size: contain;
+  }
+
+  &--special-cookie {
+    --tile-background: url("../../images/tile-special-cookie.png");
+    --tile-selected-background: url("../../images/tile-special-cookie.png");
+  }
+
+  &--blocker-special-package::after {
+    background-image: url("../../images/tile-blocker-package.png");
+  }
+
+  &--cookie-jam-1::after {
+    background-image: url("../../images/tile-cookie-jam-1.png");
+  }
+
+  &--cookie-jam-2::after {
+    background-image: url("../../images/tile-cookie-jam-2.png");
   }
 }

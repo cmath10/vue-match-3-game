@@ -5,3 +5,12 @@ export enum TILE_TYPE {
   SWEETS_PILLOW = 'sweets-pillow',
   SWEETS_SOUFFLE = 'sweets-souffle',
 }
+
+export enum SPECIAL_TILE_TYPE {
+  MUG = 'special-mug',
+  PACKAGE = 'special-package',
+  COOKIE = 'special-cookie',
+}
+
+export type BoardTileType = TILE_TYPE | SPECIAL_TILE_TYPE.MUG | SPECIAL_TILE_TYPE.COOKIE
+export type ObjectiveType = TILE_TYPE | SPECIAL_TILE_TYPE

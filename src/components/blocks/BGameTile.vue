@@ -4,22 +4,39 @@
             'b-game-tile': true,
             'b-game-tile--small': small,
             [`b-game-tile--${type}`]: true,
+            [`b-game-tile--blocker-${blocker}`]: blocker,
+            [`b-game-tile--cookie-jam-${cookieJam}`]: cookieJam,
         }"
     />
 </template>
 
 <script lang="ts" setup>
-import { TILE_TYPE } from '@/enums/game'
+import { computed } from 'vue'
 
-withDefaults(defineProps<{
-  type: TILE_TYPE
+import type { ObjectiveType } from '@/enums/game'
+import { SPECIAL_TILE_TYPE } from '@/enums/game'
+
+const props = withDefaults(defineProps<{
+  type: ObjectiveType
   small?: boolean
+  health?: number
+  blocker?: SPECIAL_TILE_TYPE.PACKAGE
 }>(), {
   small: false,
+  health: undefined,
+  blocker: undefined,
 })
 
 defineOptions({
   name: 'BGameTile',
+})
+
+const cookieJam = computed(() => {
+  if (props.type !== SPECIAL_TILE_TYPE.COOKIE || props.health === undefined) {
+    return null
+  }
+
+  return props.health > 1 ? props.health - 1 : null
 })
 </script>
 
