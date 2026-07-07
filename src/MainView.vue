@@ -73,6 +73,7 @@ import {
   type Board,
   type Position,
 } from '@/entities/Match3Engine'
+import { generateObjectives } from '@/entities/Match3Objectives'
 
 import { TILE_TYPE } from '@/enums/game'
 
@@ -88,16 +89,10 @@ const AVAILABLE_TILE_TYPES = [
   TILE_TYPE.SWEETS_SOUFFLE,
 ]
 
-const COUNT_TURNS = 20
-const COUNT_SEED = 5
-const COUNT_MULTIPLIER_MIN = 3
-const COUNT_MULTIPLIER_MAX = 10
+const COUNT_TURNS = 25
 const ANIMATION_DELAY = 480
 
 const random = <T>(array: T[]): T => array[Math.floor(Math.random() * array.length)]
-const range = (start: number, end: number): number[] => {
-  return Array(end - start + 1).fill(1).map((_, idx) => start + idx)
-}
 
 defineOptions({ name: 'MainView' })
 
@@ -125,16 +120,6 @@ const getCells = (): Cell[] => grid.getTileList()
   .flatMap((row, i) => row.map((_, j) => ({ key: `${i}-${j}` })))
 
 const generateType = (i: number, j: number): TILE_TYPE => random(AVAILABLE_TILE_TYPES.filter(type => !createsMatch(type, i, j)))
-
-const generateObjective = (): Objective => {
-  const excluded: TILE_TYPE[] = objectives.map((o: Objective) => o.type)
-  const multiplier: number = random(range(COUNT_MULTIPLIER_MIN, COUNT_MULTIPLIER_MAX))
-
-  return {
-    type: random(AVAILABLE_TILE_TYPES.filter(type => !excluded.includes(type))),
-    count: multiplier * COUNT_SEED,
-  }
-}
 
 const swapTiles = (a: Tile, b: Tile) => {
   const indexOfA = grid.indexOf(a)
@@ -362,8 +347,7 @@ const handleSelectedTileClick = (selectedTile: Tile, tile: Tile) => {
 }
 
 const initObjectives = () => {
-  objectives.push(generateObjective())
-  objectives.push(generateObjective())
+  objectives.push(...generateObjectives(grid.getTiles().map(tile => tile.type)))
 }
 const initCounters = () => AVAILABLE_TILE_TYPES.forEach(type => counters.push({ type, count: 0 }))
 
@@ -382,8 +366,8 @@ const startNewGame = () => {
   objectives.splice(0)
   counters.splice(0)
   grid.clear()
-  initObjectives()
   fillGrid()
+  initObjectives()
   initCounters()
 }
 

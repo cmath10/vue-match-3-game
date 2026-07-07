@@ -3,7 +3,7 @@
 @mixin m-game-glass-panel {
   border: 1px solid rgba($white, 0.24);
   border-radius: 0.5rem;
-  background: rgba($primary-dark, 0.54);
+  background: #0b0000b4;
   box-shadow: 0 0.8rem 2rem rgba($black, 0.22);
   backdrop-filter: blur(14px) saturate(130%);
 }

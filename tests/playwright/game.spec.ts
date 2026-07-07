@@ -249,12 +249,12 @@ test('valid moves keep animated tiles inside the board', async ({ page }, testIn
     contentType: 'image/png',
   })
 
-  await expect(page.locator('.b-game-menu__turns-value')).toHaveText('19')
+  await expect(page.locator('.b-game-menu__turns-value')).toHaveText('24')
   await expectTilesInsideGround(page)
   await expect(page.locator('.b-game-ground__tile')).toHaveCount(BOARD_WIDTH * BOARD_HEIGHT)
 
   await page.getByRole('button', { name: 'New game' }).click()
-  await expect(page.locator('.b-game-menu__turns-value')).toHaveText('20')
+  await expect(page.locator('.b-game-menu__turns-value')).toHaveText('25')
   await expect(page.locator('.b-game-ground__tile')).toHaveCount(BOARD_WIDTH * BOARD_HEIGHT)
 
   const newGameObjectiveTypes = await getObjectiveTypes(page)

@@ -32,10 +32,45 @@
     gap: 0.5rem;
     font-size: clamp(1rem, 3.8vw, 1.2rem);
     line-height: 1;
+    transition: opacity 0.18s ease;
 
     .b-game-tile--small {
       width: clamp(2rem, 7vw, 2.35rem);
       height: clamp(2rem, 7vw, 2.35rem);
+    }
+
+    &--completed {
+      color: rgba($white, 0.58);
+
+      .b-game-tile {
+        filter: grayscale(25%) brightness(70%);
+      }
+    }
+  }
+
+  &__objective-tile {
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 auto;
+
+    .b-game-menu__objective--completed &::after {
+      position: absolute;
+      right: -0.2rem;
+      bottom: -0.2rem;
+      display: grid;
+      width: 1rem;
+      height: 1rem;
+      align-items: center;
+      color: $white;
+      content: "✓";
+      font-size: 0.72rem;
+      font-weight: 700;
+      line-height: 1;
+      background: rgba(34, 142, 83, 0.92);
+      border: 1px solid rgba($white, 0.72);
+      border-radius: 50%;
+      box-shadow: 0 0.2rem 0.5rem rgba($black, 0.28);
+      justify-items: center;
     }
   }
 

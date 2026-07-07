@@ -8,10 +8,14 @@
             <div
                 v-for="(objective, index) in objectivesComputed"
                 :key="index"
+                :class="{ 'b-game-menu__objective--completed': objective.completed }"
                 class="b-game-menu__objective"
             >
-                <b-game-tile :type="objective.type" :small="true" />
-                <span>&times; {{ objective.count }}</span>
+                <span class="b-game-menu__objective-tile">
+                    <b-game-tile :type="objective.type" :small="true" />
+                </span>
+
+                <span v-if="!objective.completed">&times; {{ objective.count }}</span>
             </div>
         </div>
 
@@ -66,10 +70,12 @@ const countersByType = computed(() => {
 const objectivesComputed = computed(() => {
   return props.objectives.map((objective: Objective) => {
     const collected = countersByType.value.get(objective.type) || 0
+    const count = Math.max(0, objective.count - collected)
 
     return {
       type: objective.type,
-      count: objective.count - collected,
+      count,
+      completed: count === 0,
     }
   })
 })
