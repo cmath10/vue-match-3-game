@@ -29,11 +29,15 @@ export const collectDroppedMugs = (
   incrementCounter: IncrementCounter
 ) => {
   for (let column = 0; column < width; column++) {
-    const tile = grid.getTileByIndex(height - 1, column)
+    for (let row = height - 1; row >= 0; row--) {
+      const tile = grid.getTileByIndex(row, column)
 
-    if (tile?.type === SPECIAL_TILE_TYPE.MUG) {
+      if (tile?.type !== SPECIAL_TILE_TYPE.MUG) {
+        break
+      }
+
       incrementCounter(SPECIAL_TILE_TYPE.MUG)
-      grid.setTile(null, height - 1, column)
+      grid.setTile(null, row, column)
     }
   }
 }

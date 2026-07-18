@@ -103,3 +103,17 @@ test('mug is collected when it reaches the bottom row', () => {
   expect(grid.getTileByIndex(2, 1)).toBeNull()
   expect(counters[0].count).toBe(1)
 })
+
+test('consecutive mugs at the bottom are collected in the same transition', () => {
+  const grid = new TileGrid(3, 3)
+  const counters = [counter(SPECIAL_TILE_TYPE.MUG)]
+  const incrementCounter = (type: ObjectiveType) => counters.find(item => item.type === type)!.count++
+
+  grid.setTile(createTile(1, SPECIAL_TILE_TYPE.MUG), 1, 1)
+  grid.setTile(createTile(2, SPECIAL_TILE_TYPE.MUG), 2, 1)
+  collectDroppedMugs(grid, 3, 3, incrementCounter)
+
+  expect(grid.getTileByIndex(1, 1)).toBeNull()
+  expect(grid.getTileByIndex(2, 1)).toBeNull()
+  expect(counters[0].count).toBe(2)
+})
