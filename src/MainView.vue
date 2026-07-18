@@ -32,6 +32,10 @@
                             :type="tile.type"
                             class="b-game-ground__tile"
                             @click="onTileClick(tile)"
+                            @dblclick="onTileDoubleClick(tile)"
+                            @pointercancel="onTilePointerCancel"
+                            @pointerdown="onTilePointerDown(tile, $event)"
+                            @pointerup="onTilePointerUp($event)"
                         />
                     </div>
 
@@ -66,22 +70,26 @@ import BGameMenu from '@/components/blocks/BGameMenu.vue'
 import BGameResultOverlay from '@/components/blocks/BGameResultOverlay.vue'
 import BGameTile from '@/components/blocks/BGameTile.vue'
 import { preserveCreatedBoosters } from '@/entities/Match3BoardBoosters'
+import { applyBoosterEffectPositions } from '@/entities/Match3BoardHits'
 import {
   getCascadeBoosterCreations,
   getMoveMatch,
   type MoveMatch,
 } from '@/entities/Match3BoosterRules'
+import { createMatch3BoosterTurn } from '@/entities/Match3BoosterTurn'
 import { getGameResult, type GameResult } from '@/entities/Match3GameResult'
 import TileGrid from '@/entities/TileGrid'
 import {
   findMatchLines,
   findMatchedPositions,
   getMatchPositions,
-  isNeighborPosition,
-  type Board,
   type Position,
 } from '@/entities/Match3Engine'
-import { generateObjectives } from '@/entities/Match3Objectives'
+import {
+  getGridTilePosition,
+  getMatchableTileBoard,
+} from '@/entities/Match3GridBoard'
+import { initializeGameGoals } from '@/entities/Match3GameSetup'
 import {
   collapseGrid,
   refillGrid,
@@ -91,16 +99,16 @@ import {
   AVAILABLE_TILE_TYPES,
   clearMatchedPositions,
   collectDroppedMugs,
-  COUNTER_TYPES,
-  isMatchableTile,
-  isMovableTile,
   placeSpecialTiles,
-  SPECIAL_OBJECTIVE_TYPES,
-  SPECIAL_TARGETS,
 } from '@/entities/Match3SpecialTiles'
+import { createMatch3TileInput } from '@/entities/Match3TileInput'
+import {
+  getGridCells,
+  getPointerTargetTile,
+  getTileStyle,
+} from '@/entities/Match3TilePresentation'
 import { TILE_TYPE, type BoardTileType, type ObjectiveType } from '@/enums/game'
 
-type Cell = { key: string }
 const WIDTH = 9
 const HEIGHT = 7
 
@@ -124,18 +132,11 @@ const nextTileId = ref(0)
 
 const locked = computed(() => evaluating.value || gameResult.value !== null)
 const activeTiles = computed(() => grid.getTiles().sort((a, b) => a.id - b.id))
-const cells = computed(() => getCells())
+const cells = computed(() => getGridCells(grid))
 
 const createTile = (type: BoardTileType, row: number, column: number): Tile => (
   { id: nextTileId.value++, type, selected: false, row, column }
 )
-
-const getTileStyle = (tile: Tile) => ({
-  transform: `translate(calc(${tile.column} * (var(--cell-size) + var(--cell-gap)) + var(--tile-offset)), calc(${tile.row} * (var(--cell-size) + var(--cell-gap)) + var(--tile-offset)))`,
-})
-
-const getCells = (): Cell[] => grid.getTileList()
-  .flatMap((row, i) => row.map((_, j) => ({ key: `${i}-${j}` })))
 
 const generateType = (i: number, j: number): TILE_TYPE => random(AVAILABLE_TILE_TYPES.filter(type => !createsMatch(type, i, j)))
 
@@ -155,8 +156,7 @@ const swapTiles = (a: Tile, b: Tile) => {
 const waitAnimation = () => new Promise<void>(resolve => setTimeout(resolve, ANIMATION_DELAY))
 const nextAnimationFrame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
 
-const getTileTypeBoard = (): Board<TILE_TYPE> => grid.getTileList()
-  .map(row => row.map(tile => tile && isMatchableTile(tile) ? tile.type : null))
+const getTileTypeBoard = () => getMatchableTileBoard(grid)
 
 const createsMatch = (type: TILE_TYPE, i: number, j: number): boolean => {
   const board = getTileTypeBoard()
@@ -167,26 +167,14 @@ const createsMatch = (type: TILE_TYPE, i: number, j: number): boolean => {
 }
 
 const getTileMoveMatch = (movedTile: Tile, swappedTile: Tile): MoveMatch => {
-  const positionA = getTilePosition(movedTile)
-  const positionB = getTilePosition(swappedTile)
+  const positionA = getGridTilePosition(grid, movedTile)
+  const positionB = getGridTilePosition(grid, swappedTile)
 
   if (positionA === null || positionB === null) {
     return { positions: [], boosters: [] }
   }
 
   return getMoveMatch(getTileTypeBoard(), positionA, positionB)
-}
-
-const getTilePosition = (tile: Tile): Position | null => {
-  const index = grid.indexOf(tile)
-  return index ? { row: index[0], column: index[1] } : null
-}
-
-const areNeighborTiles = (a: Tile, b: Tile): boolean => {
-  const positionA = getTilePosition(a)
-  const positionB = getTilePosition(b)
-
-  return positionA !== null && positionB !== null && isNeighborPosition(positionA, positionB)
 }
 
 const incrementCounter = (type: ObjectiveType) => {
@@ -231,17 +219,30 @@ const updateGrid = async (
   matchedPositions: Position[],
   boosters: MoveMatch['boosters']
 ) => {
-  let positionsToClear = preserveCreatedBoosters(grid, matchedPositions, boosters)
+  const positionsToClear = preserveCreatedBoosters(grid, matchedPositions, boosters)
 
-  while (positionsToClear.length) {
-    const movements = resolveMatchedPositions(positionsToClear)
+  if (positionsToClear.length > 0) {
+    await settleGrid(version, resolveMatchedPositions(positionsToClear))
+  }
+}
+
+const settleGrid = async (version: number, initialMovements: TileMovement[]) => {
+  let movements = initialMovements
+
+  while (true) {
     await waitAnimation()
 
     if (version !== gameVersion.value) {
       return
     }
 
-    positionsToClear = getCascadePositions(movements)
+    const positionsToClear = getCascadePositions(movements)
+
+    if (positionsToClear.length === 0) {
+      return
+    }
+
+    movements = resolveMatchedPositions(positionsToClear)
   }
 }
 
@@ -254,6 +255,15 @@ const getCascadePositions = (movements: TileMovement[]): Position[] => {
 
 const resolveMatchedPositions = (positions: Position[]): TileMovement[] => {
   clearMatchedPositions(grid, positions, WIDTH, HEIGHT, incrementCounter)
+  return transitionGrid()
+}
+
+const resolveBoosterPositions = (positions: Position[]): TileMovement[] => {
+  applyBoosterEffectPositions(grid, positions, WIDTH, HEIGHT, incrementCounter)
+  return transitionGrid()
+}
+
+const transitionGrid = (): TileMovement[] => {
   const movements = collapseGrid(grid)
 
   collectDroppedMugs(grid, WIDTH, HEIGHT, incrementCounter)
@@ -291,13 +301,17 @@ const applySuccessfulMove = async (version: number, match: MoveMatch) => {
     return
   }
 
-  turns.value--
-  updateGameResult()
-  evaluating.value = false
+  finishTurn()
 }
 
 const updateGameResult = () => {
   gameResult.value = getGameResult(objectives, counters, turns.value)
+}
+
+const finishTurn = () => {
+  turns.value--
+  updateGameResult()
+  evaluating.value = false
 }
 
 const revertFailedMove = async (a: Tile, b: Tile, version: number) => {
@@ -311,55 +325,34 @@ const revertFailedMove = async (a: Tile, b: Tile, version: number) => {
   evaluating.value = false
 }
 
-const onTileClick = (tile: Tile) => {
-  if (locked.value) {
-    return
-  }
+const { activateBooster, swipeBooster } = createMatch3BoosterTurn({
+  grid,
+  getVersion: () => gameVersion.value,
+  isVersionCurrent: version => version === gameVersion.value,
+  setEvaluating: value => evaluating.value = value,
+  waitAnimation,
+  settleGrid,
+  resolvePositions: resolveBoosterPositions,
+  finishTurn,
+  swapTiles,
+  selectButtonBoxTarget: types => types.length === 0 ? null : random(types),
+})
 
-  const selectedTile = grid.find((tile: Tile) => tile.selected)
-
-  if (!isMovableTile(tile)) {
-    clearSelectedTile(selectedTile)
-    return
-  }
-
-  if (selectedTile !== null) {
-    handleSelectedTileClick(selectedTile, tile)
-  } else {
-    tile.selected = true
-  }
-}
-
-const handleSelectedTileClick = (selectedTile: Tile, tile: Tile) => {
-  if (selectedTile !== tile) {
-    if (areNeighborTiles(selectedTile, tile)) {
-      void makeMove(selectedTile, tile)
-    } else {
-      tile.selected = true
-    }
-  }
-
-  selectedTile.selected = false
-}
-
-const clearSelectedTile = (tile: Tile | null) => {
-  if (tile) {
-    tile.selected = false
-  }
-}
-
-const initObjectives = () => {
-  const [normalObjective] = generateObjectives(grid.getTiles()
-    .filter((tile): tile is Tile & { type: TILE_TYPE } => isMatchableTile(tile))
-    .map(tile => tile.type))
-  const specialType = random(SPECIAL_OBJECTIVE_TYPES)
-
-  objectives.push(normalObjective, {
-    type: specialType,
-    count: SPECIAL_TARGETS[specialType],
-  })
-}
-const initCounters = () => COUNTER_TYPES.forEach(type => counters.push({ type, count: 0 }))
+const {
+  onTileClick,
+  onTileDoubleClick,
+  onTilePointerCancel,
+  onTilePointerDown,
+  onTilePointerUp,
+} = createMatch3TileInput({
+  grid,
+  isLocked: () => locked.value,
+  areNeighbors: (a, b) => Boolean(grid.isNeighbors(a, b)),
+  getPointerTarget: event => getPointerTargetTile(grid, event),
+  moveTiles: (a, b) => void makeMove(a, b),
+  activateBooster,
+  swipeBooster,
+})
 
 const fillGrid = () => {
   grid.forEachCell((tile: Tile | null, i: number, j: number) => {
@@ -379,8 +372,7 @@ const startNewGame = () => {
   grid.clear()
   fillGrid()
   placeSpecialTiles(grid, WIDTH, HEIGHT, createTile)
-  initObjectives()
-  initCounters()
+  initializeGameGoals(grid, objectives, counters, random)
 }
 
 startNewGame()

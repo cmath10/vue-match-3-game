@@ -1,4 +1,5 @@
 import type TileGrid from '@/entities/TileGrid'
+export { clearMatchedPositions } from '@/entities/Match3BoardHits'
 import type { BoardTileType, ObjectiveType } from '@/enums/game'
 import type { Tile } from '@/types/game'
 import type { Position } from '@/entities/Match3Engine'
@@ -21,23 +22,6 @@ export const placeSpecialTiles = (
   placeCookies(grid, height, createTile)
 }
 
-export const clearMatchedPositions = (
-  grid: TileGrid,
-  positions: Position[],
-  width: number,
-  height: number,
-  incrementCounter: IncrementCounter
-) => {
-  const adjacentCookies = new Set<Tile>()
-
-  positions.forEach((position) => {
-    collectAdjacentCookies(grid, position, width, height, adjacentCookies)
-    clearMatchedPosition(grid, position, incrementCounter)
-  })
-
-  adjacentCookies.forEach(tile => damageCookie(grid, tile, incrementCounter))
-}
-
 export const collectDroppedMugs = (
   grid: TileGrid,
   width: number,
@@ -50,75 +34,6 @@ export const collectDroppedMugs = (
     if (tile?.type === SPECIAL_TILE_TYPE.MUG) {
       incrementCounter(SPECIAL_TILE_TYPE.MUG)
       grid.setTile(null, height - 1, column)
-    }
-  }
-}
-
-const clearMatchedPosition = (grid: TileGrid, { row, column }: Position, incrementCounter: IncrementCounter) => {
-  const tile = grid.getTileByIndex(row, column)
-
-  if (tile === null) {
-    return
-  }
-
-  tile.selected = false
-
-  if (tile.blocker) {
-    damagePackage(tile, incrementCounter)
-
-    return
-  }
-
-  if (isMatchableTile(tile)) {
-    incrementCounter(tile.type)
-    grid.setTile(null, row, column)
-  }
-}
-
-const collectAdjacentCookies = (
-  grid: TileGrid,
-  { row, column }: Position,
-  width: number,
-  height: number,
-  cookies: Set<Tile>
-) => {
-  getNeighborPositions(row, column, width, height).forEach((position) => {
-    const tile = grid.getTileByIndex(position.row, position.column)
-
-    if (tile?.type === SPECIAL_TILE_TYPE.COOKIE) {
-      cookies.add(tile)
-    }
-  })
-}
-
-const damagePackage = (tile: Tile, incrementCounter: IncrementCounter) => {
-  if (!tile.blocker) {
-    return
-  }
-
-  tile.blocker.health--
-
-  if (tile.blocker.health <= 0) {
-    tile.blocker = undefined
-    incrementCounter(SPECIAL_TILE_TYPE.PACKAGE)
-  }
-}
-
-const damageCookie = (grid: TileGrid, tile: Tile, incrementCounter: IncrementCounter) => {
-  if (tile.type !== SPECIAL_TILE_TYPE.COOKIE || tile.health === undefined) {
-    return
-  }
-
-  tile.health--
-
-  if (tile.health <= 0) {
-    const index = grid.indexOf(tile)
-
-    if (index) {
-      const [row, column] = index
-
-      incrementCounter(SPECIAL_TILE_TYPE.COOKIE)
-      grid.setTile(null, row, column)
     }
   }
 }
@@ -167,15 +82,6 @@ const getRandomPositions = (
   })
 
   return shuffle(positions).slice(0, count)
-}
-
-const getNeighborPositions = (row: number, column: number, width: number, height: number): Position[] => {
-  return [
-    { row: row - 1, column },
-    { row: row + 1, column },
-    { row, column: column - 1 },
-    { row, column: column + 1 },
-  ].filter(position => position.row >= 0 && position.row < height && position.column >= 0 && position.column < width)
 }
 
 const shuffle = <T>(items: T[]): T[] => {

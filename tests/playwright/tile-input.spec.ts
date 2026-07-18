@@ -1,0 +1,43 @@
+import { expect, test } from '@playwright/test'
+
+import TileGrid from '../../src/entities/TileGrid'
+import { createMatch3TileInput } from '../../src/entities/Match3TileInput'
+import { BOOSTER_TYPE, TILE_TYPE } from '../../src/enums/game'
+import type { Tile } from '../../src/types/game'
+
+const createTile = (id: number, type: Tile['type'], column: number): Tile => ({
+  id,
+  type,
+  selected: false,
+  row: 0,
+  column,
+})
+
+test('pointer gesture emits one booster swipe and suppresses its trailing click', () => {
+  const grid = new TileGrid(2, 1)
+  const booster = createTile(1, BOOSTER_TYPE.BUTTON_BOX, 0)
+  const ordinary = createTile(2, TILE_TYPE.SWEETS_FISH, 1)
+  const swipes: Array<[Tile, Tile]> = []
+  let moves = 0
+
+  grid.setTile(booster, 0, 0)
+  grid.setTile(ordinary, 0, 1)
+
+  const input = createMatch3TileInput({
+    grid,
+    isLocked: () => false,
+    areNeighbors: () => true,
+    getPointerTarget: () => ordinary,
+    moveTiles: () => moves++,
+    activateBooster: () => undefined,
+    swipeBooster: (source, target) => swipes.push([source, target]),
+  })
+
+  input.onTilePointerDown(booster, { pointerId: 7 } as PointerEvent)
+  input.onTilePointerUp({ pointerId: 7 } as PointerEvent)
+  input.onTileClick(booster)
+
+  expect(swipes).toEqual([[booster, ordinary]])
+  expect(moves).toBe(0)
+  expect(booster.selected).toBe(false)
+})

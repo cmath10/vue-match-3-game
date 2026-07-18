@@ -27,16 +27,17 @@ export const getBoosterEffect = (
 export const getButtonBoxEffect = (
   board: Board<BoardTileType>,
   source: Position,
-  targetType: TILE_TYPE
-): BoardEffect => ({
-  source,
-  positions: [
+  targetType: TILE_TYPE | null
+): BoardEffect => {
+  const targetPositions = targetType === null ? [] : getTileTypePositions(board, targetType)
+
+  return {
     source,
-    ...getTileTypePositions(board, targetType),
-  ],
-  booster: BOOSTER_TYPE.BUTTON_BOX,
-  targetType,
-})
+    positions: [source, ...targetPositions],
+    booster: BOOSTER_TYPE.BUTTON_BOX,
+    ...(targetType === null ? {} : { targetType }),
+  }
+}
 
 export const getPresentTileTypes = (board: Board<BoardTileType>): TILE_TYPE[] => {
   const presentTypes = new Set<TILE_TYPE>()
@@ -48,6 +49,10 @@ export const getPresentTileTypes = (board: Board<BoardTileType>): TILE_TYPE[] =>
   }))
 
   return [...presentTypes]
+}
+
+export const isBoosterType = (type: BoardTileType | null): type is BOOSTER_TYPE => {
+  return Object.values(BOOSTER_TYPE).includes(type as BOOSTER_TYPE)
 }
 
 const getEffectPositions = (
@@ -101,6 +106,6 @@ const getTileTypePositions = (board: Board<BoardTileType>, targetType: TILE_TYPE
   return positions
 }
 
-const isTileType = (type: BoardTileType | null): type is TILE_TYPE => {
+export const isTileType = (type: BoardTileType | null): type is TILE_TYPE => {
   return Object.values(TILE_TYPE).includes(type as TILE_TYPE)
 }
