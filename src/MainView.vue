@@ -42,6 +42,7 @@
                         />
 
                         <b-game-button-flights :flights="buttonFlights" />
+                        <b-game-booster-effects :effects="boosterVisualEffects" />
                     </div>
 
                     <b-game-result-overlay
@@ -71,7 +72,8 @@
 import type { Counter, Objective, Tile } from '@/types/game'
 import { computed, nextTick, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useMatch3ButtonCollection } from '@/composables/useMatch3ButtonCollection'
+import { useMatch3BoosterAnimation } from '@/composables/useMatch3BoosterAnimation'
+import BGameBoosterEffects from '@/components/blocks/BGameBoosterEffects.vue'
 import BGameButtonFlights from '@/components/blocks/BGameButtonFlights.vue'
 import BGameMenu from '@/components/blocks/BGameMenu.vue'
 import BGameResultOverlay from '@/components/blocks/BGameResultOverlay.vue'
@@ -118,12 +120,9 @@ import { TILE_TYPE, type BoardTileType, type ObjectiveType } from '@/enums/game'
 
 const WIDTH = 9
 const HEIGHT = 7
-
 const COUNT_TURNS = 25
 const ANIMATION_DELAY = 480
-
 const random = <T>(array: T[]): T => array[Math.floor(Math.random() * array.length)]
-
 defineOptions({ name: 'MainView' })
 
 const { t } = useI18n()
@@ -162,8 +161,10 @@ const swapTiles = (a: Tile, b: Tile) => {
 
 const waitAnimation = () => new Promise<void>(resolve => setTimeout(resolve, ANIMATION_DELAY))
 const nextAnimationFrame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
-const { flights: buttonFlights, collectingTileIds, animateWave: animateButtonCollection, cancel: cancelButtonCollection } =
-  useMatch3ButtonCollection({ grid, waitAnimation, nextAnimationFrame })
+const {
+  visualEffects: boosterVisualEffects, flights: buttonFlights, collectingTileIds,
+  animateWave: animateBoosterWave, cancel: cancelBoosterAnimation,
+} = useMatch3BoosterAnimation({ grid, waitAnimation, nextAnimationFrame })
 
 const getTileTypeBoard = () => getMatchableTileBoard(grid)
 
@@ -342,7 +343,7 @@ const { activateBooster, swipeBooster } = createMatch3BoosterTurn({
   waitAnimation,
   settleGrid,
   resolvePositions: resolveBoosterPositions,
-  animateWave: animateButtonCollection,
+  animateWave: animateBoosterWave,
   finishTurn,
   swapTiles,
   selectButtonBoxTarget: types => types.length === 0 ? null : random(types),
@@ -379,7 +380,7 @@ const startNewGame = () => {
   turns.value = COUNT_TURNS
   objectives.splice(0)
   counters.splice(0)
-  cancelButtonCollection()
+  cancelBoosterAnimation()
   grid.clear()
   fillGrid()
   placeSpecialTiles(grid, WIDTH, HEIGHT, createTile)

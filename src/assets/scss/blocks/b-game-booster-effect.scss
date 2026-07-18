@@ -1,0 +1,168 @@
+.b-game-booster-effect {
+  --board-width: calc(var(--cell-size) * 9 + var(--cell-gap) * 8);
+  --board-height: calc(var(--cell-size) * 7 + var(--cell-gap) * 6);
+  --cell-step: calc(var(--cell-size) + var(--cell-gap));
+  --effect-duration: var(--tile-transition-duration);
+
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+
+  &::before,
+  &::after {
+    position: absolute;
+    content: "";
+    pointer-events: none;
+  }
+
+  &--booster-row-firecracker {
+    width: var(--board-width);
+    height: var(--cell-size);
+    transform: translateY(calc(var(--effect-row) * var(--cell-step)));
+
+    &::before,
+    &::after {
+      top: 50%;
+      right: 0;
+      left: 0;
+      height: calc(var(--cell-size) * 0.24);
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, #ff8b31 12%, #fff6ae 50%, #ff8b31 88%, transparent);
+      box-shadow:
+        0 0 calc(var(--cell-size) * 0.14) rgba(255, 245, 174, 0.95),
+        0 0 calc(var(--cell-size) * 0.32) rgba(255, 91, 34, 0.8);
+      animation: b-game-booster-row var(--effect-duration) ease-out both;
+    }
+
+    &::after {
+      height: calc(var(--cell-size) * 0.06);
+      background: #fff;
+      animation-delay: 60ms;
+    }
+  }
+
+  &--booster-column-firecracker {
+    width: var(--cell-size);
+    height: var(--board-height);
+    transform: translateX(calc(var(--effect-column) * var(--cell-step)));
+
+    &::before,
+    &::after {
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: calc(var(--cell-size) * 0.24);
+      border-radius: 999px;
+      background: linear-gradient(180deg, transparent, #ff8b31 12%, #fff6ae 50%, #ff8b31 88%, transparent);
+      box-shadow:
+        0 0 calc(var(--cell-size) * 0.14) rgba(255, 245, 174, 0.95),
+        0 0 calc(var(--cell-size) * 0.32) rgba(255, 91, 34, 0.8);
+      animation: b-game-booster-column var(--effect-duration) ease-out both;
+    }
+
+    &::after {
+      width: calc(var(--cell-size) * 0.06);
+      background: #fff;
+      animation-delay: 60ms;
+    }
+  }
+
+  &--booster-area-kettle {
+    width: calc(var(--cell-size) * 3 + var(--cell-gap) * 2);
+    height: calc(var(--cell-size) * 3 + var(--cell-gap) * 2);
+    transform: translate(
+      calc((var(--effect-column) - 1) * var(--cell-step)),
+      calc((var(--effect-row) - 1) * var(--cell-step))
+    );
+
+    &::before {
+      inset: 0;
+      border: max(2px, calc(var(--cell-size) * 0.04)) solid rgba(255, 241, 158, 0.9);
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        rgba(255, 255, 224, 0.94) 0 8%,
+        rgba(255, 176, 55, 0.78) 24%,
+        rgba(255, 87, 34, 0.36) 52%,
+        transparent 72%
+      );
+      box-shadow:
+        inset 0 0 calc(var(--cell-size) * 0.5) rgba(255, 245, 182, 0.75),
+        0 0 calc(var(--cell-size) * 0.48) rgba(255, 110, 31, 0.7);
+      animation: b-game-booster-kettle var(--effect-duration) ease-out both;
+    }
+
+    &::after {
+      inset: 26%;
+      border: max(1px, calc(var(--cell-size) * 0.025)) solid rgba(255, 255, 225, 0.88);
+      border-radius: 50%;
+      animation: b-game-booster-kettle-ring var(--effect-duration) ease-out both;
+    }
+  }
+}
+
+@keyframes b-game-booster-row {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) scaleX(0.04);
+  }
+
+  24% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-50%) scaleX(1);
+  }
+}
+
+@keyframes b-game-booster-column {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scaleY(0.04);
+  }
+
+  24% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scaleY(1);
+  }
+}
+
+@keyframes b-game-booster-kettle {
+  0% {
+    opacity: 0;
+    transform: scale(0.12);
+  }
+
+  28% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+@keyframes b-game-booster-kettle-ring {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+
+  30% {
+    opacity: 0.9;
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+}

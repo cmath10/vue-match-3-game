@@ -61,11 +61,14 @@ for (const scenario of boosterScenarios) {
 
     if (scenario.type === BOOSTER_TYPE.BUTTON_BOX) {
       await expect(page.locator('.b-game-button').first()).toBeVisible()
+    } else {
+      await expect(page.locator(`.b-game-booster-effect--${scenario.type}`)).toBeVisible()
     }
 
     await expect(page.locator('.b-game-menu__turns-value')).toHaveText('23', { timeout: 10_000 })
     await expect(page.locator(`.b-game-ground__tile[data-tile-id="${boosterId}"]`)).toHaveCount(0)
     await expect(page.locator('.b-game-button')).toHaveCount(0)
+    await expect(page.locator('.b-game-booster-effect')).toHaveCount(0)
     await expect(page.locator('.b-game-ground__tile')).toHaveCount(BOARD_WIDTH * BOARD_HEIGHT)
   })
 }
@@ -99,6 +102,22 @@ test('starting a new game cancels button flights and the obsolete booster turn',
   await expect(page.locator('.b-game-button')).toHaveCount(0)
   await expect(page.locator('.b-game-menu__turns-value')).toHaveText('25')
   await expect(page.locator('.b-game-ground__tile')).toHaveCount(BOARD_WIDTH * BOARD_HEIGHT)
+
+  await page.waitForTimeout(600)
+  await expect(page.locator('.b-game-menu__turns-value')).toHaveText('25')
+  await expect(page.locator('.b-game-ground__tile')).toHaveCount(BOARD_WIDTH * BOARD_HEIGHT)
+})
+
+test('starting a new game cancels a geometric booster effect', async ({ page }) => {
+  const kettleScenario = boosterScenarios[3]
+  const booster = await startBoosterScenario(page, kettleScenario)
+
+  await booster.dblclick()
+  await expect(page.locator(`.b-game-booster-effect--${BOOSTER_TYPE.AREA_KETTLE}`)).toBeVisible()
+  await page.getByRole('button', { name: 'New game' }).click()
+
+  await expect(page.locator('.b-game-booster-effect')).toHaveCount(0)
+  await expect(page.locator('.b-game-menu__turns-value')).toHaveText('25')
 
   await page.waitForTimeout(600)
   await expect(page.locator('.b-game-menu__turns-value')).toHaveText('25')
