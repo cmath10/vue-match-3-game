@@ -1,5 +1,6 @@
-import { TILE_TYPE } from '@/enums/game'
 import type { Objective } from '@/types/game'
+
+import { TILE_TYPE } from '@/enums/game'
 
 const OBJECTIVE_COUNT = 2
 const OBJECTIVE_POOL_DIVISOR = 2

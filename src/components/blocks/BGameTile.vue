@@ -11,9 +11,10 @@
 </template>
 
 <script lang="ts" setup>
+import type { TileVisualType } from '@/enums/game'
+
 import { computed } from 'vue'
 
-import type { TileVisualType } from '@/enums/game'
 import { SPECIAL_TILE_TYPE } from '@/enums/game'
 
 const props = withDefaults(defineProps<{

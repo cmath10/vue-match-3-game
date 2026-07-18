@@ -1,26 +1,25 @@
-import js from '@eslint/js'
 import globals from 'globals'
-import tsParser from '@typescript-eslint/parser'
-import tsPlugin from '@typescript-eslint/eslint-plugin'
-import vue from 'eslint-plugin-vue'
+
+import pluginDependencies from '@omnicajs/eslint-plugin-dependencies'
+import pluginImport from 'eslint-plugin-import-x'
+import pluginJs from '@eslint/js'
+import pluginTs from 'typescript-eslint'
+import pluginVue from 'eslint-plugin-vue'
+
 import vueParser from 'vue-eslint-parser'
+
+const sourceFiles = ['**/*.{js,mjs,cjs,ts,vue}']
 
 export default [
   {
     ignores: ['artifacts/**', 'dist/**', 'node_modules/**', 'test-results/**'],
   },
+  { files: sourceFiles },
+  pluginJs.configs.recommended,
+  ...pluginTs.configs.recommended,
+  ...pluginVue.configs['flat/recommended'],
   {
-    files: ['*.config.{js,mjs,ts}', 'eslint.config.mjs', 'scripts/**/*.mjs'],
-    languageOptions: {
-      globals: {
-        ...globals.node,
-      },
-    },
-  },
-  js.configs.recommended,
-  ...vue.configs['flat/recommended'],
-  {
-    files: ['**/*.{js,ts,vue}'],
+    files: sourceFiles,
     languageOptions: {
       ecmaVersion: 2024,
       sourceType: 'module',
@@ -28,21 +27,104 @@ export default [
         ...globals.browser,
         ...globals.node,
       },
-      parser: vueParser,
-      parserOptions: {
-        parser: tsParser,
-        extraFileExtensions: ['.vue'],
-      },
     },
     plugins: {
-      '@typescript-eslint': tsPlugin,
+      dependencies: pluginDependencies,
+      'import-x': pluginImport,
+    },
+    settings: {
+      ...pluginImport.flatConfigs.typescript.settings,
+      'import-x/resolver': {
+        node: {
+          extensions: [
+            '.js',
+            '.mjs',
+            '.cjs',
+            '.ts',
+            '.tsx',
+            '.d.ts',
+            '.vue',
+          ],
+        },
+        typescript: {
+          project: './tsconfig.json',
+        },
+      },
     },
     rules: {
-      ...tsPlugin.configs.recommended.rules,
+      ...pluginImport.flatConfigs.recommended.rules,
+      ...pluginImport.flatConfigs.typescript.rules,
       '@typescript-eslint/explicit-function-return-type': 'off',
-      'comma-dangle': ['error', 'only-multiline'],
+      'brace-style': ['error', '1tbs', { allowSingleLine: true }],
+      'comma-dangle': ['error', {
+        arrays: 'always-multiline',
+        exports: 'always-multiline',
+        functions: 'never',
+        imports: 'always-multiline',
+        objects: 'always-multiline',
+      }],
       'complexity': ['error', 5],
+      'dependencies/import-style': ['error', {
+        maxSingleLineLength: 90,
+        maxSingleLineSpecifiers: 3,
+      }],
+      'dependencies/separate-type-imports': 'error',
+      'dependencies/separate-type-partitions': 'error',
+      'dependencies/sort-named-imports': ['error', {
+        type: 'alphabetical',
+        ignoreAlias: true,
+      }],
+      'dependencies/sort-imports': ['error', {
+        type: 'alphabetical',
+        imports: {
+          orderBy: 'alias',
+          splitDeclarations: true,
+        },
+        groups: [
+          'side-effect-style',
+          'side-effect',
+          [
+            'type-import',
+            'type-external',
+            'type-vue-components',
+            'type-internal',
+            'type-parent',
+            'type-sibling',
+            'type-index',
+          ],
+          'builtin',
+          'value-external',
+          'value-vue-components',
+          'value-internal',
+          ['value-parent', 'value-sibling'],
+          'index',
+          'ts-equals-import',
+          'unknown',
+        ],
+        customGroups: [
+          {
+            groupName: 'type-vue-components',
+            selector: 'type',
+            elementNamePattern: ['\\.(svg|vue)$'],
+          },
+          {
+            groupName: 'value-vue-components',
+            elementNamePattern: ['\\.(svg|vue)$'],
+          },
+        ],
+        newlinesInside: 1,
+        partitions: {
+          orderBy: 'type-first',
+          splitBy: {
+            comments: false,
+            newlines: true,
+          },
+        },
+      }],
       'eqeqeq': ['error', 'always'],
+      'import-x/no-duplicates': 'off',
+      'import-x/no-named-as-default': 'off',
+      'import-x/no-named-as-default-member': 'off',
       'max-depth': ['error', 3],
       'max-lines': ['error', 200],
       'max-lines-per-function': ['error', 20],
@@ -59,6 +141,16 @@ export default [
       'no-useless-escape': 'off',
       'prefer-const': 'error',
       'use-isnan': 'error',
+      'vue/block-lang': ['error', {
+        script: {
+          lang: 'ts',
+        },
+      }],
+      'vue/html-closing-bracket-spacing': ['error', {
+        startTag: 'never',
+        endTag: 'never',
+        selfClosingTag: 'always',
+      }],
       'vue/html-indent': ['error', 4, {
         baseIndent: 1,
       }],
@@ -68,39 +160,38 @@ export default [
           max: 1,
         },
       }],
-      'vue/html-closing-bracket-spacing': ['error', {
-        startTag: 'never',
-        endTag: 'never',
-        selfClosingTag: 'always',
-      }],
+      'vue/multi-word-component-names': 'off',
       'vue/multiline-html-element-content-newline': ['error', {
         ignoreWhenEmpty: true,
         allowEmptyLines: true,
       }],
+      'vue/require-default-prop': 'off',
       'vue/singleline-html-element-content-newline': ['off', {
         ignores: ['pre', 'textarea'],
         ignoreWhenEmpty: true,
         ignoreWhenNoAttributes: true,
       }],
-      'vue/block-lang': ['error', {
-        script: {
-          lang: 'ts',
-        },
-      }],
-      'vue/multi-word-component-names': 'off',
-      'vue/require-default-prop': 'off',
     },
   },
   {
     files: ['**/*.vue'],
+    languageOptions: {
+      parser: vueParser,
+      parserOptions: {
+        parser: pluginTs.parser,
+        extraFileExtensions: ['.vue'],
+      },
+    },
     rules: {
-      'max-lines': ['warn', 400],
+      'max-lines': ['warn', {
+        max: 400,
+        skipBlankLines: true,
+      }],
     },
   },
   {
     files: ['**/*.ts'],
     languageOptions: {
-      parser: tsParser,
       parserOptions: {
         project: './tsconfig.json',
       },
@@ -111,6 +202,19 @@ export default [
         ignore: [0, 1, -1],
         ignoreEnums: true,
       }],
+    },
+  },
+  {
+    files: ['*.config.{js,mjs,ts}', 'eslint.config.mjs', 'scripts/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
+      'no-magic-numbers': 'off',
     },
   },
   {

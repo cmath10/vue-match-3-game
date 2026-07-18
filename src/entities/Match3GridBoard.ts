@@ -1,8 +1,11 @@
-import type TileGrid from '@/entities/TileGrid'
-import type { Board, Position } from '@/entities/Match3Engine'
-import { isMatchableTile } from '@/entities/Match3SpecialTileConfig'
-import type { BoardTileType, TILE_TYPE } from '@/enums/game'
+import type { Board } from '@/entities/Match3Engine'
+import type { BoardTileType } from '@/enums/game'
+import type { Position } from '@/entities/Match3Engine'
 import type { Tile } from '@/types/game'
+import type { TILE_TYPE } from '@/enums/game'
+import type TileGrid from '@/entities/TileGrid'
+
+import { isMatchableTile } from '@/entities/Match3SpecialTileConfig'
 
 export const getMatchableTileBoard = (grid: TileGrid): Board<TILE_TYPE> => {
   return grid.getTileList()

@@ -1,3 +1,8 @@
+import type { BoardTileType } from '../../src/enums/game'
+import type { Counter } from '../../src/types/game'
+import type { ObjectiveType } from '../../src/enums/game'
+import type { Tile } from '../../src/types/game'
+
 import { expect, test } from '@playwright/test'
 
 import {
@@ -5,10 +10,8 @@ import {
   collectDroppedMugs,
   isMovableTile,
 } from '../../src/entities/Match3SpecialTiles'
-import TileGrid from '../../src/entities/TileGrid'
 import { SPECIAL_TILE_TYPE, TILE_TYPE } from '../../src/enums/game'
-import type { Counter, Tile } from '../../src/types/game'
-import type { BoardTileType, ObjectiveType } from '../../src/enums/game'
+import TileGrid from '../../src/entities/TileGrid'
 
 const createTile = (id: number, type: BoardTileType = TILE_TYPE.SWEETS_BARBARIS): Tile => ({
   id,

@@ -1,18 +1,19 @@
-import type TileGrid from '@/entities/TileGrid'
-import {
-  getBoosterSwipeActivations,
-  resolveBoosterWave,
-  type BoosterActivation,
-  type BoosterWave,
-  type SelectButtonBoxTarget,
+import type {
+  BoosterActivation,
+  BoosterWave,
+  SelectButtonBoxTarget,
 } from '@/entities/Match3BoosterWave'
-import {
-  getBoardTileTypeBoard,
-  getGridTilePosition,
-} from '@/entities/Match3GridBoard'
-import type { TileMovement } from '@/entities/Match3GridTransitions'
+
+import type TileGrid from '@/entities/TileGrid'
+
 import type { Position } from '@/entities/Match3Engine'
 import type { Tile } from '@/types/game'
+import type { TileMovement } from '@/entities/Match3GridTransitions'
+
+import { getBoardTileTypeBoard } from '@/entities/Match3GridBoard'
+import { getBoosterSwipeActivations } from '@/entities/Match3BoosterWave'
+import { getGridTilePosition } from '@/entities/Match3GridBoard'
+import { resolveBoosterWave } from '@/entities/Match3BoosterWave'
 
 type BoosterTurnOptions = {
   grid: TileGrid

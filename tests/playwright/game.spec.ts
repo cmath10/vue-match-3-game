@@ -1,5 +1,8 @@
-import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
+
+import type { Move } from './helpers/game-board'
+
+import { expect, test } from '@playwright/test'
 
 import {
   BOARD_HEIGHT,
@@ -12,7 +15,6 @@ import {
   getTiles,
   makeMove,
   seedMathRandom,
-  type Move,
 } from './helpers/game-board'
 
 const expectTilesInsideGround = async (page: Page) => {

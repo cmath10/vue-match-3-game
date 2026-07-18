@@ -1,13 +1,15 @@
-import type { Board, BoardTile, Position } from '@/entities/Match3Engine'
-import type { TileMovement } from '@/entities/Match3GridTransitions'
+import type { Board, BoardTile } from '@/entities/Match3Engine'
 import type { MatchLine } from '@/entities/Match3Matches'
+import type { Position } from '@/entities/Match3Engine'
+import type { TileMovement } from '@/entities/Match3GridTransitions'
+
+import { BOOSTER_TYPE } from '@/enums/game'
 import {
   findMatchGroup,
   findMatchGroups,
   findMoveMatchLines,
   getMatchPositions,
 } from '@/entities/Match3Matches'
-import { BOOSTER_TYPE } from '@/enums/game'
 
 const FIRECRACKER_MATCH_LENGTH = 4
 const BUTTON_BOX_MATCH_LENGTH = 5

@@ -1,4 +1,5 @@
 import type { BoardTileType, ObjectiveType } from '@/enums/game'
+
 import { SPECIAL_TILE_TYPE } from '@/enums/game'
 
 export type TileBlocker = {

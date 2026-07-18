@@ -1,13 +1,14 @@
+import type { Counter, Objective, Tile } from '@/types/game'
+import type { TILE_TYPE } from '@/enums/game'
 import type TileGrid from '@/entities/TileGrid'
+
+import { COUNTER_TYPES } from '@/entities/Match3SpecialTileConfig'
 import { generateObjectives } from '@/entities/Match3Objectives'
 import {
-  COUNTER_TYPES,
   isMatchableTile,
   SPECIAL_OBJECTIVE_TYPES,
   SPECIAL_TARGETS,
 } from '@/entities/Match3SpecialTileConfig'
-import type { TILE_TYPE } from '@/enums/game'
-import type { Counter, Objective, Tile } from '@/types/game'
 
 type SelectRandom = <T>(items: T[]) => T
 

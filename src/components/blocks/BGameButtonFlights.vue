@@ -9,10 +9,9 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  getButtonFlightStyle,
-  type ButtonFlight,
-} from '@/composables/useMatch3ButtonCollection'
+import type { ButtonFlight } from '@/composables/useMatch3ButtonCollection'
+
+import { getButtonFlightStyle } from '@/composables/useMatch3ButtonCollection'
 
 defineProps<{
   flights: ButtonFlight[]

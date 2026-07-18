@@ -1,10 +1,11 @@
-import type TileGrid from '@/entities/TileGrid'
-import { isBoosterType } from '@/entities/Match3BoosterEffects'
-import type { Position } from '@/entities/Match3Engine'
-import { isMatchableTile } from '@/entities/Match3SpecialTileConfig'
 import type { ObjectiveType } from '@/enums/game'
-import { SPECIAL_TILE_TYPE, TILE_TYPE } from '@/enums/game'
+import type { Position } from '@/entities/Match3Engine'
 import type { Tile } from '@/types/game'
+import type TileGrid from '@/entities/TileGrid'
+
+import { isBoosterType } from '@/entities/Match3BoosterEffects'
+import { isMatchableTile } from '@/entities/Match3SpecialTileConfig'
+import { SPECIAL_TILE_TYPE, TILE_TYPE } from '@/enums/game'
 
 type IncrementCounter = (type: ObjectiveType) => void
 type HitMode = 'match' | 'effect'

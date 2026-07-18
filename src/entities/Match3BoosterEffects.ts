@@ -1,5 +1,8 @@
 import type { Board, Position } from '@/entities/Match3Engine'
-import { BOOSTER_TYPE, type BoardTileType, TILE_TYPE } from '@/enums/game'
+
+import type { BoardTileType } from '@/enums/game'
+
+import { BOOSTER_TYPE, TILE_TYPE } from '@/enums/game'
 
 export type BoardEffect = {
   source: Position

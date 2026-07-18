@@ -1,8 +1,9 @@
-import type TileGrid from '@/entities/TileGrid'
-import { isBoosterType } from '@/entities/Match3BoosterEffects'
-import { isMovableTile } from '@/entities/Match3SpecialTileConfig'
 import type { PointerPosition } from '@/entities/Match3TileGesture'
 import type { Tile } from '@/types/game'
+import type TileGrid from '@/entities/TileGrid'
+
+import { isBoosterType } from '@/entities/Match3BoosterEffects'
+import { isMovableTile } from '@/entities/Match3SpecialTileConfig'
 
 type TileInputOptions = {
   grid: TileGrid

@@ -1,15 +1,13 @@
+import type { Counter, Tile } from '../../src/types/game'
+
+import type { BoardTileType, ObjectiveType } from '../../src/enums/game'
+
 import { expect, test } from '@playwright/test'
 
 import { applyBoosterEffectPositions } from '../../src/entities/Match3BoardHits'
+
+import { BOOSTER_TYPE, SPECIAL_TILE_TYPE, TILE_TYPE } from '../../src/enums/game'
 import TileGrid from '../../src/entities/TileGrid'
-import {
-  BOOSTER_TYPE,
-  type BoardTileType,
-  type ObjectiveType,
-  SPECIAL_TILE_TYPE,
-  TILE_TYPE,
-} from '../../src/enums/game'
-import type { Counter, Tile } from '../../src/types/game'
 
 const createTile = (id: number, type: BoardTileType, row: number, column: number): Tile => ({
   id,

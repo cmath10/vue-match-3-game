@@ -1,6 +1,6 @@
-import type TileGrid from '@/entities/TileGrid'
 import type { BoosterCreation } from '@/entities/Match3BoosterRules'
 import type { Position } from '@/entities/Match3Engine'
+import type TileGrid from '@/entities/TileGrid'
 
 export const preserveCreatedBoosters = (
   grid: TileGrid,

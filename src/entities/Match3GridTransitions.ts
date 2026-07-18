@@ -1,7 +1,8 @@
-import type TileGrid from '@/entities/TileGrid'
 import type { Board, Position } from '@/entities/Match3Engine'
-import { collapseBoard } from '@/entities/Match3Engine'
 import type { Tile } from '@/types/game'
+import type TileGrid from '@/entities/TileGrid'
+
+import { collapseBoard } from '@/entities/Match3Engine'
 
 export type TileMovement = {
   tileId: string

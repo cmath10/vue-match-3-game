@@ -1,7 +1,11 @@
-import { expect, test } from '@playwright/test'
 import type { Locator, Page } from '@playwright/test'
 
+import type { TileSnapshot } from './helpers/game-board'
+
+import { expect, test } from '@playwright/test'
+
 import { BOOSTER_TYPE, TILE_TYPE } from '../../src/enums/game'
+
 import {
   BOARD_HEIGHT,
   BOARD_WIDTH,
@@ -12,7 +16,6 @@ import {
   makeMove,
   seedMathRandom,
   swipeTile,
-  type TileSnapshot,
 } from './helpers/game-board'
 
 type BoosterScenario = {

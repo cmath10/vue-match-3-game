@@ -65,6 +65,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import BGameTile from '@/components/blocks/BGameTile.vue'
+
 import { localeOptions, setLocale } from '@/i18n'
 
 const props = defineProps<{

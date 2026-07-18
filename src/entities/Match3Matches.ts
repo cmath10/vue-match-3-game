@@ -1,4 +1,9 @@
-import type { Board, BoardCell, BoardTile, Position } from '@/entities/Match3Engine'
+import type {
+  Board,
+  BoardCell,
+  BoardTile,
+  Position,
+} from '@/entities/Match3Engine'
 
 const MIN_MATCH_LENGTH = 3
 

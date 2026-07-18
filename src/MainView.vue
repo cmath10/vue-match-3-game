@@ -69,53 +69,64 @@
 </template>
 
 <script lang="ts" setup>
+import type { MoveMatch } from '@/entities/Match3BoosterRules'
+
 import type { Counter, Objective, Tile } from '@/types/game'
-import { computed, nextTick, reactive, ref } from 'vue'
+
+import type { BoardTileType } from '@/enums/game'
+
+import type { GameResult } from '@/entities/Match3GameResult'
+
+import type { ObjectiveType } from '@/enums/game'
+
+import type { Position } from '@/entities/Match3Engine'
+
+import type { TileMovement } from '@/entities/Match3GridTransitions'
+
+import {
+  computed,
+  nextTick,
+  reactive,
+  ref,
+} from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useMatch3BoosterAnimation } from '@/composables/useMatch3BoosterAnimation'
+
 import BGameBoosterEffects from '@/components/blocks/BGameBoosterEffects.vue'
 import BGameButtonFlights from '@/components/blocks/BGameButtonFlights.vue'
 import BGameMenu from '@/components/blocks/BGameMenu.vue'
 import BGameResultOverlay from '@/components/blocks/BGameResultOverlay.vue'
 import BGameTile from '@/components/blocks/BGameTile.vue'
+
+import { useMatch3BoosterAnimation } from '@/composables/useMatch3BoosterAnimation'
+
+import { applyBoosterEffectPositions } from '@/entities/Match3BoardHits'
 import { BOARD_HEIGHT, BOARD_WIDTH } from '@/entities/Match3BoardConfig'
 import { preserveCreatedBoosters } from '@/entities/Match3BoardBoosters'
-import { applyBoosterEffectPositions } from '@/entities/Match3BoardHits'
-import {
-  getCascadeBoosterCreations,
-  getMoveMatch,
-  type MoveMatch,
-} from '@/entities/Match3BoosterRules'
+
+import { AVAILABLE_TILE_TYPES } from '@/entities/Match3SpecialTiles'
+
+import { clearMatchedPositions } from '@/entities/Match3SpecialTiles'
+import { collapseGrid } from '@/entities/Match3GridTransitions'
+import { collectDroppedMugs } from '@/entities/Match3SpecialTiles'
 import { createMatch3BoosterTurn } from '@/entities/Match3BoosterTurn'
-import { getGameResult, type GameResult } from '@/entities/Match3GameResult'
-import TileGrid from '@/entities/TileGrid'
-import {
-  findMatchLines,
-  findMatchedPositions,
-  getMatchPositions,
-  type Position,
-} from '@/entities/Match3Engine'
-import { getGridTilePosition, getMatchableTileBoard } from '@/entities/Match3GridBoard'
-import { initializeGameGoals } from '@/entities/Match3GameSetup'
-import {
-  collapseGrid,
-  refillGrid,
-  type TileMovement,
-} from '@/entities/Match3GridTransitions'
-import {
-  AVAILABLE_TILE_TYPES,
-  clearMatchedPositions,
-  collectDroppedMugs,
-  placeSpecialTiles,
-} from '@/entities/Match3SpecialTiles'
 import { createMatch3TileInput } from '@/entities/Match3TileInput'
-import {
-  getBoardStyle,
-  getGridCells,
-  getPointerTargetTile,
-  getTileStyle,
-} from '@/entities/Match3TilePresentation'
-import { TILE_TYPE, type BoardTileType, type ObjectiveType } from '@/enums/game'
+import { findMatchedPositions, findMatchLines } from '@/entities/Match3Engine'
+
+import { getBoardStyle } from '@/entities/Match3TilePresentation'
+import { getCascadeBoosterCreations } from '@/entities/Match3BoosterRules'
+import { getGameResult } from '@/entities/Match3GameResult'
+import { getGridCells } from '@/entities/Match3TilePresentation'
+import { getGridTilePosition, getMatchableTileBoard } from '@/entities/Match3GridBoard'
+import { getMatchPositions } from '@/entities/Match3Engine'
+import { getMoveMatch } from '@/entities/Match3BoosterRules'
+import { getPointerTargetTile, getTileStyle } from '@/entities/Match3TilePresentation'
+import { initializeGameGoals } from '@/entities/Match3GameSetup'
+
+import { placeSpecialTiles } from '@/entities/Match3SpecialTiles'
+
+import { refillGrid } from '@/entities/Match3GridTransitions'
+import { TILE_TYPE } from '@/enums/game'
+import TileGrid from '@/entities/TileGrid'
 
 const COUNT_TURNS = 25
 const ANIMATION_DELAY = 480

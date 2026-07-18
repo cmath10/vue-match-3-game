@@ -1,13 +1,18 @@
+import type { BoardEffect } from '@/entities/Match3BoosterEffects'
+
+import type { Board, Position } from '@/entities/Match3Engine'
+
+import type { BoardTileType, TILE_TYPE } from '@/enums/game'
+
 import {
   getBoosterEffect,
   getButtonBoxEffect,
   getPresentTileTypes,
   isBoosterType,
   isTileType,
-  type BoardEffect,
 } from '@/entities/Match3BoosterEffects'
-import type { Board, Position } from '@/entities/Match3Engine'
-import { BOOSTER_TYPE, type BoardTileType, type TILE_TYPE } from '@/enums/game'
+
+import { BOOSTER_TYPE } from '@/enums/game'
 
 export type BoosterActivation = {
   source: Position

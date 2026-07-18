@@ -1,3 +1,7 @@
+import type { Board } from '../../src/entities/Match3Engine'
+
+import type { BoardTileType } from '../../src/enums/game'
+
 import { expect, test } from '@playwright/test'
 
 import {
@@ -5,13 +9,8 @@ import {
   getButtonBoxEffect,
   getPresentTileTypes,
 } from '../../src/entities/Match3BoosterEffects'
-import type { Board } from '../../src/entities/Match3Engine'
-import {
-  BOOSTER_TYPE,
-  type BoardTileType,
-  SPECIAL_TILE_TYPE,
-  TILE_TYPE,
-} from '../../src/enums/game'
+
+import { BOOSTER_TYPE, SPECIAL_TILE_TYPE, TILE_TYPE } from '../../src/enums/game'
 
 test('row and column firecrackers cover their full lines', () => {
   expect(getBoosterEffect(

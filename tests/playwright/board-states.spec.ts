@@ -1,10 +1,13 @@
 /// <reference types="node" />
 
-import { expect, test } from '@playwright/test'
+import type { Board, Position } from '../../src/entities/Match3Engine'
+
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
-import { applyMove, type Board, type Position } from '../../src/entities/Match3Engine'
+import { expect, test } from '@playwright/test'
+
+import { applyMove } from '../../src/entities/Match3Engine'
 
 type TileCounts = Record<string, number>
 type MoveFixture = {

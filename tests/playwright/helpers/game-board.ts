@@ -1,11 +1,10 @@
 import type { Page } from '@playwright/test'
 
-import {
-  BOARD_HEIGHT,
-  BOARD_WIDTH,
-} from '../../../src/entities/Match3BoardConfig'
-import { getMoveMatch } from '../../../src/entities/Match3BoosterRules'
 import type { Board } from '../../../src/entities/Match3Engine'
+
+import { BOARD_HEIGHT, BOARD_WIDTH } from '../../../src/entities/Match3BoardConfig'
+import { getMoveMatch } from '../../../src/entities/Match3BoosterRules'
+
 import { BOOSTER_TYPE, TILE_TYPE } from '../../../src/enums/game'
 
 export type TileSnapshot = {

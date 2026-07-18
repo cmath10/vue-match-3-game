@@ -1,8 +1,9 @@
+import type { Counter, Objective } from '../../src/types/game'
+
 import { expect, test } from '@playwright/test'
 
 import { getGameResult } from '../../src/entities/Match3GameResult'
 import { TILE_TYPE } from '../../src/enums/game'
-import type { Counter, Objective } from '../../src/types/game'
 
 const objective = (type: TILE_TYPE, count: number): Objective => ({ type, count })
 const counter = (type: TILE_TYPE, count: number): Counter => ({ type, count })

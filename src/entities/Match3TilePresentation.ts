@@ -1,11 +1,11 @@
-import type TileGrid from '@/entities/TileGrid'
+import type { PointerPosition } from '@/entities/Match3TileGesture'
+
 import type { Position } from '@/entities/Match3Engine'
-import {
-  getDirectionalNeighbor,
-  getSwipeDirection,
-  type PointerPosition,
-} from '@/entities/Match3TileGesture'
+import type TileGrid from '@/entities/TileGrid'
+
 import type { Tile } from '@/types/game'
+
+import { getDirectionalNeighbor, getSwipeDirection } from '@/entities/Match3TileGesture'
 
 const CENTER_DIVISOR = 2
 const SWIPE_THRESHOLD_RATIO = 0.18

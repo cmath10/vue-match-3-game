@@ -1,5 +1,6 @@
 import type { ObjectiveType } from '@/enums/game'
 import type { Tile } from '@/types/game'
+
 import { SPECIAL_TILE_TYPE, TILE_TYPE } from '@/enums/game'
 
 const SPECIAL_MUG_TARGET = 3

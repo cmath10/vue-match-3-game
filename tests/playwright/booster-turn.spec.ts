@@ -1,10 +1,13 @@
+import type { Position } from '../../src/entities/Match3Engine'
+
+import type { Tile } from '../../src/types/game'
+
 import { expect, test } from '@playwright/test'
 
 import { createMatch3BoosterTurn } from '../../src/entities/Match3BoosterTurn'
 import TileGrid from '../../src/entities/TileGrid'
-import type { Position } from '../../src/entities/Match3Engine'
+
 import { BOOSTER_TYPE, TILE_TYPE } from '../../src/enums/game'
-import type { Tile } from '../../src/types/game'
 
 const createTile = (id: number, type: Tile['type'], column: number): Tile => ({
   id,

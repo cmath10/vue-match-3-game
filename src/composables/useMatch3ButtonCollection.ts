@@ -1,10 +1,17 @@
-import type TileGrid from '@/entities/TileGrid'
+import type { TILE_TYPE } from '@/enums/game'
+
 import type { BoardEffect } from '@/entities/Match3BoosterEffects'
 import type { BoosterWave } from '@/entities/Match3BoosterWave'
 import type { Position } from '@/entities/Match3Engine'
+import type TileGrid from '@/entities/TileGrid'
+
+import type { Ref } from 'vue'
+
+import { computed, nextTick, ref } from 'vue'
+
 import { isMatchableTile } from '@/entities/Match3SpecialTileConfig'
-import { BOOSTER_TYPE, type TILE_TYPE } from '@/enums/game'
-import { computed, nextTick, ref, type Ref } from 'vue'
+
+import { BOOSTER_TYPE } from '@/enums/game'
 
 export type ButtonFlight = {
   id: string

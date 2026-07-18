@@ -1,16 +1,15 @@
+import type { Board } from '../../src/entities/Match3Engine'
+
+import type { BoardTileType } from '../../src/enums/game'
+
 import { expect, test } from '@playwright/test'
 
 import {
   getBoosterSwipeActivations,
   resolveBoosterWave,
 } from '../../src/entities/Match3BoosterWave'
-import type { Board } from '../../src/entities/Match3Engine'
-import {
-  BOOSTER_TYPE,
-  type BoardTileType,
-  SPECIAL_TILE_TYPE,
-  TILE_TYPE,
-} from '../../src/enums/game'
+
+import { BOOSTER_TYPE, SPECIAL_TILE_TYPE, TILE_TYPE } from '../../src/enums/game'
 
 test('booster wave activates each hit booster once and deduplicates positions', () => {
   const board: Board<BoardTileType> = [

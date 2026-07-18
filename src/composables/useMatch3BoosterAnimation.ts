@@ -1,9 +1,13 @@
-import type TileGrid from '@/entities/TileGrid'
-import type { GeometricBoosterType } from '@/entities/Match3BoosterEffects'
 import type { BoosterWave } from '@/entities/Match3BoosterWave'
+import type { GeometricBoosterType } from '@/entities/Match3BoosterEffects'
 import type { Position } from '@/entities/Match3Engine'
+import type TileGrid from '@/entities/TileGrid'
+
+import type { Ref } from 'vue'
+
+import { ref } from 'vue'
+
 import { BOOSTER_TYPE } from '@/enums/game'
-import { ref, type Ref } from 'vue'
 
 import { useMatch3ButtonCollection } from '@/composables/useMatch3ButtonCollection'
 

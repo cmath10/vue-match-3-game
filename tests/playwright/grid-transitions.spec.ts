@@ -1,12 +1,10 @@
+import type { Tile } from '../../src/types/game'
+
 import { expect, test } from '@playwright/test'
 
-import TileGrid from '../../src/entities/TileGrid'
-import {
-  collapseGrid,
-  refillGrid,
-} from '../../src/entities/Match3GridTransitions'
+import { collapseGrid, refillGrid } from '../../src/entities/Match3GridTransitions'
 import { TILE_TYPE } from '../../src/enums/game'
-import type { Tile } from '../../src/types/game'
+import TileGrid from '../../src/entities/TileGrid'
 
 const createTile = (id: number, row: number, column: number): Tile => ({
   id,

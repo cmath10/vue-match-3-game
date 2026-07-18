@@ -1,10 +1,12 @@
+import type { BoosterWave } from '../../src/entities/Match3BoosterWave'
+
 import { expect, test } from '@playwright/test'
 
 import {
   getBoosterVisualEffects,
   getBoosterVisualEffectStyle,
 } from '../../src/composables/useMatch3BoosterAnimation'
-import type { BoosterWave } from '../../src/entities/Match3BoosterWave'
+
 import { BOOSTER_TYPE, TILE_TYPE } from '../../src/enums/game'
 
 test('visual effects include geometric boosters but keep button collection separate', () => {

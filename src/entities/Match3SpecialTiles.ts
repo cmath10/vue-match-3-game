@@ -1,10 +1,16 @@
 import type TileGrid from '@/entities/TileGrid'
 export { clearMatchedPositions } from '@/entities/Match3BoardHits'
 import type { BoardTileType, ObjectiveType } from '@/enums/game'
-import type { Tile } from '@/types/game'
 import type { Position } from '@/entities/Match3Engine'
+import type { Tile } from '@/types/game'
+
+import {
+  COOKIE_HEALTH,
+  isMatchableTile,
+  PACKAGE_HEALTH,
+  SPECIAL_TARGETS,
+} from '@/entities/Match3SpecialTileConfig'
 import { SPECIAL_TILE_TYPE } from '@/enums/game'
-import { COOKIE_HEALTH, isMatchableTile, PACKAGE_HEALTH, SPECIAL_TARGETS } from '@/entities/Match3SpecialTileConfig'
 
 export { AVAILABLE_TILE_TYPES, COUNTER_TYPES, isMatchableTile, isMovableTile, SPECIAL_OBJECTIVE_TYPES, SPECIAL_TARGETS } from '@/entities/Match3SpecialTileConfig'
 

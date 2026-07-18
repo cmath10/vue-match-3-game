@@ -9,10 +9,9 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  getBoosterVisualEffectStyle,
-  type BoosterVisualEffect,
-} from '@/composables/useMatch3BoosterAnimation'
+import type { BoosterVisualEffect } from '@/composables/useMatch3BoosterAnimation'
+
+import { getBoosterVisualEffectStyle } from '@/composables/useMatch3BoosterAnimation'
 
 defineProps<{
   effects: BoosterVisualEffect[]
