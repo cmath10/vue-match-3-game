@@ -1,6 +1,13 @@
 import { findMatchedPositions, findMoveMatchedPositions } from '@/entities/Match3Matches'
 
-export { findMatchedPositions, findMoveMatchedPositions } from '@/entities/Match3Matches'
+export {
+  findMatchedPositions,
+  findMatchGroups,
+  findMatchLines,
+  findMoveMatchedPositions,
+  findMoveMatchLines,
+  getMatchPositions,
+} from '@/entities/Match3Matches'
 
 export type BoardTile = string
 export type BoardCell<T extends BoardTile = BoardTile> = T | null

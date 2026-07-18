@@ -65,17 +65,28 @@ import { useI18n } from 'vue-i18n'
 import BGameMenu from '@/components/blocks/BGameMenu.vue'
 import BGameResultOverlay from '@/components/blocks/BGameResultOverlay.vue'
 import BGameTile from '@/components/blocks/BGameTile.vue'
+import { preserveCreatedBoosters } from '@/entities/Match3BoardBoosters'
+import {
+  getCascadeBoosterCreations,
+  getMoveMatch,
+  type MoveMatch,
+} from '@/entities/Match3BoosterRules'
 import { getGameResult, type GameResult } from '@/entities/Match3GameResult'
 import TileGrid from '@/entities/TileGrid'
 import {
-  collapseBoard,
+  findMatchLines,
   findMatchedPositions,
-  findMoveMatchedPositions,
+  getMatchPositions,
   isNeighborPosition,
   type Board,
   type Position,
 } from '@/entities/Match3Engine'
 import { generateObjectives } from '@/entities/Match3Objectives'
+import {
+  collapseGrid,
+  refillGrid,
+  type TileMovement,
+} from '@/entities/Match3GridTransitions'
 import {
   AVAILABLE_TILE_TYPES,
   clearMatchedPositions,
@@ -147,8 +158,6 @@ const nextAnimationFrame = () => new Promise<void>(resolve => requestAnimationFr
 const getTileTypeBoard = (): Board<TILE_TYPE> => grid.getTileList()
   .map(row => row.map(tile => tile && isMatchableTile(tile) ? tile.type : null))
 
-const getTileIdBoard = (): Board<string> => grid.getTileList().map(row => row.map(tile => tile?.id.toString() ?? null))
-
 const createsMatch = (type: TILE_TYPE, i: number, j: number): boolean => {
   const board = getTileTypeBoard()
 
@@ -157,17 +166,15 @@ const createsMatch = (type: TILE_TYPE, i: number, j: number): boolean => {
   return findMatchedPositions(board).some(position => position.row === i && position.column === j)
 }
 
-const getFilledPositions = (): Position[] => findMatchedPositions(getTileTypeBoard())
-
-const getMoveFilledPositions = (a: Tile, b: Tile): Position[] => {
-  const positionA = getTilePosition(a)
-  const positionB = getTilePosition(b)
+const getTileMoveMatch = (movedTile: Tile, swappedTile: Tile): MoveMatch => {
+  const positionA = getTilePosition(movedTile)
+  const positionB = getTilePosition(swappedTile)
 
   if (positionA === null || positionB === null) {
-    return []
+    return { positions: [], boosters: [] }
   }
 
-  return findMoveMatchedPositions(getTileTypeBoard(), positionA, positionB)
+  return getMoveMatch(getTileTypeBoard(), positionA, positionB)
 }
 
 const getTilePosition = (tile: Tile): Position | null => {
@@ -190,36 +197,7 @@ const incrementCounter = (type: ObjectiveType) => {
   }
 }
 
-const refillGrid = () => {
-  for (let j = 0; j < WIDTH; j++) {
-    let spawnRow = -1
-
-    for (let i = HEIGHT - 1; i >= 0; i--) {
-      if (grid.getTileByIndex(i, j) === null) {
-        spawnTile(i, j, spawnRow)
-        spawnRow--
-      }
-    }
-  }
-}
-
-const collapseGrid = () => {
-  const tilesById = new Map(grid.getTiles().map(tile => [tile.id.toString(), tile]))
-  const collapsedBoard = collapseBoard(getTileIdBoard())
-
-  grid.clear()
-  collapsedBoard.forEach((row, i) => row.forEach((tileId, j) => {
-    if (tileId !== null) {
-      const tile = tilesById.get(tileId)
-
-      if (tile) {
-        grid.setTile(tile, i, j)
-      }
-    }
-  }))
-}
-
-const spawnTile = (i: number, j: number, spawnRow: number) => {
+const spawnTile = (i: number, j: number, spawnRow: number): Tile => {
   const tile = createTile(generateType(i, j), spawnRow, j)
 
   grid.setTile(tile, i, j, {
@@ -228,6 +206,8 @@ const spawnTile = (i: number, j: number, spawnRow: number) => {
   })
 
   void moveSpawnedTileToCell(tile, i, j)
+
+  return tile
 }
 
 const moveSpawnedTileToCell = async (tile: Tile, i: number, j: number) => {
@@ -246,23 +226,41 @@ const moveTileToCell = (tile: Tile, i: number, j: number) => {
   tile.row = i; tile.column = j
 }
 
-const updateGrid = async (version: number, matchedPositions: Position[]) => {
-  let positionsToClear = matchedPositions
+const updateGrid = async (
+  version: number,
+  matchedPositions: Position[],
+  boosters: MoveMatch['boosters']
+) => {
+  let positionsToClear = preserveCreatedBoosters(grid, matchedPositions, boosters)
 
   while (positionsToClear.length) {
-    clearMatchedPositions(grid, positionsToClear, WIDTH, HEIGHT, incrementCounter)
-    collapseGrid()
-    collectDroppedMugs(grid, WIDTH, HEIGHT, incrementCounter)
-    collapseGrid()
-    refillGrid()
+    const movements = resolveMatchedPositions(positionsToClear)
     await waitAnimation()
 
     if (version !== gameVersion.value) {
       return
     }
 
-    positionsToClear = getFilledPositions()
+    positionsToClear = getCascadePositions(movements)
   }
+}
+
+const getCascadePositions = (movements: TileMovement[]): Position[] => {
+  const lines = findMatchLines(getTileTypeBoard())
+  const boosters = getCascadeBoosterCreations(lines, movements)
+
+  return preserveCreatedBoosters(grid, getMatchPositions(lines), boosters)
+}
+
+const resolveMatchedPositions = (positions: Position[]): TileMovement[] => {
+  clearMatchedPositions(grid, positions, WIDTH, HEIGHT, incrementCounter)
+  const movements = collapseGrid(grid)
+
+  collectDroppedMugs(grid, WIDTH, HEIGHT, incrementCounter)
+  movements.push(...collapseGrid(grid, movements.length))
+  movements.push(...refillGrid(grid, WIDTH, HEIGHT, spawnTile, movements.length))
+
+  return movements
 }
 
 const makeMove = async (a: Tile, b: Tile) => {
@@ -271,23 +269,23 @@ const makeMove = async (a: Tile, b: Tile) => {
   evaluating.value = true
   swapTiles(a, b)
 
-  const matchedPositions = getMoveFilledPositions(a, b)
+  const match = getTileMoveMatch(a, b)
 
-  if (matchedPositions.length) {
-    await applySuccessfulMove(version, matchedPositions)
+  if (match.positions.length) {
+    await applySuccessfulMove(version, match)
   } else {
     await revertFailedMove(a, b, version)
   }
 }
 
-const applySuccessfulMove = async (version: number, matchedPositions: Position[]) => {
+const applySuccessfulMove = async (version: number, match: MoveMatch) => {
   await waitAnimation()
 
   if (version !== gameVersion.value) {
     return
   }
 
-  await updateGrid(version, matchedPositions)
+  await updateGrid(version, match.positions, match.boosters)
 
   if (version !== gameVersion.value) {
     return
