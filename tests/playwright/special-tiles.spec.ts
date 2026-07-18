@@ -1,19 +1,7 @@
 import { expect, test } from '@playwright/test'
-import type { Page } from '@playwright/test'
 
 import { BOOSTER_TYPE } from '../../src/enums/game'
-
-const seedMathRandom = async (page: Page) => {
-  await page.addInitScript(() => {
-    let seed = 42
-
-    Math.random = () => {
-      seed = (seed * 16807) % 2147483647
-
-      return (seed - 1) / 2147483646
-    }
-  })
-}
+import { seedMathRandom } from './helpers/game-board'
 
 test('new game renders special tile mechanics', async ({ page }) => {
   await seedMathRandom(page)

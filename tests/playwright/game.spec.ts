@@ -1,208 +1,18 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 
-type TileSnapshot = {
-  id: string
-  type: string
-  blocked: boolean
-  row: number
-  column: number
-  x: number
-  y: number
-  width: number
-  height: number
-}
-
-type Move = {
-  from: TileSnapshot
-  to: TileSnapshot
-}
-
-const BOARD_WIDTH = 9
-const BOARD_HEIGHT = 7
-const MATCHABLE_TILE_TYPES = new Set([
-  'sweets-barbaris',
-  'sweets-fish',
-  'sweets-rooster',
-  'sweets-pillow',
-  'sweets-bird',
-])
-const seedMathRandom = async (page: Page) => {
-  await page.addInitScript(() => {
-    let seed = 42
-
-    Math.random = () => {
-      seed = (seed * 16807) % 2147483647
-
-      return (seed - 1) / 2147483646
-    }
-  })
-}
-
-const getTiles = async (page: Page): Promise<TileSnapshot[]> => {
-  return page.evaluate((boardWidth) => {
-    const cells = [...document.querySelectorAll<HTMLElement>('.b-game-ground__cell')]
-      .map((element, index) => {
-        const rect = element.getBoundingClientRect()
-
-        return {
-          row: Math.floor(index / boardWidth),
-          column: index % boardWidth,
-          centerX: rect.x + rect.width / 2,
-          centerY: rect.y + rect.height / 2,
-        }
-      })
-
-    const getNearestCell = (tileRect: DOMRect) => {
-      const tileCenterX = tileRect.x + tileRect.width / 2
-      const tileCenterY = tileRect.y + tileRect.height / 2
-
-      return cells.reduce((nearest, cell) => {
-        const nearestDistance = Math.hypot(nearest.centerX - tileCenterX, nearest.centerY - tileCenterY)
-        const cellDistance = Math.hypot(cell.centerX - tileCenterX, cell.centerY - tileCenterY)
-
-        return cellDistance < nearestDistance ? cell : nearest
-      })
-    }
-
-    return [...document.querySelectorAll<HTMLElement>('.b-game-ground__tile')].map((element) => {
-      const rect = element.getBoundingClientRect()
-      const cell = getNearestCell(rect)
-      const className = element.className.toString()
-      const classNames = className.split(/\s+/)
-      const type = className
-        .split(/\s+/)
-        .find((name: string) => name.startsWith('b-game-tile--') && name !== 'b-game-tile--small')
-        ?.replace('b-game-tile--', '') || ''
-
-      return {
-        id: element.getAttribute('data-tile-id') || '',
-        type,
-        blocked: classNames.some((name: string) => name.startsWith('b-game-tile--blocker-')),
-        row: cell.row,
-        column: cell.column,
-        x: rect.x,
-        y: rect.y,
-        width: rect.width,
-        height: rect.height,
-      }
-    })
-  }, BOARD_WIDTH)
-}
-
-const getObjectiveTypes = async (page: Page): Promise<string[]> => {
-  return page.locator('.b-game-menu__objective .b-game-tile').evaluateAll((elements) => {
-    return elements.map((element) => {
-      return element.className.toString()
-        .split(/\s+/)
-        .find((name: string) => name.startsWith('b-game-tile--') && name !== 'b-game-tile--small')
-        ?.replace('b-game-tile--', '') || ''
-    })
-  })
-}
-
-const getBoard = (tiles: TileSnapshot[]): string[][] => {
-  const board = Array.from({ length: BOARD_HEIGHT }, () => Array.from({ length: BOARD_WIDTH }, () => ''))
-
-  tiles.forEach(tile => {
-    board[tile.row][tile.column] = MATCHABLE_TILE_TYPES.has(tile.type) ? tile.type : ''
-  })
-
-  return board
-}
-
-const hasMatchAt = (board: string[][], row: number, column: number): boolean => {
-  const type = board[row][column]
-
-  if (!type) {
-    return false
-  }
-
-  let horizontal = 1
-  let vertical = 1
-
-  for (let j = column - 1; j >= 0 && board[row][j] === type; j--) {
-    horizontal++
-  }
-  for (let j = column + 1; j < BOARD_WIDTH && board[row][j] === type; j++) {
-    horizontal++
-  }
-  for (let i = row - 1; i >= 0 && board[i][column] === type; i--) {
-    vertical++
-  }
-  for (let i = row + 1; i < BOARD_HEIGHT && board[i][column] === type; i++) {
-    vertical++
-  }
-
-  return horizontal >= 3 || vertical >= 3
-}
-
-const findValidMove = (tiles: TileSnapshot[]): Move => {
-  const board = getBoard(tiles)
-  const byPosition = new Map(tiles.map(tile => [`${tile.row}-${tile.column}`, tile]))
-
-  for (const tile of tiles) {
-    const candidates = [
-      byPosition.get(`${tile.row}-${tile.column + 1}`),
-      byPosition.get(`${tile.row + 1}-${tile.column}`),
-    ].filter((candidate): candidate is TileSnapshot => Boolean(candidate))
-
-    for (const candidate of candidates) {
-      if (tile.blocked || candidate.blocked) {
-        continue
-      }
-
-      board[tile.row][tile.column] = MATCHABLE_TILE_TYPES.has(candidate.type) ? candidate.type : ''
-      board[candidate.row][candidate.column] = MATCHABLE_TILE_TYPES.has(tile.type) ? tile.type : ''
-
-      const isValid = hasMatchAt(board, tile.row, tile.column) ||
-        hasMatchAt(board, candidate.row, candidate.column)
-
-      board[tile.row][tile.column] = MATCHABLE_TILE_TYPES.has(tile.type) ? tile.type : ''
-      board[candidate.row][candidate.column] = MATCHABLE_TILE_TYPES.has(candidate.type) ? candidate.type : ''
-
-      if (isValid) {
-        return { from: tile, to: candidate }
-      }
-    }
-  }
-
-  throw new Error('Cannot find a valid move on the seeded board')
-}
-
-const findVerticalValidMove = (tiles: TileSnapshot[]): Move => {
-  const board = getBoard(tiles)
-  const byPosition = new Map(tiles.map(tile => [`${tile.row}-${tile.column}`, tile]))
-
-  for (const tile of tiles) {
-    const candidate = byPosition.get(`${tile.row + 1}-${tile.column}`)
-
-    if (!candidate || tile.blocked || candidate.blocked) {
-      continue
-    }
-
-    board[tile.row][tile.column] = MATCHABLE_TILE_TYPES.has(candidate.type) ? candidate.type : ''
-    board[candidate.row][candidate.column] = MATCHABLE_TILE_TYPES.has(tile.type) ? tile.type : ''
-
-    const isValid = hasMatchAt(board, tile.row, tile.column) ||
-      hasMatchAt(board, candidate.row, candidate.column)
-
-    board[tile.row][tile.column] = MATCHABLE_TILE_TYPES.has(tile.type) ? tile.type : ''
-    board[candidate.row][candidate.column] = MATCHABLE_TILE_TYPES.has(candidate.type) ? candidate.type : ''
-
-    if (isValid) {
-      return { from: tile, to: candidate }
-    }
-  }
-
-  throw new Error('Cannot find a vertical valid move on the seeded board')
-}
-
-const clickTile = async (page: Page, tile: TileSnapshot) => {
-  const tileElement = page.locator(`.b-game-ground__tile[data-tile-id="${tile.id}"]`)
-
-  await tileElement.click()
-}
+import {
+  BOARD_HEIGHT,
+  BOARD_WIDTH,
+  clickTile,
+  findValidMove,
+  findVerticalValidMove,
+  getObjectiveTypes,
+  getTiles,
+  makeMove,
+  seedMathRandom,
+  type Move,
+} from './helpers/game-board'
 
 const expectTilesInsideGround = async (page: Page) => {
   const ground = await page.locator('.b-game-ground').boundingBox()
@@ -224,8 +34,7 @@ const expectTilesInsideGround = async (page: Page) => {
 const makeValidMove = async (page: Page): Promise<Move> => {
   const move = findValidMove(await getTiles(page))
 
-  await clickTile(page, move.from)
-  await clickTile(page, move.to)
+  await makeMove(page, move)
 
   return move
 }
