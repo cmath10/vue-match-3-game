@@ -78,6 +78,47 @@ for (const scenario of boosterScenarios) {
   })
 }
 
+for (const scenario of boosterScenarios.filter(({ type }) => (
+  type === BOOSTER_TYPE.ROW_FIRECRACKER || type === BOOSTER_TYPE.COLUMN_FIRECRACKER
+))) {
+  test(`${scenario.type} animation starts at the activated tile`, async ({ page }) => {
+    const booster = await startBoosterScenario(page, scenario)
+    const boosterBox = await booster.boundingBox()
+
+    expect(boosterBox).not.toBeNull()
+
+    await booster.dblclick()
+
+    const effect = page.locator(`.b-game-booster-effect--${scenario.type}`)
+
+    await expect(effect).toBeVisible()
+
+    const origin = await effect.evaluate((element) => {
+      const rect = element.getBoundingClientRect()
+      const [x, y] = getComputedStyle(element, '::before')
+        .transformOrigin
+        .split(' ')
+        .map(Number.parseFloat)
+
+      return {
+        x: rect.x + x,
+        y: rect.y + y,
+      }
+    })
+
+    const expected = {
+      x: boosterBox!.x + boosterBox!.width / 2,
+      y: boosterBox!.y + boosterBox!.height / 2,
+    }
+
+    if (scenario.type === BOOSTER_TYPE.ROW_FIRECRACKER) {
+      expect(origin.x).toBeCloseTo(expected.x, 0)
+    } else {
+      expect(origin.y).toBeCloseTo(expected.y, 0)
+    }
+  })
+}
+
 for (const scenario of geometricBoosterScenarios) {
   test(`${scenario.type} activates when an ordinary tile is swiped into it`, async ({ page }) => {
     const booster = await startBoosterScenario(page, scenario)
