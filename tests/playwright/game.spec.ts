@@ -5,6 +5,7 @@ import {
   BOARD_HEIGHT,
   BOARD_WIDTH,
   clickTile,
+  dragTileToward,
   findValidMove,
   findVerticalValidMove,
   getObjectiveTypes,
@@ -130,4 +131,17 @@ test('vertical valid moves animate before settling', async ({ page }) => {
   await clickTile(page, move.to)
   await page.waitForTimeout(80)
   await expectSwapAnimationStarted(page, move)
+})
+
+test('directional mouse drag performs a valid ordinary move', async ({ page }) => {
+  await seedMathRandom(page)
+  await page.goto('/')
+  await expect(page.locator('.b-game-ground')).toBeVisible()
+
+  const move = findValidMove(await getTiles(page))
+
+  await dragTileToward(page, move.from, move.to)
+
+  await expect(page.locator('.b-game-menu__turns-value')).toHaveText('24', { timeout: 10_000 })
+  await expect(page.locator('.b-game-ground__tile')).toHaveCount(BOARD_WIDTH * BOARD_HEIGHT)
 })

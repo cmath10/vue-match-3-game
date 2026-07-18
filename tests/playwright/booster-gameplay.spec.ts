@@ -6,6 +6,7 @@ import {
   BOARD_HEIGHT,
   BOARD_WIDTH,
   clickTile,
+  dragTileToward,
   findBoosterMove,
   getTiles,
   makeMove,
@@ -111,6 +112,26 @@ test('adjacent click fallback activates a firecracker instead of reverting its s
 
   await clickTile(page, target!)
   await booster.click()
+
+  await expect(page.locator(`.b-game-booster-effect--${scenario.type}`)).toBeVisible()
+  await expect(page.locator('.b-game-menu__turns-value')).toHaveText('23', { timeout: 10_000 })
+  await expect(booster).toHaveCount(0)
+})
+
+test('directional mouse drag activates a firecracker before reaching the target tile', async ({ page }) => {
+  const scenario = geometricBoosterScenarios.find(item => item.type === BOOSTER_TYPE.ROW_FIRECRACKER)!
+  const booster = await startBoosterScenario(page, scenario)
+  const tiles = await getTiles(page)
+  const boosterId = await booster.getAttribute('data-tile-id')
+  const boosterSnapshot = tiles.find(tile => tile.id === boosterId)
+
+  expect(boosterSnapshot).toBeDefined()
+
+  const target = findOrdinaryNeighbor(tiles, boosterSnapshot!)
+
+  expect(target).not.toBeNull()
+
+  await dragTileToward(page, boosterSnapshot!, target!)
 
   await expect(page.locator(`.b-game-booster-effect--${scenario.type}`)).toBeVisible()
   await expect(page.locator('.b-game-menu__turns-value')).toHaveText('23', { timeout: 10_000 })

@@ -1,13 +1,14 @@
 import type TileGrid from '@/entities/TileGrid'
 import { isBoosterType } from '@/entities/Match3BoosterEffects'
 import { isMovableTile } from '@/entities/Match3SpecialTileConfig'
+import type { PointerPosition } from '@/entities/Match3TileGesture'
 import type { Tile } from '@/types/game'
 
 type TileInputOptions = {
   grid: TileGrid
   isLocked: () => boolean
   areNeighbors: (a: Tile, b: Tile) => boolean
-  getPointerTarget: (event: PointerEvent) => Tile | null
+  getPointerTarget: (source: Tile, start: PointerPosition, end: PointerPosition) => Tile | null
   moveTiles: (a: Tile, b: Tile) => void
   activateBooster: (tile: Tile) => void
   swipeBooster: (source: Tile, target: Tile) => void
@@ -26,8 +27,14 @@ export const createMatch3TileInput = (options: TileInputOptions) => {
 }
 
 type TileInputState = {
-  gesture: { source: Tile, pointerId: number } | null
+  gesture: PointerGesture | null
   suppressClick: boolean
+}
+
+type PointerGesture = {
+  source: Tile
+  pointerId: number
+  start: PointerPosition
 }
 
 const onTileClick = (options: TileInputOptions, state: TileInputState, tile: Tile): void => {
@@ -61,10 +68,12 @@ const onTilePointerDown = (
     return
   }
 
-  state.gesture = { source: tile, pointerId: event.pointerId }
-  if (isBoosterType(tile.type)) {
-    tile.selected = true
+  state.gesture = {
+    source: tile,
+    pointerId: event.pointerId,
+    start: { x: event.clientX, y: event.clientY },
   }
+  tile.selected = true
   capturePointer(event)
 }
 
@@ -77,14 +86,26 @@ const onTilePointerUp = (
   if (gesture === null || gesture.pointerId !== event.pointerId) {
     return
   }
-  const target = options.getPointerTarget(event)
+  const target = getGestureTarget(options, gesture, event)
 
   gesture.source.selected = false
   state.gesture = null
-  if (isValidSwipeTarget(options, gesture.source, target)) {
+  if (isValidGestureTarget(options, gesture.source, target)) {
     state.suppressClick = true
-    swipeTiles(options, gesture.source, target)
+    resolveTileGesture(options, gesture.source, target)
   }
+}
+
+const getGestureTarget = (
+  options: TileInputOptions,
+  gesture: PointerGesture,
+  event: PointerEvent
+): Tile | null => {
+  return options.getPointerTarget(
+    gesture.source,
+    gesture.start,
+    { x: event.clientX, y: event.clientY }
+  )
 }
 
 const onTileDoubleClick = (options: TileInputOptions, tile: Tile): void => {
@@ -93,7 +114,7 @@ const onTileDoubleClick = (options: TileInputOptions, tile: Tile): void => {
   }
 }
 
-const isValidSwipeTarget = (
+const isValidGestureTarget = (
   options: TileInputOptions,
   source: Tile,
   target: Tile | null
@@ -101,8 +122,7 @@ const isValidSwipeTarget = (
   return target !== null &&
     target !== source &&
     isMovableTile(target) &&
-    options.areNeighbors(source, target) &&
-    hasBooster(source, target)
+    options.areNeighbors(source, target)
 }
 
 const hasBooster = (source: Tile, target: Tile): boolean => (
@@ -120,6 +140,14 @@ const swipeTiles = (options: TileInputOptions, source: Tile, target: Tile): void
     options.swipeBooster(source, target)
   } else {
     options.swipeBooster(target, source)
+  }
+}
+
+const resolveTileGesture = (options: TileInputOptions, source: Tile, target: Tile): void => {
+  if (hasBooster(source, target)) {
+    swipeTiles(options, source, target)
+  } else {
+    options.moveTiles(source, target)
   }
 }
 

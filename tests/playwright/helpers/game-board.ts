@@ -180,6 +180,26 @@ export const swipeTile = async (page: Page, from: TileSnapshot, to: TileSnapshot
   await page.mouse.up()
 }
 
+export const dragTileToward = async (
+  page: Page,
+  source: TileSnapshot,
+  target: TileSnapshot
+): Promise<void> => {
+  const sourceX = source.x + source.width / 2
+  const sourceY = source.y + source.height / 2
+  const targetX = target.x + target.width / 2
+  const targetY = target.y + target.height / 2
+  const dragRatio = 0.3
+
+  await page.mouse.move(sourceX, sourceY)
+  await page.mouse.down()
+  await page.mouse.move(
+    sourceX + (targetX - sourceX) * dragRatio,
+    sourceY + (targetY - sourceY) * dragRatio
+  )
+  await page.mouse.up()
+}
+
 export const makeMove = async (page: Page, move: Move) => {
   await clickTile(page, move.from)
   await clickTile(page, move.to)

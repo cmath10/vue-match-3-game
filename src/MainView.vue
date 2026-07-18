@@ -359,7 +359,7 @@ const {
   grid,
   isLocked: () => locked.value,
   areNeighbors: (a, b) => Boolean(grid.isNeighbors(a, b)),
-  getPointerTarget: event => getPointerTargetTile(grid, event),
+  getPointerTarget: (source, start, end) => getPointerTargetTile(grid, source, start, end),
   moveTiles: (a, b) => void makeMove(a, b),
   activateBooster,
   swipeBooster,
