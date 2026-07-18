@@ -1,5 +1,6 @@
 @import "../variables";
 @import "../mixins/m-game-glass-panel";
+@import "b-game-button";
 
 .b-game-ground {
   @include m-game-glass-panel();
@@ -64,6 +65,10 @@
       &::after {
         background-image: var(--tile-selected-overlay-background, var(--tile-overlay-background));
       }
+    }
+
+    &--collecting {
+      opacity: 0;
     }
   }
 

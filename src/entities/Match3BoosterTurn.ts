@@ -3,6 +3,7 @@ import {
   getBoosterSwipeActivations,
   resolveBoosterWave,
   type BoosterActivation,
+  type BoosterWave,
   type SelectButtonBoxTarget,
 } from '@/entities/Match3BoosterWave'
 import {
@@ -21,6 +22,7 @@ type BoosterTurnOptions = {
   waitAnimation: () => Promise<void>
   settleGrid: (version: number, movements: TileMovement[]) => Promise<void>
   resolvePositions: (positions: Position[]) => TileMovement[]
+  animateWave: (wave: BoosterWave) => Promise<void>
   finishTurn: () => void
   swapTiles: (a: Tile, b: Tile) => void
   selectButtonBoxTarget: SelectButtonBoxTarget
@@ -76,19 +78,29 @@ const runBoosterTurn = async (
   animateSwap: boolean
 ): Promise<void> => {
   const version = options.getVersion()
-
   options.setEvaluating(true)
   if (!await waitForSwap(options, version, animateSwap)) {
     return
   }
-
   const wave = resolveTurnWave(options, activations)
-
+  if (!await animateTurnWave(options, wave, version)) {
+    return
+  }
   await options.settleGrid(version, options.resolvePositions(wave.positions))
 
   if (options.isVersionCurrent(version)) {
     options.finishTurn()
   }
+}
+
+const animateTurnWave = async (
+  options: BoosterTurnOptions,
+  wave: BoosterWave,
+  version: number
+): Promise<boolean> => {
+  await options.animateWave(wave)
+
+  return options.isVersionCurrent(version)
 }
 
 const resolveTurnWave = (

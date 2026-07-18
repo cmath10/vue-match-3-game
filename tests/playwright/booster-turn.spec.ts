@@ -39,6 +39,7 @@ test('direct activation resolves a complete chain as one turn', async () => {
 
       return []
     },
+    animateWave: () => Promise.resolve(),
     finishTurn: () => {
       finishedTurns++
       evaluating = false
