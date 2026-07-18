@@ -125,14 +125,20 @@ const swipeTiles = (options: TileInputOptions, source: Tile, target: Tile): void
 
 const handleSelectedTileClick = (options: TileInputOptions, selectedTile: Tile, tile: Tile): void => {
   if (selectedTile !== tile) {
-    if (options.areNeighbors(selectedTile, tile)) {
-      options.moveTiles(selectedTile, tile)
-    } else {
-      tile.selected = true
-    }
+    handleSecondTileClick(options, selectedTile, tile)
   }
 
   selectedTile.selected = false
+}
+
+const handleSecondTileClick = (options: TileInputOptions, selectedTile: Tile, tile: Tile): void => {
+  if (!options.areNeighbors(selectedTile, tile)) {
+    tile.selected = true
+  } else if (hasBooster(selectedTile, tile)) {
+    swipeTiles(options, selectedTile, tile)
+  } else {
+    options.moveTiles(selectedTile, tile)
+  }
 }
 
 const clearSelectedTile = (tile: Tile | null): void => {

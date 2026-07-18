@@ -66,3 +66,34 @@ test('pointer gesture can start from a non-booster and still activates the adjac
 
   expect(swipes).toEqual([[booster, ordinary]])
 })
+
+for (const selectedType of [BOOSTER_TYPE.ROW_FIRECRACKER, TILE_TYPE.SWEETS_BARBARIS]) {
+  test(`adjacent click fallback activates a booster when selected type is ${selectedType}`, () => {
+    const grid = new TileGrid(2, 1)
+    const firecracker = createTile(1, BOOSTER_TYPE.ROW_FIRECRACKER, 0)
+    const barbaris = createTile(2, TILE_TYPE.SWEETS_BARBARIS, 1)
+    const selected = selectedType === BOOSTER_TYPE.ROW_FIRECRACKER ? firecracker : barbaris
+    const clicked = selected === firecracker ? barbaris : firecracker
+    const swipes: Array<[Tile, Tile]> = []
+    let moves = 0
+
+    grid.setTile(firecracker, 0, 0)
+    grid.setTile(barbaris, 0, 1)
+    selected.selected = true
+
+    const input = createMatch3TileInput({
+      grid,
+      isLocked: () => false,
+      areNeighbors: () => true,
+      getPointerTarget: () => null,
+      moveTiles: () => moves++,
+      activateBooster: () => undefined,
+      swipeBooster: (source, target) => swipes.push([source, target]),
+    })
+
+    input.onTileClick(clicked)
+
+    expect(swipes).toEqual([[firecracker, barbaris]])
+    expect(moves).toBe(0)
+  })
+}
