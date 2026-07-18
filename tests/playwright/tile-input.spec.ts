@@ -41,3 +41,28 @@ test('pointer gesture emits one booster swipe and suppresses its trailing click'
   expect(moves).toBe(0)
   expect(booster.selected).toBe(false)
 })
+
+test('pointer gesture can start from a non-booster and still activates the adjacent booster', () => {
+  const grid = new TileGrid(2, 1)
+  const ordinary = createTile(1, TILE_TYPE.SWEETS_FISH, 0)
+  const booster = createTile(2, BOOSTER_TYPE.AREA_KETTLE, 1)
+  const swipes: Array<[Tile, Tile]> = []
+
+  grid.setTile(ordinary, 0, 0)
+  grid.setTile(booster, 0, 1)
+
+  const input = createMatch3TileInput({
+    grid,
+    isLocked: () => false,
+    areNeighbors: () => true,
+    getPointerTarget: () => booster,
+    moveTiles: () => undefined,
+    activateBooster: () => undefined,
+    swipeBooster: (source, target) => swipes.push([source, target]),
+  })
+
+  input.onTilePointerDown(ordinary, { pointerId: 8 } as PointerEvent)
+  input.onTilePointerUp({ pointerId: 8 } as PointerEvent)
+
+  expect(swipes).toEqual([[booster, ordinary]])
+})

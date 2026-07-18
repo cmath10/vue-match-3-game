@@ -27,7 +27,7 @@ export const getBoosterSwipeActivations = (
   sourceDestination: Position,
   targetDestination: Position
 ): BoosterActivation[] | null => {
-  if (!isBoosterType(sourceType) || !isValidSwipeTarget(sourceType, targetType)) {
+  if (!isBoosterType(sourceType)) {
     return null
   }
 
@@ -147,10 +147,6 @@ const getBoardTile = (board: Board<BoardTileType>, position: Position): BoardTil
 }
 
 const getPositionKey = ({ row, column }: Position): string => `${row}-${column}`
-
-const isValidSwipeTarget = (sourceType: BOOSTER_TYPE, targetType: BoardTileType): boolean => {
-  return sourceType !== BOOSTER_TYPE.BUTTON_BOX || isTileType(targetType) || isBoosterType(targetType)
-}
 
 const getSourceActivation = (
   sourceType: BOOSTER_TYPE,

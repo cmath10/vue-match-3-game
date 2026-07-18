@@ -31,7 +31,7 @@ export const getMoveMatch = <T extends BoardTile>(
 
   return {
     positions: getMatchPositions(lines),
-    boosters: toArray(getBoosterCreation(lines, movedPosition)),
+    boosters: toArray(getMoveBoosterCreation(board, lines, movedPosition)),
   }
 }
 
@@ -59,6 +59,24 @@ export const getBoosterCreation = <T extends BoardTile>(
   const type = getBoosterType(group)
 
   return type === null ? null : { type, position }
+}
+
+const getMoveBoosterCreation = <T extends BoardTile>(
+  board: Board<T>,
+  lines: Array<MatchLine<T>>,
+  movedPosition: Position
+): BoosterCreation | null => {
+  const destinationCreation = getBoosterCreation(lines, movedPosition)
+
+  if (destinationCreation !== null || board[movedPosition.row]?.[movedPosition.column] === null) {
+    return destinationCreation
+  }
+
+  const fallbackType = findMatchGroups(lines)
+    .map(getBoosterType)
+    .find((type): type is BOOSTER_TYPE => type !== null)
+
+  return fallbackType === undefined ? null : { type: fallbackType, position: movedPosition }
 }
 
 const getBoosterType = <T extends BoardTile>(group: Array<MatchLine<T>>): BOOSTER_TYPE | null => {

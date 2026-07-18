@@ -70,7 +70,7 @@ for (const scenario of boosterScenarios) {
   })
 }
 
-test('a created booster swaps with an ordinary tile and activates on swipe', async ({ page }) => {
+test('a swipe starting from an ordinary tile swaps and activates the adjacent booster', async ({ page }) => {
   const booster = await startBoosterScenario(page, rowFirecrackerScenario)
   const tiles = await getTiles(page)
   const boosterId = await booster.getAttribute('data-tile-id')
@@ -82,7 +82,7 @@ test('a created booster swaps with an ordinary tile and activates on swipe', asy
 
   expect(target).not.toBeNull()
 
-  await swipeTile(page, boosterSnapshot!, target!)
+  await swipeTile(page, target!, boosterSnapshot!)
 
   await expect(page.locator('.b-game-menu__turns-value')).toHaveText('23', { timeout: 10_000 })
   await expect(booster).toHaveCount(0)

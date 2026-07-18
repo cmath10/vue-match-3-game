@@ -66,6 +66,17 @@ test('five tiles create a button box', () => {
     type: BOOSTER_TYPE.BUTTON_BOX,
     position: { row: 1, column: 4 },
   })
+
+  expect(boosterAt([
+    '..A..',
+    '..A..',
+    '..A..',
+    '..A..',
+    '..A..',
+  ], { row: 4, column: 2 })).toEqual({
+    type: BOOSTER_TYPE.BUTTON_BOX,
+    position: { row: 4, column: 2 },
+  })
 })
 
 test('intersecting T and L matches create an area kettle', () => {
@@ -107,6 +118,38 @@ test('move match includes the connected arm of a T shape', () => {
   expect(match.boosters).toEqual([{
     type: BOOSTER_TYPE.AREA_KETTLE,
     position: { row: 1, column: 2 },
+  }])
+})
+
+test('move creates a kettle from an asymmetric T at the swap origin', () => {
+  const match = getMoveMatch(parseBoard([
+    '..A...',
+    '..A...',
+    '.AAAA.',
+    '..B...',
+  ]), { row: 3, column: 2 }, { row: 2, column: 2 })
+
+  expect(match.positions).toHaveLength(6)
+  expect(match.boosters).toEqual([{
+    type: BOOSTER_TYPE.AREA_KETTLE,
+    position: { row: 3, column: 2 },
+  }])
+})
+
+test('move creates a box from a vertical five at the swap origin', () => {
+  const match = getMoveMatch(parseBoard([
+    '..A..',
+    '..A..',
+    '..A..',
+    '..A..',
+    '..A..',
+    '..B..',
+  ]), { row: 5, column: 2 }, { row: 4, column: 2 })
+
+  expect(match.positions).toHaveLength(5)
+  expect(match.boosters).toEqual([{
+    type: BOOSTER_TYPE.BUTTON_BOX,
+    position: { row: 5, column: 2 },
   }])
 })
 

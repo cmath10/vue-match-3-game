@@ -57,13 +57,15 @@ const onTilePointerDown = (
   tile: Tile,
   event: PointerEvent
 ): void => {
-  if (!options.isLocked() && isBoosterType(tile.type)) {
-    const pointerTarget = event.currentTarget as Element | null
-
-    state.gesture = { source: tile, pointerId: event.pointerId }
-    tile.selected = true
-    pointerTarget?.setPointerCapture?.(event.pointerId)
+  if (options.isLocked() || !isMovableTile(tile)) {
+    return
   }
+
+  state.gesture = { source: tile, pointerId: event.pointerId }
+  if (isBoosterType(tile.type)) {
+    tile.selected = true
+  }
+  capturePointer(event)
 }
 
 const onTilePointerUp = (
@@ -81,7 +83,7 @@ const onTilePointerUp = (
   state.gesture = null
   if (isValidSwipeTarget(options, gesture.source, target)) {
     state.suppressClick = true
-    options.swipeBooster(gesture.source, target)
+    swipeTiles(options, gesture.source, target)
   }
 }
 
@@ -99,7 +101,26 @@ const isValidSwipeTarget = (
   return target !== null &&
     target !== source &&
     isMovableTile(target) &&
-    options.areNeighbors(source, target)
+    options.areNeighbors(source, target) &&
+    hasBooster(source, target)
+}
+
+const hasBooster = (source: Tile, target: Tile): boolean => (
+  isBoosterType(source.type) || isBoosterType(target.type)
+)
+
+const capturePointer = (event: PointerEvent): void => {
+  const pointerTarget = event.currentTarget as Element | null
+
+  pointerTarget?.setPointerCapture?.(event.pointerId)
+}
+
+const swipeTiles = (options: TileInputOptions, source: Tile, target: Tile): void => {
+  if (isBoosterType(source.type)) {
+    options.swipeBooster(source, target)
+  } else {
+    options.swipeBooster(target, source)
+  }
 }
 
 const handleSelectedTileClick = (options: TileInputOptions, selectedTile: Tile, tile: Tile): void => {

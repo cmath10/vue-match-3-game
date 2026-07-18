@@ -105,11 +105,25 @@ test('two swiped boosters activate from both swapped destinations', () => {
   ])
 })
 
-test('button box rejects a special-object swipe target', () => {
+test('two identical swiped boosters activate from both swapped destinations', () => {
+  expect(getBoosterSwipeActivations(
+    BOOSTER_TYPE.AREA_KETTLE,
+    BOOSTER_TYPE.AREA_KETTLE,
+    { row: 2, column: 3 },
+    { row: 2, column: 2 }
+  )).toEqual([
+    { source: { row: 2, column: 3 } },
+    { source: { row: 2, column: 2 } },
+  ])
+})
+
+test('button box uses random selection when swiped with a special object', () => {
   expect(getBoosterSwipeActivations(
     BOOSTER_TYPE.BUTTON_BOX,
     SPECIAL_TILE_TYPE.COOKIE,
     { row: 0, column: 1 },
     { row: 0, column: 0 }
-  )).toBeNull()
+  )).toEqual([{
+    source: { row: 0, column: 1 },
+  }])
 })

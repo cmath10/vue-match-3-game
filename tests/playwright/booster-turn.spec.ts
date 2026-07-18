@@ -59,3 +59,48 @@ test('direct activation resolves a complete chain as one turn', async () => {
     { row: 1, column: 2 },
   ]))
 })
+
+test('swiping two identical boosters swaps and activates both in one turn', async () => {
+  const grid = new TileGrid(3, 3)
+  const firstKettle = createTile(1, BOOSTER_TYPE.AREA_KETTLE, 0)
+  const secondKettle = createTile(2, BOOSTER_TYPE.AREA_KETTLE, 1)
+  const resolvedPositions: Position[][] = []
+  let effectCount = 0
+  let finishedTurns = 0
+
+  grid.setTile(firstKettle, 1, 0)
+  grid.setTile(secondKettle, 1, 1)
+  grid.setTile(createTile(3, TILE_TYPE.SWEETS_FISH, 2), 1, 2)
+
+  const turn = createMatch3BoosterTurn({
+    grid,
+    getVersion: () => 1,
+    isVersionCurrent: version => version === 1,
+    setEvaluating: () => undefined,
+    waitAnimation: () => Promise.resolve(),
+    settleGrid: () => Promise.resolve(),
+    resolvePositions: (positions) => {
+      resolvedPositions.push(positions)
+
+      return []
+    },
+    animateWave: (wave) => {
+      effectCount = wave.effects.length
+
+      return Promise.resolve()
+    },
+    finishTurn: () => finishedTurns++,
+    swapTiles: (a, b) => {
+      grid.setTile(a, 1, 1)
+      grid.setTile(b, 1, 0)
+    },
+    selectButtonBoxTarget: () => null,
+  })
+
+  turn.swipeBooster(firstKettle, secondKettle)
+
+  await expect.poll(() => finishedTurns).toBe(1)
+  expect(effectCount).toBe(2)
+  expect(resolvedPositions).toHaveLength(1)
+  expect(resolvedPositions[0]).toHaveLength(9)
+})
