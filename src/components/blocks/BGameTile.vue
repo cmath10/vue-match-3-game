@@ -13,11 +13,11 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 
-import type { ObjectiveType } from '@/enums/game'
+import type { TileVisualType } from '@/enums/game'
 import { SPECIAL_TILE_TYPE } from '@/enums/game'
 
 const props = withDefaults(defineProps<{
-  type: ObjectiveType
+  type: TileVisualType
   small?: boolean
   health?: number
   blocker?: SPECIAL_TILE_TYPE.PACKAGE

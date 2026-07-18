@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 
+import { BOOSTER_TYPE } from '../../src/enums/game'
+
 const seedMathRandom = async (page: Page) => {
   await page.addInitScript(() => {
     let seed = 42
@@ -83,4 +85,30 @@ test('cookies use highlighted assets when selected for a swap', async ({ page })
   await expect.poll(() => cookieTile.evaluate(element => (
     getComputedStyle(element, '::after').backgroundImage
   ))).toContain('tile-cookie-jam-2-selected')
+})
+
+test('boosters have regular and highlighted game assets', async ({ page }) => {
+  await page.goto('/')
+
+  const boosterTypes = Object.values(BOOSTER_TYPE)
+
+  await page.evaluate((types) => {
+    for (const type of types) {
+      const tile = document.createElement('div')
+
+      tile.dataset.boosterType = type
+      tile.classList.add('b-game-tile', `b-game-tile--${type}`)
+      document.body.append(tile)
+    }
+  }, boosterTypes)
+
+  for (const type of boosterTypes) {
+    const tile = page.locator(`[data-booster-type="${type}"]`)
+
+    await expect(tile).toHaveCSS('background-image', new RegExp(`tile-${type}\\.png`))
+
+    await tile.evaluate(element => element.classList.add('b-game-ground__tile--selected'))
+
+    await expect(tile).toHaveCSS('background-image', new RegExp(`tile-${type}-selected\\.png`))
+  }
 })

@@ -29,12 +29,12 @@
     --tile-selected-background: url("../../images/tile-sweets-barbaris-selected.png");
   }
 
-  &--sweets-cookie {
+  &--sweets-fish {
     --tile-background: url("../../images/tile-sweets-fish.png");
     --tile-selected-background: url("../../images/tile-sweets-fish-selected.png");
   }
 
-  &--sweets-lollipop {
+  &--sweets-rooster {
     --tile-background: url("../../images/tile-sweets-rooster.png");
     --tile-selected-background: url("../../images/tile-sweets-rooster-selected.png");
   }
@@ -44,9 +44,29 @@
     --tile-selected-background: url("../../images/tile-sweets-pillow-selected.png");
   }
 
-  &--sweets-souffle {
+  &--sweets-bird {
     --tile-background: url("../../images/tile-sweets-bird.png");
     --tile-selected-background: url("../../images/tile-sweets-bird-selected.png");
+  }
+
+  &--booster-row-firecracker {
+    --tile-background: url("../../images/tile-booster-row-firecracker.png");
+    --tile-selected-background: url("../../images/tile-booster-row-firecracker-selected.png");
+  }
+
+  &--booster-column-firecracker {
+    --tile-background: url("../../images/tile-booster-column-firecracker.png");
+    --tile-selected-background: url("../../images/tile-booster-column-firecracker-selected.png");
+  }
+
+  &--booster-area-kettle {
+    --tile-background: url("../../images/tile-booster-area-kettle.png");
+    --tile-selected-background: url("../../images/tile-booster-area-kettle-selected.png");
+  }
+
+  &--booster-button-box {
+    --tile-background: url("../../images/tile-booster-button-box.png");
+    --tile-selected-background: url("../../images/tile-booster-button-box-selected.png");
   }
 
   &--special-mug {

@@ -8,16 +8,16 @@ const repeatType = (type: TILE_TYPE, count: number): TILE_TYPE[] => Array(count)
 test('objectives are generated from frequent starting board tile types', () => {
   const objectives = generateObjectives([
     ...repeatType(TILE_TYPE.SWEETS_BARBARIS, 12),
-    ...repeatType(TILE_TYPE.SWEETS_COOKIE, 11),
-    ...repeatType(TILE_TYPE.SWEETS_LOLLIPOP, 10),
+    ...repeatType(TILE_TYPE.SWEETS_FISH, 11),
+    ...repeatType(TILE_TYPE.SWEETS_ROOSTER, 10),
     ...repeatType(TILE_TYPE.SWEETS_PILLOW, 2),
-    ...repeatType(TILE_TYPE.SWEETS_SOUFFLE, 1),
+    ...repeatType(TILE_TYPE.SWEETS_BIRD, 1),
   ])
   const objectiveTypes = objectives.map(objective => objective.type)
   const frequentTypes = [
     TILE_TYPE.SWEETS_BARBARIS,
-    TILE_TYPE.SWEETS_COOKIE,
-    TILE_TYPE.SWEETS_LOLLIPOP,
+    TILE_TYPE.SWEETS_FISH,
+    TILE_TYPE.SWEETS_ROOSTER,
   ]
 
   expect(objectives).toHaveLength(2)

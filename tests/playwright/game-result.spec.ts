@@ -10,19 +10,19 @@ const counter = (type: TILE_TYPE, count: number): Counter => ({ type, count })
 test('game result is based on objectives and remaining turns', () => {
   const objectives = [
     objective(TILE_TYPE.SWEETS_BARBARIS, 20),
-    objective(TILE_TYPE.SWEETS_COOKIE, 30),
+    objective(TILE_TYPE.SWEETS_FISH, 30),
   ]
 
   expect(getGameResult(objectives, [
     counter(TILE_TYPE.SWEETS_BARBARIS, 20),
-    counter(TILE_TYPE.SWEETS_COOKIE, 30),
+    counter(TILE_TYPE.SWEETS_FISH, 30),
   ], 0)).toBe('win')
   expect(getGameResult(objectives, [
     counter(TILE_TYPE.SWEETS_BARBARIS, 20),
-    counter(TILE_TYPE.SWEETS_COOKIE, 29),
+    counter(TILE_TYPE.SWEETS_FISH, 29),
   ], 0)).toBe('lose')
   expect(getGameResult(objectives, [
     counter(TILE_TYPE.SWEETS_BARBARIS, 20),
-    counter(TILE_TYPE.SWEETS_COOKIE, 29),
+    counter(TILE_TYPE.SWEETS_FISH, 29),
   ], 1)).toBeNull()
 })

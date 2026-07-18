@@ -22,10 +22,10 @@ const BOARD_WIDTH = 9
 const BOARD_HEIGHT = 7
 const MATCHABLE_TILE_TYPES = new Set([
   'sweets-barbaris',
-  'sweets-cookie',
-  'sweets-lollipop',
+  'sweets-fish',
+  'sweets-rooster',
   'sweets-pillow',
-  'sweets-souffle',
+  'sweets-bird',
 ])
 const seedMathRandom = async (page: Page) => {
   await page.addInitScript(() => {
