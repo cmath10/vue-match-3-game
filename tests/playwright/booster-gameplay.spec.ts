@@ -25,7 +25,7 @@ const boosterScenarios: BoosterScenario[] = [
   { type: BOOSTER_TYPE.AREA_KETTLE, seed: 19 },
 ]
 const buttonBoxScenario = boosterScenarios[0]
-const rowFirecrackerScenario = boosterScenarios[2]
+const geometricBoosterScenarios = boosterScenarios.filter(scenario => scenario.type !== BOOSTER_TYPE.BUTTON_BOX)
 
 const startBoosterScenario = async (
   page: Page,
@@ -73,8 +73,55 @@ for (const scenario of boosterScenarios) {
   })
 }
 
-test('a swipe starting from an ordinary tile swaps and activates the adjacent booster', async ({ page }) => {
-  const booster = await startBoosterScenario(page, rowFirecrackerScenario)
+for (const scenario of geometricBoosterScenarios) {
+  test(`${scenario.type} activates when an ordinary tile is swiped into it`, async ({ page }) => {
+    const booster = await startBoosterScenario(page, scenario)
+    const tiles = await getTiles(page)
+    const boosterId = await booster.getAttribute('data-tile-id')
+    const boosterSnapshot = tiles.find(tile => tile.id === boosterId)
+
+    expect(boosterSnapshot).toBeDefined()
+
+    const target = findOrdinaryNeighbor(tiles, boosterSnapshot!)
+
+    expect(target).not.toBeNull()
+
+    await swipeTile(page, target!, boosterSnapshot!)
+
+    await expect(page.locator(`.b-game-booster-effect--${scenario.type}`)).toBeVisible()
+    await expect(page.locator('.b-game-menu__turns-value')).toHaveText('23', { timeout: 10_000 })
+    await expect(booster).toHaveCount(0)
+    await expect(page.locator('.b-game-ground__tile')).toHaveCount(BOARD_WIDTH * BOARD_HEIGHT)
+  })
+}
+
+for (const direction of ['booster-to-tile', 'tile-to-booster'] as const) {
+  test(`button box collects the selected ordinary type on ${direction} swipe`, async ({ page }) => {
+    const booster = await startBoosterScenario(page, buttonBoxScenario)
+    const tiles = await getTiles(page)
+    const boosterId = await booster.getAttribute('data-tile-id')
+    const boosterSnapshot = tiles.find(tile => tile.id === boosterId)
+
+    expect(boosterSnapshot).toBeDefined()
+
+    const target = findOrdinaryNeighbor(tiles, boosterSnapshot!)
+
+    expect(target).not.toBeNull()
+
+    const [from, to] = direction === 'booster-to-tile'
+      ? [boosterSnapshot!, target!]
+      : [target!, boosterSnapshot!]
+
+    await swipeTile(page, from, to)
+
+    await expect(page.locator(`.b-game-button--${target!.type}`).first()).toBeVisible()
+    await expect(page.locator('.b-game-menu__turns-value')).toHaveText('23', { timeout: 10_000 })
+    await expect(booster).toHaveCount(0)
+  })
+}
+
+test('button box swipe tolerates release in the target cell outside the tile image', async ({ page }) => {
+  const booster = await startBoosterScenario(page, buttonBoxScenario)
   const tiles = await getTiles(page)
   const boosterId = await booster.getAttribute('data-tile-id')
   const boosterSnapshot = tiles.find(tile => tile.id === boosterId)
@@ -85,11 +132,10 @@ test('a swipe starting from an ordinary tile swaps and activates the adjacent bo
 
   expect(target).not.toBeNull()
 
-  await swipeTile(page, target!, boosterSnapshot!)
+  await swipePastTargetEdge(page, boosterSnapshot!, target!)
 
+  await expect(page.locator(`.b-game-button--${target!.type}`).first()).toBeVisible()
   await expect(page.locator('.b-game-menu__turns-value')).toHaveText('23', { timeout: 10_000 })
-  await expect(booster).toHaveCount(0)
-  await expect(page.locator('.b-game-ground__tile')).toHaveCount(BOARD_WIDTH * BOARD_HEIGHT)
 })
 
 test('starting a new game cancels button flights and the obsolete booster turn', async ({ page }) => {
@@ -138,4 +184,25 @@ const findOrdinaryNeighbor = (
       (tile.column === source.column && Math.abs(tile.row - source.row) === 1)
     )
   )) ?? null
+}
+
+const swipePastTargetEdge = async (
+  page: Page,
+  source: TileSnapshot,
+  target: TileSnapshot
+): Promise<void> => {
+  const sourceX = source.x + source.width / 2
+  const sourceY = source.y + source.height / 2
+  const targetX = target.x + target.width / 2
+  const targetY = target.y + target.height / 2
+  const horizontalDirection = Math.sign(targetX - sourceX)
+  const verticalDirection = Math.sign(targetY - sourceY)
+
+  await page.mouse.move(sourceX, sourceY)
+  await page.mouse.down()
+  await page.mouse.move(
+    targetX + horizontalDirection * (target.width / 2 + 2),
+    targetY + verticalDirection * (target.height / 2 + 2)
+  )
+  await page.mouse.up()
 }
