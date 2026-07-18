@@ -28,24 +28,59 @@ test('new game renders special tile mechanics', async ({ page }) => {
   )).toHaveCount(1)
 })
 
-test('packaged tiles cannot be selected for a swap', async ({ page }) => {
+test('package blockers cover the whole cell and cannot be selected', async ({ page }) => {
   await seedMathRandom(page)
   await page.goto('/')
 
   const packagedTile = page.locator('.b-game-ground__tile.b-game-tile--blocker-special-package').first()
+  const cell = page.locator('.b-game-ground__cell').first()
+  const cellBox = await cell.boundingBox()
+  const packageOverlaySize = await packagedTile.evaluate((element) => {
+    const styles = getComputedStyle(element, '::after')
+
+    return {
+      width: Number.parseFloat(styles.width),
+      height: Number.parseFloat(styles.height),
+    }
+  })
+
+  if (cellBox === null) {
+    throw new Error('Expected a visible game cell')
+  }
+
+  expect(packageOverlaySize.width).toBeCloseTo(cellBox.width, 0)
+  expect(packageOverlaySize.height).toBeCloseTo(cellBox.height, 0)
 
   await packagedTile.click()
 
   await expect(packagedTile).not.toHaveClass(/b-game-ground__tile--selected/)
 })
 
-test('cookies can be selected for a swap', async ({ page }) => {
+test('mugs use highlighted assets when selected for a swap', async ({ page }) => {
   await seedMathRandom(page)
   await page.goto('/')
 
-  const cookieTile = page.locator('.b-game-ground__tile.b-game-tile--special-cookie').first()
+  const mugTile = page.locator('.b-game-ground__tile.b-game-tile--special-mug').first()
+
+  await mugTile.click()
+
+  await expect(mugTile).toHaveClass(/b-game-ground__tile--selected/)
+  await expect(mugTile).toHaveCSS('background-image', /tile-special-mug-selected/)
+})
+
+test('cookies use highlighted assets when selected for a swap', async ({ page }) => {
+  await seedMathRandom(page)
+  await page.goto('/')
+
+  const cookieTile = page.locator(
+    '.b-game-ground__tile.b-game-tile--special-cookie.b-game-tile--cookie-jam-2'
+  ).first()
 
   await cookieTile.click()
 
   await expect(cookieTile).toHaveClass(/b-game-ground__tile--selected/)
+  await expect(cookieTile).toHaveCSS('background-image', /tile-special-cookie-selected/)
+  await expect.poll(() => cookieTile.evaluate(element => (
+    getComputedStyle(element, '::after').backgroundImage
+  ))).toContain('tile-cookie-jam-2-selected')
 })

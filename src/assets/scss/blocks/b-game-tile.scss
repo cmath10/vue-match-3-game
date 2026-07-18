@@ -17,6 +17,7 @@
     position: absolute;
     inset: 0;
     content: "";
+    background-image: var(--tile-overlay-background);
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -29,13 +30,13 @@
   }
 
   &--sweets-cookie {
-    --tile-background: url("../../images/tile-sweets-cookie.png");
-    --tile-selected-background: url("../../images/tile-sweets-cookie-selected.png");
+    --tile-background: url("../../images/tile-sweets-fish.png");
+    --tile-selected-background: url("../../images/tile-sweets-fish-selected.png");
   }
 
   &--sweets-lollipop {
-    --tile-background: url("../../images/tile-sweets-lollipop.png");
-    --tile-selected-background: url("../../images/tile-sweets-lollipop-selected.png");
+    --tile-background: url("../../images/tile-sweets-rooster.png");
+    --tile-selected-background: url("../../images/tile-sweets-rooster-selected.png");
   }
 
   &--sweets-pillow {
@@ -44,13 +45,13 @@
   }
 
   &--sweets-souffle {
-    --tile-background: url("../../images/tile-sweets-souffle.png");
-    --tile-selected-background: url("../../images/tile-sweets-souffle-selected.png");
+    --tile-background: url("../../images/tile-sweets-bird.png");
+    --tile-selected-background: url("../../images/tile-sweets-bird-selected.png");
   }
 
   &--special-mug {
     --tile-background: url("../../images/tile-special-mug.png");
-    --tile-selected-background: url("../../images/tile-special-mug.png");
+    --tile-selected-background: url("../../images/tile-special-mug-selected.png");
 
     background-size: contain;
   }
@@ -64,18 +65,24 @@
 
   &--special-cookie {
     --tile-background: url("../../images/tile-special-cookie.png");
-    --tile-selected-background: url("../../images/tile-special-cookie.png");
+    --tile-selected-background: url("../../images/tile-special-cookie-selected.png");
   }
 
-  &--blocker-special-package::after {
-    background-image: url("../../images/tile-blocker-package.png");
+  &--blocker-special-package {
+    --tile-overlay-background: url("../../images/tile-blocker-package.png");
+
+    &::after {
+      inset: calc((var(--tile-size) - var(--cell-size)) / 2);
+    }
   }
 
-  &--cookie-jam-1::after {
-    background-image: url("../../images/tile-cookie-jam-1.png");
+  &--cookie-jam-1 {
+    --tile-overlay-background: url("../../images/tile-cookie-jam-1.png");
+    --tile-selected-overlay-background: url("../../images/tile-cookie-jam-1-selected.png");
   }
 
-  &--cookie-jam-2::after {
-    background-image: url("../../images/tile-cookie-jam-2.png");
+  &--cookie-jam-2 {
+    --tile-overlay-background: url("../../images/tile-cookie-jam-2.png");
+    --tile-selected-overlay-background: url("../../images/tile-cookie-jam-2-selected.png");
   }
 }

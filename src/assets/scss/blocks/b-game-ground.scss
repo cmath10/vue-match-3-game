@@ -59,6 +59,10 @@
 
     &--selected {
       background-image: var(--tile-selected-background);
+
+      &::after {
+        background-image: var(--tile-selected-overlay-background, var(--tile-overlay-background));
+      }
     }
   }
 
