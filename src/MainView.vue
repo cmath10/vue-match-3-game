@@ -1,5 +1,5 @@
 <template>
-    <div class="b-game-layout">
+    <div :style="boardStyle" class="b-game-layout">
         <aside class="b-game-layout__menu">
             <b-game-menu
                 :counters="counters"
@@ -78,6 +78,7 @@ import BGameButtonFlights from '@/components/blocks/BGameButtonFlights.vue'
 import BGameMenu from '@/components/blocks/BGameMenu.vue'
 import BGameResultOverlay from '@/components/blocks/BGameResultOverlay.vue'
 import BGameTile from '@/components/blocks/BGameTile.vue'
+import { BOARD_HEIGHT, BOARD_WIDTH } from '@/entities/Match3BoardConfig'
 import { preserveCreatedBoosters } from '@/entities/Match3BoardBoosters'
 import { applyBoosterEffectPositions } from '@/entities/Match3BoardHits'
 import {
@@ -94,10 +95,7 @@ import {
   getMatchPositions,
   type Position,
 } from '@/entities/Match3Engine'
-import {
-  getGridTilePosition,
-  getMatchableTileBoard,
-} from '@/entities/Match3GridBoard'
+import { getGridTilePosition, getMatchableTileBoard } from '@/entities/Match3GridBoard'
 import { initializeGameGoals } from '@/entities/Match3GameSetup'
 import {
   collapseGrid,
@@ -112,14 +110,13 @@ import {
 } from '@/entities/Match3SpecialTiles'
 import { createMatch3TileInput } from '@/entities/Match3TileInput'
 import {
+  getBoardStyle,
   getGridCells,
   getPointerTargetTile,
   getTileStyle,
 } from '@/entities/Match3TilePresentation'
 import { TILE_TYPE, type BoardTileType, type ObjectiveType } from '@/enums/game'
 
-const WIDTH = 9
-const HEIGHT = 7
 const COUNT_TURNS = 25
 const ANIMATION_DELAY = 480
 const random = <T>(array: T[]): T => array[Math.floor(Math.random() * array.length)]
@@ -127,7 +124,7 @@ defineOptions({ name: 'MainView' })
 
 const { t } = useI18n()
 
-const grid = reactive(new TileGrid(WIDTH, HEIGHT)) as TileGrid
+const grid = reactive(new TileGrid(BOARD_WIDTH, BOARD_HEIGHT)) as TileGrid
 const objectives = reactive<Objective[]>([])
 const counters = reactive<Counter[]>([])
 const turns = ref(COUNT_TURNS)
@@ -135,6 +132,7 @@ const evaluating = ref(false)
 const gameResult = ref<GameResult | null>(null)
 const gameVersion = ref(0)
 const nextTileId = ref(0)
+const boardStyle = getBoardStyle(BOARD_WIDTH, BOARD_HEIGHT)
 
 const locked = computed(() => evaluating.value || gameResult.value !== null)
 const activeTiles = computed(() => grid.getTiles().sort((a, b) => a.id - b.id))
@@ -264,21 +262,21 @@ const getCascadePositions = (movements: TileMovement[]): Position[] => {
 }
 
 const resolveMatchedPositions = (positions: Position[]): TileMovement[] => {
-  clearMatchedPositions(grid, positions, WIDTH, HEIGHT, incrementCounter)
+  clearMatchedPositions(grid, positions, BOARD_WIDTH, BOARD_HEIGHT, incrementCounter)
   return transitionGrid()
 }
 
 const resolveBoosterPositions = (positions: Position[]): TileMovement[] => {
-  applyBoosterEffectPositions(grid, positions, WIDTH, HEIGHT, incrementCounter)
+  applyBoosterEffectPositions(grid, positions, BOARD_WIDTH, BOARD_HEIGHT, incrementCounter)
   return transitionGrid()
 }
 
 const transitionGrid = (): TileMovement[] => {
   const movements = collapseGrid(grid)
 
-  collectDroppedMugs(grid, WIDTH, HEIGHT, incrementCounter)
+  collectDroppedMugs(grid, BOARD_WIDTH, BOARD_HEIGHT, incrementCounter)
   movements.push(...collapseGrid(grid, movements.length))
-  movements.push(...refillGrid(grid, WIDTH, HEIGHT, spawnTile, movements.length))
+  movements.push(...refillGrid(grid, BOARD_WIDTH, BOARD_HEIGHT, spawnTile, movements.length))
 
   return movements
 }
@@ -383,7 +381,7 @@ const startNewGame = () => {
   cancelBoosterAnimation()
   grid.clear()
   fillGrid()
-  placeSpecialTiles(grid, WIDTH, HEIGHT, createTile)
+  placeSpecialTiles(grid, BOARD_WIDTH, BOARD_HEIGHT, createTile)
   initializeGameGoals(grid, objectives, counters, random)
 }
 

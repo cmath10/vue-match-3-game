@@ -12,6 +12,11 @@ const SWIPE_THRESHOLD_RATIO = 0.18
 
 export type GameCell = { key: string }
 
+export const getBoardStyle = (width: number, height: number) => ({
+  '--board-column-count': width,
+  '--board-row-count': height,
+})
+
 export const getTileStyle = (tile: Tile) => ({
   transform: `translate(calc(${tile.column} * (var(--cell-size) + var(--cell-gap)) + var(--tile-offset)), calc(${tile.row} * (var(--cell-size) + var(--cell-gap)) + var(--tile-offset)))`,
 })

@@ -60,6 +60,42 @@ const expectSwapAnimationStarted = async (page: Page, move: Move) => {
   expect(currentDistance).toBeGreaterThan(1)
 }
 
+test('expanded board keeps an 11 by 9 grid readable on mobile', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await seedMathRandom(page)
+  await page.goto('/')
+
+  const cells = page.locator('.b-game-ground__cell')
+
+  await expect(cells).toHaveCount(11 * 9)
+
+  const metrics = await page.locator('.b-game-ground').evaluate((ground) => {
+    const grid = ground.querySelector<HTMLElement>('.b-game-ground__cells')!
+    const cell = ground.querySelector<HTMLElement>('.b-game-ground__cell')!
+    const board = ground.parentElement!
+    const gridStyle = getComputedStyle(grid)
+    const groundRect = ground.getBoundingClientRect()
+    const boardRect = board.getBoundingClientRect()
+    const cellRect = cell.getBoundingClientRect()
+
+    return {
+      columns: gridStyle.gridTemplateColumns.split(' ').length,
+      rows: gridStyle.gridTemplateRows.split(' ').length,
+      fitsWidth: groundRect.width <= boardRect.width + 1,
+      fitsHeight: groundRect.height <= boardRect.height + 1,
+      cellSize: Math.min(cellRect.width, cellRect.height),
+    }
+  })
+
+  expect(metrics).toMatchObject({
+    columns: 11,
+    rows: 9,
+    fitsWidth: true,
+    fitsHeight: true,
+  })
+  expect(metrics.cellSize).toBeGreaterThanOrEqual(28)
+})
+
 test('valid moves keep animated tiles inside the board', async ({ page }, testInfo) => {
   await seedMathRandom(page)
   await page.goto('/')

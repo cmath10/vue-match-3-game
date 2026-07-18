@@ -1,6 +1,4 @@
 .b-game-booster-effect {
-  --board-width: calc(var(--cell-size) * 9 + var(--cell-gap) * 8);
-  --board-height: calc(var(--cell-size) * 7 + var(--cell-gap) * 6);
   --cell-step: calc(var(--cell-size) + var(--cell-gap));
   --effect-duration: var(--tile-transition-duration);
 
@@ -18,7 +16,7 @@
   }
 
   &--booster-row-firecracker {
-    width: var(--board-width);
+    width: 100%;
     height: var(--cell-size);
     transform: translateY(calc(var(--effect-row) * var(--cell-step)));
 
@@ -45,7 +43,7 @@
 
   &--booster-column-firecracker {
     width: var(--cell-size);
-    height: var(--board-height);
+    height: 100%;
     transform: translateX(calc(var(--effect-column) * var(--cell-step)));
 
     &::before,

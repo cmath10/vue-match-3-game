@@ -1,5 +1,9 @@
 import type { Page } from '@playwright/test'
 
+import {
+  BOARD_HEIGHT,
+  BOARD_WIDTH,
+} from '../../../src/entities/Match3BoardConfig'
 import { getMoveMatch } from '../../../src/entities/Match3BoosterRules'
 import type { Board } from '../../../src/entities/Match3Engine'
 import { BOOSTER_TYPE, TILE_TYPE } from '../../../src/enums/game'
@@ -21,8 +25,7 @@ export type Move = {
   to: TileSnapshot
 }
 
-export const BOARD_WIDTH = 9
-export const BOARD_HEIGHT = 7
+export { BOARD_HEIGHT, BOARD_WIDTH }
 
 const MATCHABLE_TILE_TYPES = new Set<string>(Object.values(TILE_TYPE))
 
