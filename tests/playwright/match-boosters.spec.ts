@@ -1,4 +1,4 @@
-import type { Board, Position } from '../../src/entities/Match3Engine'
+import type { Board, Position } from '@/entities/Match3Engine'
 
 import { expect, test } from '@playwright/test'
 
@@ -6,10 +6,10 @@ import {
   getBoosterCreation,
   getCascadeBoosterCreations,
   getMoveMatch,
-} from '../../src/entities/Match3BoosterRules'
+} from '@/entities/Match3BoosterRules'
 
-import { BOOSTER_TYPE } from '../../src/enums/game'
-import { findMatchLines } from '../../src/entities/Match3Matches'
+import { BOOSTER_TYPE } from '@/enums/game'
+import { findMatchLines } from '@/entities/Match3Matches'
 
 const parseBoard = (rows: string[]): Board<string> => {
   return rows.map(row => [...row].map(tile => tile === '.' ? null : tile))

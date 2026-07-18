@@ -1,9 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-import {
-  getDirectionalNeighbor,
-  getSwipeDirection,
-} from '../../src/entities/Match3TileGesture'
+import { getDirectionalNeighbor, getSwipeDirection } from '@/entities/Match3TileGesture'
 
 test('swipe direction uses the dominant axis after crossing its threshold', () => {
   expect(getSwipeDirection({ x: 10, y: 10 }, { x: 24, y: 14 }, 8)).toBe('right')

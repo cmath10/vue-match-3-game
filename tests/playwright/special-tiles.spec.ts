@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 
-import { BOOSTER_TYPE } from '../../src/enums/game'
+import { BOOSTER_TYPE } from '@/enums/game'
+
 import { seedMathRandom } from './helpers/game-board'
 
 test('new game renders special tile mechanics', async ({ page }) => {

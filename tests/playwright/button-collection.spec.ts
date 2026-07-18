@@ -1,13 +1,13 @@
-import type { BoosterWave } from '../../src/entities/Match3BoosterWave'
+import type { BoosterWave } from '@/entities/Match3BoosterWave'
 
-import type { Tile } from '../../src/types/game'
+import type { Tile } from '@/types/game'
 
 import { expect, test } from '@playwright/test'
 
-import { getButtonFlights } from '../../src/composables/useMatch3ButtonCollection'
-import TileGrid from '../../src/entities/TileGrid'
+import { getButtonFlights } from '@/composables/useMatch3ButtonCollection'
+import TileGrid from '@/entities/TileGrid'
 
-import { BOOSTER_TYPE, SPECIAL_TILE_TYPE, TILE_TYPE } from '../../src/enums/game'
+import { BOOSTER_TYPE, SPECIAL_TILE_TYPE, TILE_TYPE } from '@/enums/game'
 
 const createTile = (id: number, type: Tile['type'], row: number, column: number): Tile => ({
   id,

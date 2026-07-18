@@ -4,7 +4,7 @@ import type { TileSnapshot } from './helpers/game-board'
 
 import { expect, test } from '@playwright/test'
 
-import { BOOSTER_TYPE, TILE_TYPE } from '../../src/enums/game'
+import { BOOSTER_TYPE, TILE_TYPE } from '@/enums/game'
 
 import {
   BOARD_HEIGHT,
