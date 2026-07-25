@@ -39,7 +39,38 @@ test('row and column firecrackers cover their full lines', () => {
   ])
 })
 
-test('kettle has a clipped 3 by 3 area at board edges', () => {
+test('kettle covers a 5 by 5 circle without the four zone corners', () => {
+  expect(getBoosterEffect(
+    BoosterType.AreaKettle,
+    { row: 2, column: 2 },
+    5,
+    5
+  ).positions).toEqual([
+    { row: 0, column: 1 },
+    { row: 0, column: 2 },
+    { row: 0, column: 3 },
+    { row: 1, column: 0 },
+    { row: 1, column: 1 },
+    { row: 1, column: 2 },
+    { row: 1, column: 3 },
+    { row: 1, column: 4 },
+    { row: 2, column: 0 },
+    { row: 2, column: 1 },
+    { row: 2, column: 2 },
+    { row: 2, column: 3 },
+    { row: 2, column: 4 },
+    { row: 3, column: 0 },
+    { row: 3, column: 1 },
+    { row: 3, column: 2 },
+    { row: 3, column: 3 },
+    { row: 3, column: 4 },
+    { row: 4, column: 1 },
+    { row: 4, column: 2 },
+    { row: 4, column: 3 },
+  ])
+})
+
+test('kettle circle is clipped at board edges', () => {
   expect(getBoosterEffect(
     BoosterType.AreaKettle,
     { row: 0, column: 0 },
@@ -48,8 +79,12 @@ test('kettle has a clipped 3 by 3 area at board edges', () => {
   ).positions).toEqual([
     { row: 0, column: 0 },
     { row: 0, column: 1 },
+    { row: 0, column: 2 },
     { row: 1, column: 0 },
     { row: 1, column: 1 },
+    { row: 1, column: 2 },
+    { row: 2, column: 0 },
+    { row: 2, column: 1 },
   ])
 })
 

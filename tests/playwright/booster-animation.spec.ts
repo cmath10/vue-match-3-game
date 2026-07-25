@@ -56,3 +56,16 @@ test('visual effect position is expressed through board coordinates', () => {
     '--effect-column': 7,
   })
 })
+
+test('kettle visual effect carries its domain area dimensions', () => {
+  expect(getBoosterVisualEffectStyle({
+    id: 'effect',
+    type: BoosterType.AreaKettle,
+    source: { row: 3, column: 7 },
+  })).toEqual({
+    '--effect-row': 3,
+    '--effect-column': 7,
+    '--effect-area-radius': 2,
+    '--effect-area-size': 5,
+  })
+})

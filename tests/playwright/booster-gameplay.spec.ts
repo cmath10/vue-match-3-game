@@ -119,6 +119,46 @@ for (const scenario of boosterScenarios.filter(({ type }) => (
   })
 }
 
+test('area kettle has a continuous circular animation across its 5 by 5 zone', async ({ page }, testInfo) => {
+  const kettleScenario = boosterScenarios[3]
+  const booster = await startBoosterScenario(page, kettleScenario)
+
+  await booster.dblclick()
+
+  const effect = page.locator(`.b-game-booster-effect--${BoosterType.AreaKettle}`)
+
+  await expect(effect).toBeVisible()
+  await page.waitForTimeout(240)
+  await testInfo.attach('area-kettle-animation', {
+    body: await page.screenshot(),
+    contentType: 'image/png',
+  })
+
+  const geometry = await effect.evaluate((element) => {
+    const cells = document.querySelectorAll<HTMLElement>('.b-game-ground__cell')
+    const effectRect = element.getBoundingClientRect()
+    const firstCell = cells[0].getBoundingClientRect()
+    const secondCell = cells[1].getBoundingClientRect()
+
+    return {
+      width: effectRect.width,
+      height: effectRect.height,
+      cellSize: firstCell.width,
+      cellStep: secondCell.x - firstCell.x,
+      backgroundImage: getComputedStyle(element, '::before').backgroundImage,
+      borderRadius: getComputedStyle(element, '::before').borderRadius,
+      clipPath: getComputedStyle(element, '::before').clipPath,
+    }
+  })
+  const expectedSize = geometry.cellSize + geometry.cellStep * 4
+
+  expect(geometry.width).toBeCloseTo(expectedSize, 0)
+  expect(geometry.height).toBeCloseTo(expectedSize, 0)
+  expect(geometry.backgroundImage).toContain('radial-gradient(')
+  expect(geometry.borderRadius).toBe('50%')
+  expect(geometry.clipPath).toBe('none')
+})
+
 for (const scenario of geometricBoosterScenarios) {
   test(`${scenario.type} activates when an ordinary tile is swiped into it`, async ({ page }) => {
     const booster = await startBoosterScenario(page, scenario)

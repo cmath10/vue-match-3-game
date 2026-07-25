@@ -6,6 +6,7 @@ import type { Ref } from 'vue'
 import { ref } from 'vue'
 
 import { BoosterType } from '@/domain/enums'
+import { KETTLE_AREA_RADIUS, KETTLE_AREA_SIZE } from '@/domain/boosters/effects'
 
 import { useButtonCollection } from '@/composables/useButtonCollection'
 
@@ -77,10 +78,20 @@ export const getBoosterVisualEffects = (wave: BoosterWave): BoosterVisualEffect[
   })
 }
 
-export const getBoosterVisualEffectStyle = (effect: BoosterVisualEffect) => ({
-  '--effect-row': effect.source.row,
-  '--effect-column': effect.source.column,
-})
+export const getBoosterVisualEffectStyle = (effect: BoosterVisualEffect) => {
+  const position = {
+    '--effect-row': effect.source.row,
+    '--effect-column': effect.source.column,
+  }
+
+  return effect.type === BoosterType.AreaKettle
+    ? {
+        ...position,
+        '--effect-area-radius': KETTLE_AREA_RADIUS,
+        '--effect-area-size': KETTLE_AREA_SIZE,
+      }
+    : position
+}
 
 const isGeometricBooster = (type: BoosterType): type is GeometricBoosterType => {
   return GEOMETRIC_BOOSTERS.has(type)

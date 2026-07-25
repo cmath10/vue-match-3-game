@@ -11,6 +11,9 @@ import { BoosterType } from '@/domain/enums'
 import { isTileType } from '@/domain/tiles'
 import { TileType } from '@/domain/enums'
 
+export const KETTLE_AREA_RADIUS = 2
+export const KETTLE_AREA_SIZE = KETTLE_AREA_RADIUS + KETTLE_AREA_RADIUS + 1
+
 export const getBoosterEffect = (
   booster: GeometricBoosterType,
   source: Position,
@@ -80,10 +83,20 @@ const getAreaPositions = (source: Position, width: number, height: number): Posi
 
   return rows
     .flatMap(row => columns.map(column => ({ row, column })))
+    .filter(position => !isAreaCorner(position, source))
     .filter(position => isInsideBoard(position, width, height))
 }
 
-const getAreaIndexes = (center: number): number[] => [center - 1, center, center + 1]
+const getAreaIndexes = (center: number): number[] => {
+  return Array.from(
+    { length: KETTLE_AREA_SIZE },
+    (_, index) => center - KETTLE_AREA_RADIUS + index
+  )
+}
+const isAreaCorner = (position: Position, source: Position): boolean => {
+  return Math.abs(position.row - source.row) === KETTLE_AREA_RADIUS &&
+    Math.abs(position.column - source.column) === KETTLE_AREA_RADIUS
+}
 const isInsideBoard = ({ row, column }: Position, width: number, height: number): boolean => {
   return row >= 0 && row < height && column >= 0 && column < width
 }
