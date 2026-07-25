@@ -1,0 +1,25 @@
+.b-game-objective-flight {
+  position: fixed;
+  z-index: 10;
+  top: 0;
+  left: 0;
+  width: var(--objective-flight-size);
+  height: var(--objective-flight-size);
+  filter: drop-shadow(0 0.2rem 0.35rem rgba(0, 0, 0, 0.32));
+  pointer-events: none;
+  transform-origin: center;
+  will-change: transform;
+
+  &--ready {
+    transition: none;
+  }
+
+  &--dropping {
+    z-index: 0;
+    transition: transform 0.18s ease-in;
+  }
+
+  &--flying {
+    transition: transform 0.48s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}

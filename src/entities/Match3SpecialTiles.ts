@@ -1,6 +1,7 @@
 import type TileGrid from '@/entities/TileGrid'
 export { clearMatchedPositions } from '@/entities/Match3BoardHits'
-import type { BoardTileType, ObjectiveType } from '@/enums/game'
+import type { BoardTileType } from '@/enums/game'
+import type { CollectObjective } from '@/entities/Match3ObjectiveCollection'
 import type { Position } from '@/entities/Match3Engine'
 import type { Tile } from '@/types/game'
 
@@ -15,7 +16,6 @@ import { SPECIAL_TILE_TYPE } from '@/enums/game'
 export { AVAILABLE_TILE_TYPES, COUNTER_TYPES, isMatchableTile, isMovableTile, SPECIAL_OBJECTIVE_TYPES, SPECIAL_TARGETS } from '@/entities/Match3SpecialTileConfig'
 
 type CreateTile = (type: BoardTileType, row: number, column: number) => Tile
-type IncrementCounter = (type: ObjectiveType) => void
 
 export const placeSpecialTiles = (
   grid: TileGrid,
@@ -32,19 +32,28 @@ export const collectDroppedMugs = (
   grid: TileGrid,
   width: number,
   height: number,
-  incrementCounter: IncrementCounter
+  collectObjective: CollectObjective
 ) => {
   for (let column = 0; column < width; column++) {
-    for (let row = height - 1; row >= 0; row--) {
-      const tile = grid.getTileByIndex(row, column)
+    collectMugsInColumn(grid, height, column, collectObjective)
+  }
+}
 
-      if (tile?.type !== SPECIAL_TILE_TYPE.MUG) {
-        break
-      }
+const collectMugsInColumn = (
+  grid: TileGrid,
+  height: number,
+  column: number,
+  collectObjective: CollectObjective
+): void => {
+  for (let row = height - 1; row >= 0; row--) {
+    const tile = grid.getTileByIndex(row, column)
 
-      incrementCounter(SPECIAL_TILE_TYPE.MUG)
-      grid.setTile(null, row, column)
+    if (tile?.type !== SPECIAL_TILE_TYPE.MUG) {
+      break
     }
+
+    collectObjective({ tileId: tile.id, type: SPECIAL_TILE_TYPE.MUG, position: { row, column } })
+    grid.setTile(null, row, column)
   }
 }
 

@@ -1,4 +1,4 @@
-import type { ObjectiveType } from '@/enums/game'
+import type { CollectObjective } from '@/entities/Match3ObjectiveCollection'
 import type { Position } from '@/entities/Match3Engine'
 import type { Tile } from '@/types/game'
 import type TileGrid from '@/entities/TileGrid'
@@ -7,14 +7,13 @@ import { isBoosterType } from '@/entities/Match3BoosterEffects'
 import { isMatchableTile } from '@/entities/Match3SpecialTileConfig'
 import { SPECIAL_TILE_TYPE, TILE_TYPE } from '@/enums/game'
 
-type IncrementCounter = (type: ObjectiveType) => void
 type HitMode = 'match' | 'effect'
 type HitContext = {
   grid: TileGrid
   width: number
   height: number
   adjacentCookies: Set<Tile>
-  incrementCounter: IncrementCounter
+  collectObjective: CollectObjective
   mode: HitMode
 }
 
@@ -23,9 +22,9 @@ export const clearMatchedPositions = (
   positions: Position[],
   width: number,
   height: number,
-  incrementCounter: IncrementCounter
+  collectObjective: CollectObjective
 ): void => {
-  applyHitPositions(grid, positions, width, height, incrementCounter, 'match')
+  applyHitPositions(grid, positions, width, height, collectObjective, 'match')
 }
 
 export const applyBoosterEffectPositions = (
@@ -33,9 +32,9 @@ export const applyBoosterEffectPositions = (
   positions: Position[],
   width: number,
   height: number,
-  incrementCounter: IncrementCounter
+  collectObjective: CollectObjective
 ): void => {
-  applyHitPositions(grid, positions, width, height, incrementCounter, 'effect')
+  applyHitPositions(grid, positions, width, height, collectObjective, 'effect')
 }
 
 const applyHitPositions = (
@@ -43,19 +42,18 @@ const applyHitPositions = (
   positions: Position[],
   width: number,
   height: number,
-  incrementCounter: IncrementCounter,
+  collectObjective: CollectObjective,
   mode: HitMode
 ): void => {
   const adjacentCookies = new Set<Tile>()
-  const context = { grid, width, height, adjacentCookies, incrementCounter, mode }
+  const context = { grid, width, height, adjacentCookies, collectObjective, mode }
 
   positions.forEach(position => hitPosition(context, position))
-  adjacentCookies.forEach(tile => damageCookie(grid, tile, incrementCounter))
+  adjacentCookies.forEach(tile => damageCookie(grid, tile, collectObjective))
 }
 
 const hitPosition = (context: HitContext, { row, column }: Position): void => {
   const tile = context.grid.getTileByIndex(row, column)
-
   if (tile === null) {
     return
   }
@@ -63,11 +61,23 @@ const hitPosition = (context: HitContext, { row, column }: Position): void => {
   tile.selected = false
 
   if (tile.blocker) {
-    damagePackage(tile, context.incrementCounter)
-  } else if (isMatchableTile(tile)) {
+    damagePackage(tile, { row, column }, context.collectObjective)
+    return
+  }
+
+  if (isMatchableTile(tile)) {
     clearOrdinaryTile(context, tile, { row, column })
-  } else if (context.mode === 'effect') {
-    hitSpecialTile(context, tile, { row, column })
+    return
+  }
+
+  hitNonMatchableTile(context, tile, { row, column })
+}
+
+const hitNonMatchableTile = (context: HitContext, tile: Tile, position: Position): void => {
+  if (context.mode === 'effect') {
+    hitSpecialTile(context, tile, position)
+  } else if (isBoosterType(tile.type)) {
+    collectAdjacentCookies(context, position)
   }
 }
 
@@ -77,7 +87,7 @@ const clearOrdinaryTile = (
   position: Position
 ): void => {
   collectAdjacentCookies(context, position)
-  context.incrementCounter(tile.type)
+  context.collectObjective({ tileId: tile.id, type: tile.type, position })
   context.grid.setTile(null, position.row, position.column)
 }
 
@@ -99,7 +109,11 @@ const collectAdjacentCookies = (context: HitContext, { row, column }: Position):
   })
 }
 
-const damagePackage = (tile: Tile, incrementCounter: IncrementCounter): void => {
+const damagePackage = (
+  tile: Tile,
+  position: Position,
+  collectObjective: CollectObjective
+): void => {
   if (tile.blocker === undefined) {
     return
   }
@@ -108,11 +122,11 @@ const damagePackage = (tile: Tile, incrementCounter: IncrementCounter): void => 
 
   if (tile.blocker.health <= 0) {
     tile.blocker = undefined
-    incrementCounter(SPECIAL_TILE_TYPE.PACKAGE)
+    collectObjective({ tileId: tile.id, type: SPECIAL_TILE_TYPE.PACKAGE, position })
   }
 }
 
-const damageCookie = (grid: TileGrid, tile: Tile, incrementCounter: IncrementCounter): void => {
+const damageCookie = (grid: TileGrid, tile: Tile, collectObjective: CollectObjective): void => {
   if (tile.type !== SPECIAL_TILE_TYPE.COOKIE || tile.health === undefined) {
     return
   }
@@ -120,16 +134,22 @@ const damageCookie = (grid: TileGrid, tile: Tile, incrementCounter: IncrementCou
   tile.health--
 
   if (tile.health <= 0) {
-    removeCookie(grid, tile, incrementCounter)
+    removeCookie(grid, tile, collectObjective)
   }
 }
 
-const removeCookie = (grid: TileGrid, tile: Tile, incrementCounter: IncrementCounter): void => {
+const removeCookie = (grid: TileGrid, tile: Tile, collectObjective: CollectObjective): void => {
   const index = grid.indexOf(tile)
 
   if (index !== null) {
-    incrementCounter(SPECIAL_TILE_TYPE.COOKIE)
-    grid.setTile(null, index[0], index[1])
+    const [row, column] = index
+
+    collectObjective({
+      tileId: tile.id,
+      type: SPECIAL_TILE_TYPE.COOKIE,
+      position: { row, column },
+    })
+    grid.setTile(null, row, column)
   }
 }
 

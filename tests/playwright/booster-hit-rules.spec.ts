@@ -1,6 +1,7 @@
 import type { Counter, Tile } from '@/types/game'
 
-import type { BoardTileType, ObjectiveType } from '@/enums/game'
+import type { BoardTileType } from '@/enums/game'
+import type { ObjectiveCollection } from '@/entities/Match3ObjectiveCollection'
 
 import { expect, test } from '@playwright/test'
 
@@ -24,7 +25,7 @@ test('effect wave applies blockers, cookies, counters and boosters once', () => 
   const cookie = createTile(3, SPECIAL_TILE_TYPE.COOKIE, 1, 1)
   const booster = createTile(4, BOOSTER_TYPE.AREA_KETTLE, 0, 2)
   const counters: Counter[] = []
-  const incrementCounter = (type: ObjectiveType) => {
+  const collectObjective = ({ type }: ObjectiveCollection) => {
     const counter = counters.find(item => item.type === type)
 
     if (counter === undefined) {
@@ -46,7 +47,7 @@ test('effect wave applies blockers, cookies, counters and boosters once', () => 
     { row: 0, column: 1 },
     { row: 1, column: 1 },
     { row: 0, column: 2 },
-  ], 4, 2, incrementCounter)
+  ], 4, 2, collectObjective)
 
   expect(grid.getTileByIndex(0, 0)).toBe(packaged)
   expect(packaged.blocker).toBeUndefined()

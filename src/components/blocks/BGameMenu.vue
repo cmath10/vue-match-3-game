@@ -28,6 +28,7 @@
                 v-for="(objective, index) in objectivesComputed"
                 :key="index"
                 :class="{ 'b-game-menu__objective--completed': objective.completed }"
+                :data-objective-type="objective.type"
                 class="b-game-menu__objective"
             >
                 <span class="b-game-menu__objective-tile">

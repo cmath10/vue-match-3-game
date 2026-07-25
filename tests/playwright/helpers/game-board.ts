@@ -118,15 +118,23 @@ const getMoveCandidates = (tiles: TileSnapshot[]): Move[] => {
 }
 
 const getMoveResult = (board: Board<string>, move: Move) => {
-  const swappedBoard = board.map(row => [...row])
+  const swappedBoard = getSwappedBoard(board, move)
   const from = { row: move.from.row, column: move.from.column }
   const to = { row: move.to.row, column: move.to.column }
+
+  return getMoveMatch(swappedBoard, to, from)
+}
+
+const getSwappedBoard = (board: Board<string>, move: Move): Board<string> => {
+  const swappedBoard = board.map(row => [...row])
+  const from = move.from
+  const to = move.to
   const type = swappedBoard[from.row][from.column]
 
   swappedBoard[from.row][from.column] = swappedBoard[to.row][to.column]
   swappedBoard[to.row][to.column] = type
 
-  return getMoveMatch(swappedBoard, to, from)
+  return swappedBoard
 }
 
 export const findValidMove = (tiles: TileSnapshot[]): Move => {
@@ -135,6 +143,23 @@ export const findValidMove = (tiles: TileSnapshot[]): Move => {
 
   if (move === undefined) {
     throw new Error('Cannot find a valid move on the seeded board')
+  }
+
+  return move
+}
+
+export const findValidMoveForType = (tiles: TileSnapshot[], type: string): Move => {
+  const board = getBoard(tiles)
+  const move = getMoveCandidates(tiles).find((candidate) => {
+    const swappedBoard = getSwappedBoard(board, candidate)
+
+    return getMoveResult(board, candidate).positions.some(position => (
+      swappedBoard[position.row][position.column] === type
+    ))
+  })
+
+  if (move === undefined) {
+    throw new Error(`Cannot find a valid move for ${type} on the seeded board`)
   }
 
   return move

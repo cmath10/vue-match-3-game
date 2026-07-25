@@ -65,6 +65,8 @@
                 </div>
             </footer>
         </main>
+
+        <b-game-objective-flights :flights="objectiveFlights" />
     </div>
 </template>
 
@@ -94,14 +96,16 @@ import { useI18n } from 'vue-i18n'
 import BGameBoosterEffects from '@/components/blocks/BGameBoosterEffects.vue'
 import BGameButtonFlights from '@/components/blocks/BGameButtonFlights.vue'
 import BGameMenu from '@/components/blocks/BGameMenu.vue'
+import BGameObjectiveFlights from '@/components/blocks/BGameObjectiveFlights.vue'
 import BGameResultOverlay from '@/components/blocks/BGameResultOverlay.vue'
 import BGameTile from '@/components/blocks/BGameTile.vue'
 
 import { useMatch3BoosterAnimation } from '@/composables/useMatch3BoosterAnimation'
+import { useMatch3ObjectiveCollection } from '@/composables/useMatch3ObjectiveCollection'
 
 import { applyBoosterEffectPositions } from '@/entities/Match3BoardHits'
 import { BOARD_HEIGHT, BOARD_WIDTH } from '@/entities/Match3BoardConfig'
-import { preserveCreatedBoosters } from '@/entities/Match3BoardBoosters'
+import { placeCreatedBoosters } from '@/entities/Match3BoardBoosters'
 
 import { AVAILABLE_TILE_TYPES } from '@/entities/Match3SpecialTiles'
 
@@ -204,6 +208,20 @@ const incrementCounter = (type: ObjectiveType) => {
   }
 }
 
+const {
+  flights: objectiveFlights,
+  animatePending: animateObjectiveCollections,
+  cancel: cancelObjectiveCollection,
+  collect: collectObjective,
+} = useMatch3ObjectiveCollection({
+  objectives,
+  counters,
+  boardWidth: BOARD_WIDTH,
+  incrementCounter,
+  waitAnimation,
+  nextAnimationFrame,
+})
+
 const spawnTile = (i: number, j: number, spawnRow: number): Tile => {
   const tile = createTile(generateType(i, j), spawnRow, j)
 
@@ -238,10 +256,9 @@ const updateGrid = async (
   matchedPositions: Position[],
   boosters: MoveMatch['boosters']
 ) => {
-  const positionsToClear = preserveCreatedBoosters(grid, matchedPositions, boosters)
-
-  if (positionsToClear.length > 0) {
-    await settleGrid(version, resolveMatchedPositions(positionsToClear))
+  if (matchedPositions.length > 0) {
+    placeCreatedBoosters(grid, boosters)
+    await settleGrid(version, resolveMatchedPositions(matchedPositions))
   }
 }
 
@@ -249,7 +266,7 @@ const settleGrid = async (version: number, initialMovements: TileMovement[]) => 
   let movements = initialMovements
 
   while (true) {
-    await waitAnimation()
+    await Promise.all([waitAnimation(), animateObjectiveCollections()])
 
     if (version !== gameVersion.value) {
       return
@@ -268,24 +285,27 @@ const settleGrid = async (version: number, initialMovements: TileMovement[]) => 
 const getCascadePositions = (movements: TileMovement[]): Position[] => {
   const lines = findMatchLines(getTileTypeBoard())
   const boosters = getCascadeBoosterCreations(lines, movements)
+  const positions = getMatchPositions(lines)
 
-  return preserveCreatedBoosters(grid, getMatchPositions(lines), boosters)
+  placeCreatedBoosters(grid, boosters)
+
+  return positions
 }
 
 const resolveMatchedPositions = (positions: Position[]): TileMovement[] => {
-  clearMatchedPositions(grid, positions, BOARD_WIDTH, BOARD_HEIGHT, incrementCounter)
+  clearMatchedPositions(grid, positions, BOARD_WIDTH, BOARD_HEIGHT, collectObjective)
   return transitionGrid()
 }
 
 const resolveBoosterPositions = (positions: Position[]): TileMovement[] => {
-  applyBoosterEffectPositions(grid, positions, BOARD_WIDTH, BOARD_HEIGHT, incrementCounter)
+  applyBoosterEffectPositions(grid, positions, BOARD_WIDTH, BOARD_HEIGHT, collectObjective)
   return transitionGrid()
 }
 
 const transitionGrid = (): TileMovement[] => {
   const movements = collapseGrid(grid)
 
-  collectDroppedMugs(grid, BOARD_WIDTH, BOARD_HEIGHT, incrementCounter)
+  collectDroppedMugs(grid, BOARD_WIDTH, BOARD_HEIGHT, collectObjective)
   movements.push(...collapseGrid(grid, movements.length))
   movements.push(...refillGrid(grid, BOARD_WIDTH, BOARD_HEIGHT, spawnTile, movements.length))
 
@@ -387,6 +407,7 @@ const startNewGame = () => {
   evaluating.value = false
   gameResult.value = null
   turns.value = COUNT_TURNS
+  cancelObjectiveCollection()
   objectives.splice(0)
   counters.splice(0)
   cancelBoosterAnimation()
