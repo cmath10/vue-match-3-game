@@ -1,11 +1,11 @@
 import type { Page } from '@playwright/test'
 
-import type { Board } from '@/entities/Match3Engine'
+import type { Board } from '@/domain/types'
 
-import { BOARD_HEIGHT, BOARD_WIDTH } from '@/entities/Match3BoardConfig'
-import { getMoveMatch } from '@/entities/Match3BoosterRules'
+import { BOARD_HEIGHT, BOARD_WIDTH } from '@/entities/BoardConfig'
+import { getMoveMatch } from '@/entities/BoosterRules'
 
-import { BOOSTER_TYPE, TILE_TYPE } from '@/enums/game'
+import { BoosterType, TileType } from '@/domain/enums'
 
 export type TileSnapshot = {
   id: string
@@ -26,7 +26,7 @@ export type Move = {
 
 export { BOARD_HEIGHT, BOARD_WIDTH }
 
-const MATCHABLE_TILE_TYPES = new Set<string>(Object.values(TILE_TYPE))
+const MATCHABLE_TILE_TYPES = new Set<string>(Object.values(TileType))
 
 export const seedMathRandom = async (page: Page, initialSeed = 42) => {
   await page.addInitScript((seedValue) => {
@@ -179,7 +179,7 @@ export const findVerticalValidMove = (tiles: TileSnapshot[]): Move => {
   return move
 }
 
-export const findBoosterMove = (tiles: TileSnapshot[], type: BOOSTER_TYPE): Move | null => {
+export const findBoosterMove = (tiles: TileSnapshot[], type: BoosterType): Move | null => {
   const board = getBoard(tiles)
 
   return getMoveCandidates(tiles).find(candidate => (

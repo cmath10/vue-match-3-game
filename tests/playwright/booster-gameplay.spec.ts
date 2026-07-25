@@ -4,7 +4,7 @@ import type { TileSnapshot } from './helpers/game-board'
 
 import { expect, test } from '@playwright/test'
 
-import { BOOSTER_TYPE, TILE_TYPE } from '@/enums/game'
+import { BoosterType, TileType } from '@/domain/enums'
 
 import {
   BOARD_HEIGHT,
@@ -19,18 +19,18 @@ import {
 } from './helpers/game-board'
 
 type BoosterScenario = {
-  type: BOOSTER_TYPE
+  type: BoosterType
   seed: number
 }
 
 const boosterScenarios: BoosterScenario[] = [
-  { type: BOOSTER_TYPE.BUTTON_BOX, seed: 4 },
-  { type: BOOSTER_TYPE.COLUMN_FIRECRACKER, seed: 5 },
-  { type: BOOSTER_TYPE.ROW_FIRECRACKER, seed: 2 },
-  { type: BOOSTER_TYPE.AREA_KETTLE, seed: 8 },
+  { type: BoosterType.ButtonBox, seed: 4 },
+  { type: BoosterType.ColumnFirecracker, seed: 5 },
+  { type: BoosterType.RowFirecracker, seed: 2 },
+  { type: BoosterType.AreaKettle, seed: 8 },
 ]
 const buttonBoxScenario = boosterScenarios[0]
-const geometricBoosterScenarios = boosterScenarios.filter(scenario => scenario.type !== BOOSTER_TYPE.BUTTON_BOX)
+const geometricBoosterScenarios = boosterScenarios.filter(scenario => scenario.type !== BoosterType.ButtonBox)
 
 const startBoosterScenario = async (
   page: Page,
@@ -64,7 +64,7 @@ for (const scenario of boosterScenarios) {
 
     await booster.dblclick()
 
-    if (scenario.type === BOOSTER_TYPE.BUTTON_BOX) {
+    if (scenario.type === BoosterType.ButtonBox) {
       await expect(page.locator('.b-game-button').first()).toBeVisible()
     } else {
       await expect(page.locator(`.b-game-booster-effect--${scenario.type}`)).toBeVisible()
@@ -79,7 +79,7 @@ for (const scenario of boosterScenarios) {
 }
 
 for (const scenario of boosterScenarios.filter(({ type }) => (
-  type === BOOSTER_TYPE.ROW_FIRECRACKER || type === BOOSTER_TYPE.COLUMN_FIRECRACKER
+  type === BoosterType.RowFirecracker || type === BoosterType.ColumnFirecracker
 ))) {
   test(`${scenario.type} animation starts at the activated tile`, async ({ page }) => {
     const booster = await startBoosterScenario(page, scenario)
@@ -111,7 +111,7 @@ for (const scenario of boosterScenarios.filter(({ type }) => (
       y: boosterBox!.y + boosterBox!.height / 2,
     }
 
-    if (scenario.type === BOOSTER_TYPE.ROW_FIRECRACKER) {
+    if (scenario.type === BoosterType.RowFirecracker) {
       expect(origin.x).toBeCloseTo(expected.x, 0)
     } else {
       expect(origin.y).toBeCloseTo(expected.y, 0)
@@ -142,7 +142,7 @@ for (const scenario of geometricBoosterScenarios) {
 }
 
 test('adjacent click fallback activates a firecracker instead of reverting its swap', async ({ page }) => {
-  const scenario = geometricBoosterScenarios.find(item => item.type === BOOSTER_TYPE.ROW_FIRECRACKER)!
+  const scenario = geometricBoosterScenarios.find(item => item.type === BoosterType.RowFirecracker)!
   const booster = await startBoosterScenario(page, scenario)
   const tiles = await getTiles(page)
   const boosterId = await booster.getAttribute('data-tile-id')
@@ -163,7 +163,7 @@ test('adjacent click fallback activates a firecracker instead of reverting its s
 })
 
 test('directional mouse drag activates a firecracker before reaching the target tile', async ({ page }) => {
-  const scenario = geometricBoosterScenarios.find(item => item.type === BOOSTER_TYPE.ROW_FIRECRACKER)!
+  const scenario = geometricBoosterScenarios.find(item => item.type === BoosterType.RowFirecracker)!
   const booster = await startBoosterScenario(page, scenario)
   const tiles = await getTiles(page)
   const boosterId = await booster.getAttribute('data-tile-id')
@@ -246,7 +246,7 @@ test('starting a new game cancels a geometric booster effect', async ({ page }) 
   const booster = await startBoosterScenario(page, kettleScenario)
 
   await booster.dblclick()
-  await expect(page.locator(`.b-game-booster-effect--${BOOSTER_TYPE.AREA_KETTLE}`)).toBeVisible()
+  await expect(page.locator(`.b-game-booster-effect--${BoosterType.AreaKettle}`)).toBeVisible()
   await page.getByRole('button', { name: 'New game' }).click()
 
   await expect(page.locator('.b-game-booster-effect')).toHaveCount(0)
@@ -261,7 +261,7 @@ const findOrdinaryNeighbor = (
   tiles: TileSnapshot[],
   source: TileSnapshot
 ): TileSnapshot | null => {
-  const ordinaryTypes = new Set<string>(Object.values(TILE_TYPE))
+  const ordinaryTypes = new Set<string>(Object.values(TileType))
 
   return tiles.find(tile => (
     !tile.blocked &&

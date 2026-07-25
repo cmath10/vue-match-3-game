@@ -1,13 +1,11 @@
-import type { BoosterWave } from '@/entities/Match3BoosterWave'
-
-import type { Tile } from '@/types/game'
+import type { BoosterWave, Tile } from '@/domain/types'
 
 import { expect, test } from '@playwright/test'
 
-import { getButtonFlights } from '@/composables/useMatch3ButtonCollection'
+import { getButtonFlights } from '@/composables/useButtonCollection'
 import TileGrid from '@/entities/TileGrid'
 
-import { BOOSTER_TYPE, SPECIAL_TILE_TYPE, TILE_TYPE } from '@/enums/game'
+import { BoosterType, SpecialTileType, TileType } from '@/domain/enums'
 
 const createTile = (id: number, type: Tile['type'], row: number, column: number): Tile => ({
   id,
@@ -19,10 +17,10 @@ const createTile = (id: number, type: Tile['type'], row: number, column: number)
 
 test('button flights include only ordinary tiles actually collected by the box', () => {
   const grid = new TileGrid(4, 2)
-  const box = createTile(1, BOOSTER_TYPE.BUTTON_BOX, 0, 0)
-  const collectable = createTile(2, TILE_TYPE.SWEETS_FISH, 0, 1)
-  const packaged = createTile(3, TILE_TYPE.SWEETS_FISH, 0, 2)
-  const cookie = createTile(4, SPECIAL_TILE_TYPE.COOKIE, 0, 3)
+  const box = createTile(1, BoosterType.ButtonBox, 0, 0)
+  const collectable = createTile(2, TileType.SweetsFish, 0, 1)
+  const packaged = createTile(3, TileType.SweetsFish, 0, 2)
+  const cookie = createTile(4, SpecialTileType.Cookie, 0, 3)
   const wave: BoosterWave = {
     effects: [{
       source: { row: 0, column: 0 },
@@ -31,8 +29,8 @@ test('button flights include only ordinary tiles actually collected by the box',
         { row: 0, column: 1 },
         { row: 0, column: 2 },
       ],
-      booster: BOOSTER_TYPE.BUTTON_BOX,
-      targetType: TILE_TYPE.SWEETS_FISH,
+      booster: BoosterType.ButtonBox,
+      targetType: TileType.SweetsFish,
     }],
     positions: [
       { row: 0, column: 0 },
@@ -41,7 +39,7 @@ test('button flights include only ordinary tiles actually collected by the box',
     ],
   }
 
-  packaged.blocker = { type: SPECIAL_TILE_TYPE.PACKAGE, health: 1 }
+  packaged.blocker = { type: SpecialTileType.Package, health: 1 }
   cookie.health = 3
   grid.setTile(box, 0, 0)
   grid.setTile(collectable, 0, 1)
@@ -51,7 +49,7 @@ test('button flights include only ordinary tiles actually collected by the box',
   expect(getButtonFlights(grid, wave)).toEqual([{
     id: '0-0-2',
     tileId: 2,
-    type: TILE_TYPE.SWEETS_FISH,
+    type: TileType.SweetsFish,
     from: { row: 0, column: 1 },
     to: { row: 0, column: 0 },
     active: false,
@@ -62,11 +60,11 @@ test('each ordinary tile type has its corresponding button asset', async ({ page
   await page.goto('/')
 
   const buttonAssets = [
-    [TILE_TYPE.SWEETS_BARBARIS, 'tile-button-barbaris'],
-    [TILE_TYPE.SWEETS_FISH, 'tile-button-fish'],
-    [TILE_TYPE.SWEETS_ROOSTER, 'tile-button-rooster'],
-    [TILE_TYPE.SWEETS_PILLOW, 'tile-button-pillow'],
-    [TILE_TYPE.SWEETS_BIRD, 'tile-button-bird'],
+    [TileType.SweetsBarbaris, 'tile-button-barbaris'],
+    [TileType.SweetsFish, 'tile-button-fish'],
+    [TileType.SweetsRooster, 'tile-button-rooster'],
+    [TileType.SweetsPillow, 'tile-button-pillow'],
+    [TileType.SweetsBird, 'tile-button-bird'],
   ] as const
 
   await page.evaluate((types) => {

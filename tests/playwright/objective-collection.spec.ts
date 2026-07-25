@@ -2,9 +2,9 @@ import type { Locator } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
-import { isAnimatedObjectiveType } from '@/composables/useMatch3ObjectiveCollection'
+import { isAnimatedObjectiveType } from '@/composables/useObjectiveCollection'
 
-import { SPECIAL_TILE_TYPE, TILE_TYPE } from '@/enums/game'
+import { SpecialTileType, TileType } from '@/domain/enums'
 
 import {
   BOARD_WIDTH,
@@ -31,7 +31,7 @@ test('ordinary objective tiles reach the counter before it changes', async ({ pa
   await page.goto('/')
 
   const objectiveType = (await getObjectiveTypes(page))
-    .find(type => Object.values(TILE_TYPE).includes(type as TILE_TYPE))
+    .find(type => Object.values(TileType).includes(type as TileType))
 
   expect(objectiveType).toBeDefined()
 
@@ -52,17 +52,17 @@ test('ordinary objective tiles reach the counter before it changes', async ({ pa
 })
 
 test('only ordinary tiles and mugs use objective flights', () => {
-  Object.values(TILE_TYPE).forEach(type => expect(isAnimatedObjectiveType(type)).toBe(true))
-  expect(isAnimatedObjectiveType(SPECIAL_TILE_TYPE.MUG)).toBe(true)
-  expect(isAnimatedObjectiveType(SPECIAL_TILE_TYPE.COOKIE)).toBe(false)
-  expect(isAnimatedObjectiveType(SPECIAL_TILE_TYPE.PACKAGE)).toBe(false)
+  Object.values(TileType).forEach(type => expect(isAnimatedObjectiveType(type)).toBe(true))
+  expect(isAnimatedObjectiveType(SpecialTileType.Mug)).toBe(true)
+  expect(isAnimatedObjectiveType(SpecialTileType.Cookie)).toBe(false)
+  expect(isAnimatedObjectiveType(SpecialTileType.Package)).toBe(false)
 })
 
 test('mug drops past the board edge before flying to its counter', async ({ page }) => {
   await page.goto('/')
 
   const result = await page.evaluate(async ({ boardWidth, modulePath, mugType }) => {
-    const { useMatch3ObjectiveCollection } = await import(modulePath)
+    const { useObjectiveCollection } = await import(modulePath)
     const delay = (milliseconds: number) => new Promise(resolve => setTimeout(resolve, milliseconds))
     const target = document.createElement('div')
     const targetTile = document.createElement('span')
@@ -74,7 +74,7 @@ test('mug drops past the board edge before flying to its counter', async ({ page
     target.append(targetTile)
     document.body.append(target)
 
-    const collection = useMatch3ObjectiveCollection({
+    const collection = useObjectiveCollection({
       objectives: [{ type: mugType, count: 1 }],
       counters,
       boardWidth,
@@ -114,8 +114,8 @@ test('mug drops past the board edge before flying to its counter', async ({ page
     }
   }, {
     boardWidth: BOARD_WIDTH,
-    modulePath: '/src/composables/useMatch3ObjectiveCollection.ts',
-    mugType: SPECIAL_TILE_TYPE.MUG,
+    modulePath: '/src/composables/useObjectiveCollection.ts',
+    mugType: SpecialTileType.Mug,
   })
 
   expect(result.duringDrop).toEqual({

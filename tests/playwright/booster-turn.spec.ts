@@ -1,13 +1,11 @@
-import type { Position } from '@/entities/Match3Engine'
-
-import type { Tile } from '@/types/game'
+import type { Position, Tile } from '@/domain/types'
 
 import { expect, test } from '@playwright/test'
 
-import { createMatch3BoosterTurn } from '@/entities/Match3BoosterTurn'
+import { createMatch3BoosterTurn } from '@/entities/BoosterTurn'
 import TileGrid from '@/entities/TileGrid'
 
-import { BOOSTER_TYPE, TILE_TYPE } from '@/enums/game'
+import { BoosterType, TileType } from '@/domain/enums'
 
 const createTile = (id: number, type: Tile['type'], column: number): Tile => ({
   id,
@@ -19,16 +17,16 @@ const createTile = (id: number, type: Tile['type'], column: number): Tile => ({
 
 test('direct activation resolves a complete chain as one turn', async () => {
   const grid = new TileGrid(3, 2)
-  const rowFirecracker = createTile(1, BOOSTER_TYPE.ROW_FIRECRACKER, 0)
-  const columnFirecracker = createTile(2, BOOSTER_TYPE.COLUMN_FIRECRACKER, 2)
+  const rowFirecracker = createTile(1, BoosterType.RowFirecracker, 0)
+  const columnFirecracker = createTile(2, BoosterType.ColumnFirecracker, 2)
   const resolvedPositions: Position[][] = []
   let evaluating = false
   let finishedTurns = 0
 
   grid.setTile(rowFirecracker, 0, 0)
-  grid.setTile(createTile(3, TILE_TYPE.SWEETS_FISH, 1), 0, 1)
+  grid.setTile(createTile(3, TileType.SweetsFish, 1), 0, 1)
   grid.setTile(columnFirecracker, 0, 2)
-  grid.setTile(createTile(4, TILE_TYPE.SWEETS_BIRD, 2), 1, 2)
+  grid.setTile(createTile(4, TileType.SweetsBird, 2), 1, 2)
 
   const turn = createMatch3BoosterTurn({
     grid,
@@ -65,15 +63,15 @@ test('direct activation resolves a complete chain as one turn', async () => {
 
 test('swiping two identical boosters swaps and activates both in one turn', async () => {
   const grid = new TileGrid(3, 3)
-  const firstKettle = createTile(1, BOOSTER_TYPE.AREA_KETTLE, 0)
-  const secondKettle = createTile(2, BOOSTER_TYPE.AREA_KETTLE, 1)
+  const firstKettle = createTile(1, BoosterType.AreaKettle, 0)
+  const secondKettle = createTile(2, BoosterType.AreaKettle, 1)
   const resolvedPositions: Position[][] = []
   let effectCount = 0
   let finishedTurns = 0
 
   grid.setTile(firstKettle, 1, 0)
   grid.setTile(secondKettle, 1, 1)
-  grid.setTile(createTile(3, TILE_TYPE.SWEETS_FISH, 2), 1, 2)
+  grid.setTile(createTile(3, TileType.SweetsFish, 2), 1, 2)
 
   const turn = createMatch3BoosterTurn({
     grid,

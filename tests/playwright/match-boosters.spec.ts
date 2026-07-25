@@ -1,4 +1,4 @@
-import type { Board, Position } from '@/entities/Match3Engine'
+import type { Board, Position } from '@/domain/types'
 
 import { expect, test } from '@playwright/test'
 
@@ -6,10 +6,10 @@ import {
   getBoosterCreation,
   getCascadeBoosterCreations,
   getMoveMatch,
-} from '@/entities/Match3BoosterRules'
+} from '@/entities/BoosterRules'
 
-import { BOOSTER_TYPE } from '@/enums/game'
-import { findMatchLines } from '@/entities/Match3Matches'
+import { BoosterType } from '@/domain/enums'
+import { findMatchLines } from '@/entities/Matches'
 
 const parseBoard = (rows: string[]): Board<string> => {
   return rows.map(row => [...row].map(tile => tile === '.' ? null : tile))
@@ -44,7 +44,7 @@ test('four tiles create a firecracker opposite to match orientation', () => {
     '.AAAA',
     '.....',
   ], { row: 1, column: 3 })).toEqual({
-    type: BOOSTER_TYPE.COLUMN_FIRECRACKER,
+    type: BoosterType.ColumnFirecracker,
     position: { row: 1, column: 3 },
   })
 
@@ -54,7 +54,7 @@ test('four tiles create a firecracker opposite to match orientation', () => {
     '..A..',
     '..A..',
   ], { row: 2, column: 2 })).toEqual({
-    type: BOOSTER_TYPE.ROW_FIRECRACKER,
+    type: BoosterType.RowFirecracker,
     position: { row: 2, column: 2 },
   })
 })
@@ -65,7 +65,7 @@ test('five tiles create a button box', () => {
     'AAAAA',
     '.....',
   ], { row: 1, column: 4 })).toEqual({
-    type: BOOSTER_TYPE.BUTTON_BOX,
+    type: BoosterType.ButtonBox,
     position: { row: 1, column: 4 },
   })
 
@@ -76,7 +76,7 @@ test('five tiles create a button box', () => {
     '..A..',
     '..A..',
   ], { row: 4, column: 2 })).toEqual({
-    type: BOOSTER_TYPE.BUTTON_BOX,
+    type: BoosterType.ButtonBox,
     position: { row: 4, column: 2 },
   })
 })
@@ -87,7 +87,7 @@ test('intersecting T and L matches create an area kettle', () => {
     'AAA..',
     '.A...',
   ], { row: 1, column: 2 })).toEqual({
-    type: BOOSTER_TYPE.AREA_KETTLE,
+    type: BoosterType.AreaKettle,
     position: { row: 1, column: 2 },
   })
 
@@ -96,7 +96,7 @@ test('intersecting T and L matches create an area kettle', () => {
     'A....',
     'AAA..',
   ], { row: 2, column: 2 })).toEqual({
-    type: BOOSTER_TYPE.AREA_KETTLE,
+    type: BoosterType.AreaKettle,
     position: { row: 2, column: 2 },
   })
 })
@@ -118,7 +118,7 @@ test('move match includes the connected arm of a T shape', () => {
 
   expect(match.positions).toHaveLength(5)
   expect(match.boosters).toEqual([{
-    type: BOOSTER_TYPE.AREA_KETTLE,
+    type: BoosterType.AreaKettle,
     position: { row: 1, column: 2 },
   }])
 })
@@ -133,7 +133,7 @@ test('move creates a kettle from an asymmetric T at the swap origin', () => {
 
   expect(match.positions).toHaveLength(6)
   expect(match.boosters).toEqual([{
-    type: BOOSTER_TYPE.AREA_KETTLE,
+    type: BoosterType.AreaKettle,
     position: { row: 3, column: 2 },
   }])
 })
@@ -150,7 +150,7 @@ test('move creates a box from a vertical five at the swap origin', () => {
 
   expect(match.positions).toHaveLength(5)
   expect(match.boosters).toEqual([{
-    type: BOOSTER_TYPE.BUTTON_BOX,
+    type: BoosterType.ButtonBox,
     position: { row: 5, column: 2 },
   }])
 })
@@ -167,7 +167,7 @@ test('cascade creates a booster at the last causal movement destination', () => 
   ])
 
   expect(boosters).toEqual([{
-    type: BOOSTER_TYPE.COLUMN_FIRECRACKER,
+    type: BoosterType.ColumnFirecracker,
     position: { row: 1, column: 3 },
   }])
 })

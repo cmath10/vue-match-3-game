@@ -1,23 +1,23 @@
 import { expect, test } from '@playwright/test'
 
-import { generateObjectives } from '@/entities/Match3Objectives'
-import { TILE_TYPE } from '@/enums/game'
+import { generateObjectives } from '@/entities/Objectives'
+import { TileType } from '@/domain/enums'
 
-const repeatType = (type: TILE_TYPE, count: number): TILE_TYPE[] => Array(count).fill(type)
+const repeatType = (type: TileType, count: number): TileType[] => Array(count).fill(type)
 
 test('objectives are generated from frequent starting board tile types', () => {
   const objectives = generateObjectives([
-    ...repeatType(TILE_TYPE.SWEETS_BARBARIS, 12),
-    ...repeatType(TILE_TYPE.SWEETS_FISH, 11),
-    ...repeatType(TILE_TYPE.SWEETS_ROOSTER, 10),
-    ...repeatType(TILE_TYPE.SWEETS_PILLOW, 2),
-    ...repeatType(TILE_TYPE.SWEETS_BIRD, 1),
+    ...repeatType(TileType.SweetsBarbaris, 12),
+    ...repeatType(TileType.SweetsFish, 11),
+    ...repeatType(TileType.SweetsRooster, 10),
+    ...repeatType(TileType.SweetsPillow, 2),
+    ...repeatType(TileType.SweetsBird, 1),
   ])
   const objectiveTypes = objectives.map(objective => objective.type)
   const frequentTypes = [
-    TILE_TYPE.SWEETS_BARBARIS,
-    TILE_TYPE.SWEETS_FISH,
-    TILE_TYPE.SWEETS_ROOSTER,
+    TileType.SweetsBarbaris,
+    TileType.SweetsFish,
+    TileType.SweetsRooster,
   ]
 
   expect(objectives).toHaveLength(2)

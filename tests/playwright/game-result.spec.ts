@@ -1,29 +1,29 @@
-import type { Counter, Objective } from '@/types/game'
+import type { Counter, Objective } from '@/domain/types'
 
 import { expect, test } from '@playwright/test'
 
-import { getGameResult } from '@/entities/Match3GameResult'
-import { TILE_TYPE } from '@/enums/game'
+import { getGameResult } from '@/entities/GameResult'
+import { TileType } from '@/domain/enums'
 
-const objective = (type: TILE_TYPE, count: number): Objective => ({ type, count })
-const counter = (type: TILE_TYPE, count: number): Counter => ({ type, count })
+const objective = (type: TileType, count: number): Objective => ({ type, count })
+const counter = (type: TileType, count: number): Counter => ({ type, count })
 
 test('game result is based on objectives and remaining turns', () => {
   const objectives = [
-    objective(TILE_TYPE.SWEETS_BARBARIS, 20),
-    objective(TILE_TYPE.SWEETS_FISH, 30),
+    objective(TileType.SweetsBarbaris, 20),
+    objective(TileType.SweetsFish, 30),
   ]
 
   expect(getGameResult(objectives, [
-    counter(TILE_TYPE.SWEETS_BARBARIS, 20),
-    counter(TILE_TYPE.SWEETS_FISH, 30),
+    counter(TileType.SweetsBarbaris, 20),
+    counter(TileType.SweetsFish, 30),
   ], 0)).toBe('win')
   expect(getGameResult(objectives, [
-    counter(TILE_TYPE.SWEETS_BARBARIS, 20),
-    counter(TILE_TYPE.SWEETS_FISH, 29),
+    counter(TileType.SweetsBarbaris, 20),
+    counter(TileType.SweetsFish, 29),
   ], 0)).toBe('lose')
   expect(getGameResult(objectives, [
-    counter(TILE_TYPE.SWEETS_BARBARIS, 20),
-    counter(TILE_TYPE.SWEETS_FISH, 29),
+    counter(TileType.SweetsBarbaris, 20),
+    counter(TileType.SweetsFish, 29),
   ], 1)).toBeNull()
 })

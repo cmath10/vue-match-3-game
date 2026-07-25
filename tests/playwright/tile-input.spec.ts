@@ -1,11 +1,11 @@
-import type { Tile } from '@/types/game'
+import type { Tile } from '@/domain/types'
 
 import { expect, test } from '@playwright/test'
 
-import { BOOSTER_TYPE } from '@/enums/game'
-import { createMatch3TileInput } from '@/entities/Match3TileInput'
-import { TILE_TYPE } from '@/enums/game'
+import { BoosterType } from '@/domain/enums'
+import { createMatch3TileInput } from '@/entities/TileInput'
 import TileGrid from '@/entities/TileGrid'
+import { TileType } from '@/domain/enums'
 
 const createTile = (id: number, type: Tile['type'], column: number): Tile => ({
   id,
@@ -17,8 +17,8 @@ const createTile = (id: number, type: Tile['type'], column: number): Tile => ({
 
 test('pointer gesture emits one booster swipe and suppresses its trailing click', () => {
   const grid = new TileGrid(2, 1)
-  const booster = createTile(1, BOOSTER_TYPE.BUTTON_BOX, 0)
-  const ordinary = createTile(2, TILE_TYPE.SWEETS_FISH, 1)
+  const booster = createTile(1, BoosterType.ButtonBox, 0)
+  const ordinary = createTile(2, TileType.SweetsFish, 1)
   const swipes: Array<[Tile, Tile]> = []
   let moves = 0
 
@@ -46,8 +46,8 @@ test('pointer gesture emits one booster swipe and suppresses its trailing click'
 
 test('pointer gesture can start from a non-booster and still activates the adjacent booster', () => {
   const grid = new TileGrid(2, 1)
-  const ordinary = createTile(1, TILE_TYPE.SWEETS_FISH, 0)
-  const booster = createTile(2, BOOSTER_TYPE.AREA_KETTLE, 1)
+  const ordinary = createTile(1, TileType.SweetsFish, 0)
+  const booster = createTile(2, BoosterType.AreaKettle, 1)
   const swipes: Array<[Tile, Tile]> = []
 
   grid.setTile(ordinary, 0, 0)
@@ -71,8 +71,8 @@ test('pointer gesture can start from a non-booster and still activates the adjac
 
 test('pointer gesture between ordinary tiles emits a regular move', () => {
   const grid = new TileGrid(2, 1)
-  const source = createTile(1, TILE_TYPE.SWEETS_FISH, 0)
-  const target = createTile(2, TILE_TYPE.SWEETS_BARBARIS, 1)
+  const source = createTile(1, TileType.SweetsFish, 0)
+  const target = createTile(2, TileType.SweetsBarbaris, 1)
   const moves: Array<[Tile, Tile]> = []
 
   grid.setTile(source, 0, 0)
@@ -94,12 +94,12 @@ test('pointer gesture between ordinary tiles emits a regular move', () => {
   expect(moves).toEqual([[source, target]])
 })
 
-for (const selectedType of [BOOSTER_TYPE.ROW_FIRECRACKER, TILE_TYPE.SWEETS_BARBARIS]) {
+for (const selectedType of [BoosterType.RowFirecracker, TileType.SweetsBarbaris]) {
   test(`adjacent click fallback activates a booster when selected type is ${selectedType}`, () => {
     const grid = new TileGrid(2, 1)
-    const firecracker = createTile(1, BOOSTER_TYPE.ROW_FIRECRACKER, 0)
-    const barbaris = createTile(2, TILE_TYPE.SWEETS_BARBARIS, 1)
-    const selected = selectedType === BOOSTER_TYPE.ROW_FIRECRACKER ? firecracker : barbaris
+    const firecracker = createTile(1, BoosterType.RowFirecracker, 0)
+    const barbaris = createTile(2, TileType.SweetsBarbaris, 1)
+    const selected = selectedType === BoosterType.RowFirecracker ? firecracker : barbaris
     const clicked = selected === firecracker ? barbaris : firecracker
     const swipes: Array<[Tile, Tile]> = []
     let moves = 0

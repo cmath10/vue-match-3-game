@@ -1,13 +1,13 @@
-import type { BoosterWave } from '@/entities/Match3BoosterWave'
+import type { BoosterWave } from '@/domain/types'
 
 import { expect, test } from '@playwright/test'
 
 import {
   getBoosterVisualEffects,
   getBoosterVisualEffectStyle,
-} from '@/composables/useMatch3BoosterAnimation'
+} from '@/composables/useBoosterAnimation'
 
-import { BOOSTER_TYPE, TILE_TYPE } from '@/enums/game'
+import { BoosterType, TileType } from '@/domain/enums'
 
 test('visual effects include geometric boosters but keep button collection separate', () => {
   const wave: BoosterWave = {
@@ -15,18 +15,18 @@ test('visual effects include geometric boosters but keep button collection separ
       {
         source: { row: 2, column: 1 },
         positions: [{ row: 2, column: 1 }],
-        booster: BOOSTER_TYPE.ROW_FIRECRACKER,
+        booster: BoosterType.RowFirecracker,
       },
       {
         source: { row: 1, column: 3 },
         positions: [{ row: 1, column: 3 }],
-        booster: BOOSTER_TYPE.BUTTON_BOX,
-        targetType: TILE_TYPE.SWEETS_FISH,
+        booster: BoosterType.ButtonBox,
+        targetType: TileType.SweetsFish,
       },
       {
         source: { row: 4, column: 5 },
         positions: [{ row: 4, column: 5 }],
-        booster: BOOSTER_TYPE.AREA_KETTLE,
+        booster: BoosterType.AreaKettle,
       },
     ],
     positions: [],
@@ -35,12 +35,12 @@ test('visual effects include geometric boosters but keep button collection separ
   expect(getBoosterVisualEffects(wave)).toEqual([
     {
       id: 'booster-row-firecracker-2-1-0',
-      type: BOOSTER_TYPE.ROW_FIRECRACKER,
+      type: BoosterType.RowFirecracker,
       source: { row: 2, column: 1 },
     },
     {
       id: 'booster-area-kettle-4-5-2',
-      type: BOOSTER_TYPE.AREA_KETTLE,
+      type: BoosterType.AreaKettle,
       source: { row: 4, column: 5 },
     },
   ])
@@ -49,7 +49,7 @@ test('visual effects include geometric boosters but keep button collection separ
 test('visual effect position is expressed through board coordinates', () => {
   expect(getBoosterVisualEffectStyle({
     id: 'effect',
-    type: BOOSTER_TYPE.COLUMN_FIRECRACKER,
+    type: BoosterType.ColumnFirecracker,
     source: { row: 3, column: 7 },
   })).toEqual({
     '--effect-row': 3,

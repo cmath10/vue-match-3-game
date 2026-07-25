@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-import { BOOSTER_TYPE } from '@/enums/game'
+import { BoosterType } from '@/domain/enums'
 
 import { seedMathRandom } from './helpers/game-board'
 
@@ -79,7 +79,7 @@ test('cookies use highlighted assets when selected for a swap', async ({ page })
 test('boosters have regular and highlighted game assets', async ({ page }) => {
   await page.goto('/')
 
-  const boosterTypes = Object.values(BOOSTER_TYPE)
+  const boosterTypes = Object.values(BoosterType)
 
   await page.evaluate((types) => {
     for (const type of types) {

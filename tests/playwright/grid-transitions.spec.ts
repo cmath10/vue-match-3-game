@@ -1,14 +1,14 @@
-import type { Tile } from '@/types/game'
+import type { Tile } from '@/domain/types'
 
 import { expect, test } from '@playwright/test'
 
-import { collapseGrid, refillGrid } from '@/entities/Match3GridTransitions'
-import { TILE_TYPE } from '@/enums/game'
+import { collapseGrid, refillGrid } from '@/entities/GridTransitions'
 import TileGrid from '@/entities/TileGrid'
+import { TileType } from '@/domain/enums'
 
 const createTile = (id: number, row: number, column: number): Tile => ({
   id,
-  type: TILE_TYPE.SWEETS_BARBARIS,
+  type: TileType.SweetsBarbaris,
   selected: false,
   row,
   column,

@@ -72,21 +72,18 @@
 </template>
 
 <script lang="ts" setup>
-import type { MoveMatch } from '@/entities/Match3BoosterRules'
+import type {
+  Counter,
+  GameResult,
+  MoveMatch,
+  Objective,
+  ObjectiveCollection,
+  Position,
+  Tile,
+  TileMovement,
+} from '@/domain/types'
 
-import type { Counter, Objective, Tile } from '@/types/game'
-
-import type { BoardTileType } from '@/enums/game'
-
-import type { GameResult } from '@/entities/Match3GameResult'
-
-import type { ObjectiveCollection } from '@/entities/Match3ObjectiveCollection'
-
-import type { ObjectiveType } from '@/enums/game'
-
-import type { Position } from '@/entities/Match3Engine'
-
-import type { TileMovement } from '@/entities/Match3GridTransitions'
+import type { BoardTileType, ObjectiveType } from '@/domain/enums'
 
 import {
   computed,
@@ -96,48 +93,46 @@ import {
 } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import BGameBoosterEffects from '@/components/blocks/BGameBoosterEffects.vue'
-import BGameButtonFlights from '@/components/blocks/BGameButtonFlights.vue'
-import BGameCookieBreakEffects from '@/components/blocks/BGameCookieBreakEffects.vue'
-import BGameMenu from '@/components/blocks/BGameMenu.vue'
-import BGameObjectiveFlights from '@/components/blocks/BGameObjectiveFlights.vue'
-import BGameResultOverlay from '@/components/blocks/BGameResultOverlay.vue'
-import BGameTile from '@/components/blocks/BGameTile.vue'
+import BGameBoosterEffects from '@/components/BGameBoosterEffects.vue'
+import BGameButtonFlights from '@/components/BGameButtonFlights.vue'
+import BGameCookieBreakEffects from '@/components/BGameCookieBreakEffects.vue'
+import BGameMenu from '@/components/BGameMenu.vue'
+import BGameObjectiveFlights from '@/components/BGameObjectiveFlights.vue'
+import BGameResultOverlay from '@/components/BGameResultOverlay.vue'
+import BGameTile from '@/components/BGameTile.vue'
 
-import { useMatch3BoosterAnimation } from '@/composables/useMatch3BoosterAnimation'
-import {
-  useMatch3CookieBreakAnimation,
-} from '@/composables/useMatch3CookieBreakAnimation'
-import { useMatch3ObjectiveCollection } from '@/composables/useMatch3ObjectiveCollection'
+import { useBoosterAnimation } from '@/composables/useBoosterAnimation'
+import { useCookieBreakAnimation } from '@/composables/useCookieBreakAnimation'
+import { useObjectiveCollection } from '@/composables/useObjectiveCollection'
 
-import { applyBoosterEffectPositions } from '@/entities/Match3BoardHits'
-import { BOARD_HEIGHT, BOARD_WIDTH } from '@/entities/Match3BoardConfig'
-import { placeCreatedBoosters } from '@/entities/Match3BoardBoosters'
+import { applyBoosterEffectPositions } from '@/entities/BoardHits'
+import { BOARD_HEIGHT, BOARD_WIDTH } from '@/entities/BoardConfig'
+import { placeCreatedBoosters } from '@/entities/BoardBoosters'
 
-import { AVAILABLE_TILE_TYPES } from '@/entities/Match3SpecialTiles'
+import { AVAILABLE_TILE_TYPES } from '@/entities/SpecialTiles'
 
-import { clearMatchedPositions } from '@/entities/Match3SpecialTiles'
-import { collapseGrid } from '@/entities/Match3GridTransitions'
-import { collectDroppedMugs } from '@/entities/Match3SpecialTiles'
-import { createMatch3BoosterTurn } from '@/entities/Match3BoosterTurn'
-import { createMatch3TileInput } from '@/entities/Match3TileInput'
-import { findMatchedPositions, findMatchLines } from '@/entities/Match3Engine'
+import { clearMatchedPositions } from '@/entities/SpecialTiles'
+import { collapseGrid } from '@/entities/GridTransitions'
+import { collectDroppedMugs } from '@/entities/SpecialTiles'
+import { createMatch3BoosterTurn } from '@/entities/BoosterTurn'
+import { createMatch3TileInput } from '@/entities/TileInput'
+import { findMatchedPositions, findMatchLines } from '@/entities/Engine'
 
-import { getBoardStyle } from '@/entities/Match3TilePresentation'
-import { getCascadeBoosterCreations } from '@/entities/Match3BoosterRules'
-import { getGameResult } from '@/entities/Match3GameResult'
-import { getGridCells } from '@/entities/Match3TilePresentation'
-import { getGridTilePosition, getMatchableTileBoard } from '@/entities/Match3GridBoard'
-import { getMatchPositions } from '@/entities/Match3Engine'
-import { getMoveMatch } from '@/entities/Match3BoosterRules'
-import { getPointerTargetTile, getTileStyle } from '@/entities/Match3TilePresentation'
-import { initializeGameGoals } from '@/entities/Match3GameSetup'
+import { getBoardStyle } from '@/entities/TilePresentation'
+import { getCascadeBoosterCreations } from '@/entities/BoosterRules'
+import { getGameResult } from '@/entities/GameResult'
+import { getGridCells } from '@/entities/TilePresentation'
+import { getGridTilePosition, getMatchableTileBoard } from '@/entities/GridBoard'
+import { getMatchPositions } from '@/entities/Engine'
+import { getMoveMatch } from '@/entities/BoosterRules'
+import { getPointerTargetTile, getTileStyle } from '@/entities/TilePresentation'
+import { initializeGameGoals } from '@/entities/GameSetup'
 
-import { placeSpecialTiles } from '@/entities/Match3SpecialTiles'
+import { placeSpecialTiles } from '@/entities/SpecialTiles'
 
-import { refillGrid } from '@/entities/Match3GridTransitions'
-import { TILE_TYPE } from '@/enums/game'
+import { refillGrid } from '@/entities/GridTransitions'
 import TileGrid from '@/entities/TileGrid'
+import { TileType } from '@/domain/enums'
 
 const COUNT_TURNS = 25
 const ANIMATION_DELAY = 480
@@ -164,7 +159,7 @@ const createTile = (type: BoardTileType, row: number, column: number): Tile => (
   { id: nextTileId.value++, type, selected: false, row, column }
 )
 
-const generateType = (i: number, j: number): TILE_TYPE => random(AVAILABLE_TILE_TYPES.filter(type => !createsMatch(type, i, j)))
+const generateType = (i: number, j: number): TileType => random(AVAILABLE_TILE_TYPES.filter(type => !createsMatch(type, i, j)))
 
 const swapTiles = (a: Tile, b: Tile) => {
   const indexOfA = grid.indexOf(a)
@@ -184,11 +179,11 @@ const nextAnimationFrame = () => new Promise<void>(resolve => requestAnimationFr
 const {
   visualEffects: boosterVisualEffects, flights: buttonFlights, collectingTileIds,
   animateWave: animateBoosterWave, cancel: cancelBoosterAnimation,
-} = useMatch3BoosterAnimation({ grid, waitAnimation, nextAnimationFrame })
+} = useBoosterAnimation({ grid, waitAnimation, nextAnimationFrame })
 
 const getTileTypeBoard = () => getMatchableTileBoard(grid)
 
-const createsMatch = (type: TILE_TYPE, i: number, j: number): boolean => {
+const createsMatch = (type: TileType, i: number, j: number): boolean => {
   const board = getTileTypeBoard()
 
   board[i][j] = type
@@ -220,7 +215,7 @@ const {
   animatePending: animateObjectiveCollections,
   cancel: cancelObjectiveCollection,
   collect: collectObjective,
-} = useMatch3ObjectiveCollection({
+} = useObjectiveCollection({
   objectives,
   counters,
   boardWidth: BOARD_WIDTH,
@@ -234,7 +229,7 @@ const {
   animatePending: animateCookieBreaks,
   cancel: cancelCookieBreakAnimation,
   collect: collectCookieBreak,
-} = useMatch3CookieBreakAnimation({ waitAnimation, nextAnimationFrame })
+} = useCookieBreakAnimation({ waitAnimation, nextAnimationFrame })
 
 const collectTile = (collection: ObjectiveCollection): void => {
   collectCookieBreak(collection)

@@ -1,10 +1,6 @@
-import { Tile } from '@/types/game'
+import type { Position, Tile } from '@/domain/types'
 
-export type TilePredicate = (tile: Tile, i: number, j: number) => boolean
-export type TilePosition = {
-  row: number
-  column: number
-}
+type TilePredicate = (tile: Tile, row: number, column: number) => boolean
 
 export default class TileGrid {
   private readonly width: number
@@ -43,7 +39,7 @@ export default class TileGrid {
     return this.tiles[i] ? this.tiles[i][j] || null : null
   }
 
-  public setTile (tile: Tile | null, i: number, j: number, position?: TilePosition): void {
+  public setTile (tile: Tile | null, i: number, j: number, position?: Position): void {
     this.tiles[i][j] = tile
 
     if (tile) {

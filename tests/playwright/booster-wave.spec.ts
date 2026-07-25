@@ -1,22 +1,19 @@
-import type { Board } from '@/entities/Match3Engine'
+import type { Board } from '@/domain/types'
 
-import type { BoardTileType } from '@/enums/game'
+import type { BoardTileType } from '@/domain/enums'
 
 import { expect, test } from '@playwright/test'
 
-import {
-  getBoosterSwipeActivations,
-  resolveBoosterWave,
-} from '@/entities/Match3BoosterWave'
+import { getBoosterSwipeActivations, resolveBoosterWave } from '@/entities/BoosterWave'
 
-import { BOOSTER_TYPE, SPECIAL_TILE_TYPE, TILE_TYPE } from '@/enums/game'
+import { BoosterType, SpecialTileType, TileType } from '@/domain/enums'
 
 test('booster wave activates each hit booster once and deduplicates positions', () => {
   const board: Board<BoardTileType> = [
-    [TILE_TYPE.SWEETS_FISH, TILE_TYPE.SWEETS_BIRD, TILE_TYPE.SWEETS_PILLOW, TILE_TYPE.SWEETS_FISH],
-    [TILE_TYPE.SWEETS_BIRD, BOOSTER_TYPE.ROW_FIRECRACKER, TILE_TYPE.SWEETS_FISH, BOOSTER_TYPE.COLUMN_FIRECRACKER],
-    [TILE_TYPE.SWEETS_FISH, TILE_TYPE.SWEETS_PILLOW, TILE_TYPE.SWEETS_BIRD, BOOSTER_TYPE.AREA_KETTLE],
-    [TILE_TYPE.SWEETS_PILLOW, TILE_TYPE.SWEETS_FISH, TILE_TYPE.SWEETS_BIRD, TILE_TYPE.SWEETS_ROOSTER],
+    [TileType.SweetsFish, TileType.SweetsBird, TileType.SweetsPillow, TileType.SweetsFish],
+    [TileType.SweetsBird, BoosterType.RowFirecracker, TileType.SweetsFish, BoosterType.ColumnFirecracker],
+    [TileType.SweetsFish, TileType.SweetsPillow, TileType.SweetsBird, BoosterType.AreaKettle],
+    [TileType.SweetsPillow, TileType.SweetsFish, TileType.SweetsBird, TileType.SweetsRooster],
   ]
   const wave = resolveBoosterWave(
     board,
@@ -28,9 +25,9 @@ test('booster wave activates each hit booster once and deduplicates positions', 
     booster: effect.booster,
     source: effect.source,
   }))).toEqual([
-    { booster: BOOSTER_TYPE.ROW_FIRECRACKER, source: { row: 1, column: 1 } },
-    { booster: BOOSTER_TYPE.COLUMN_FIRECRACKER, source: { row: 1, column: 3 } },
-    { booster: BOOSTER_TYPE.AREA_KETTLE, source: { row: 2, column: 3 } },
+    { booster: BoosterType.RowFirecracker, source: { row: 1, column: 1 } },
+    { booster: BoosterType.ColumnFirecracker, source: { row: 1, column: 3 } },
+    { booster: BoosterType.AreaKettle, source: { row: 2, column: 3 } },
   ])
   expect(new Set(wave.positions.map(({ row, column }) => `${row}-${column}`)).size)
     .toBe(wave.positions.length)
@@ -38,27 +35,27 @@ test('booster wave activates each hit booster once and deduplicates positions', 
 
 test('chain-activated button box selects only types currently present on board', () => {
   const board: Board<BoardTileType> = [
-    [BOOSTER_TYPE.ROW_FIRECRACKER, BOOSTER_TYPE.BUTTON_BOX, TILE_TYPE.SWEETS_FISH],
-    [TILE_TYPE.SWEETS_BIRD, TILE_TYPE.SWEETS_FISH, TILE_TYPE.SWEETS_FISH],
+    [BoosterType.RowFirecracker, BoosterType.ButtonBox, TileType.SweetsFish],
+    [TileType.SweetsBird, TileType.SweetsFish, TileType.SweetsFish],
   ]
-  const selections: TILE_TYPE[][] = []
+  const selections: TileType[][] = []
   const wave = resolveBoosterWave(
     board,
     [{ source: { row: 0, column: 0 } }],
     (types) => {
       selections.push(types)
 
-      return TILE_TYPE.SWEETS_FISH
+      return TileType.SweetsFish
     }
   )
 
   expect(selections).toEqual([[
-    TILE_TYPE.SWEETS_FISH,
-    TILE_TYPE.SWEETS_BIRD,
+    TileType.SweetsFish,
+    TileType.SweetsBird,
   ]])
   expect(wave.effects[1]).toMatchObject({
-    booster: BOOSTER_TYPE.BUTTON_BOX,
-    targetType: TILE_TYPE.SWEETS_FISH,
+    booster: BoosterType.ButtonBox,
+    targetType: TileType.SweetsFish,
   })
   expect(wave.positions).toEqual(expect.arrayContaining([
     { row: 0, column: 1 },
@@ -69,7 +66,7 @@ test('chain-activated button box selects only types currently present on board',
 })
 
 test('button box is still consumed when no ordinary tile type is present', () => {
-  const board: Board<BoardTileType> = [[BOOSTER_TYPE.BUTTON_BOX]]
+  const board: Board<BoardTileType> = [[BoosterType.ButtonBox]]
   const wave = resolveBoosterWave(
     board,
     [{ source: { row: 0, column: 0 } }],
@@ -82,20 +79,20 @@ test('button box is still consumed when no ordinary tile type is present', () =>
 
 test('button box swipe carries the selected ordinary type to its destination', () => {
   expect(getBoosterSwipeActivations(
-    BOOSTER_TYPE.BUTTON_BOX,
-    TILE_TYPE.SWEETS_ROOSTER,
+    BoosterType.ButtonBox,
+    TileType.SweetsRooster,
     { row: 1, column: 2 },
     { row: 1, column: 1 }
   )).toEqual([{
     source: { row: 1, column: 2 },
-    targetType: TILE_TYPE.SWEETS_ROOSTER,
+    targetType: TileType.SweetsRooster,
   }])
 })
 
 test('two swiped boosters activate from both swapped destinations', () => {
   expect(getBoosterSwipeActivations(
-    BOOSTER_TYPE.AREA_KETTLE,
-    BOOSTER_TYPE.ROW_FIRECRACKER,
+    BoosterType.AreaKettle,
+    BoosterType.RowFirecracker,
     { row: 2, column: 3 },
     { row: 2, column: 2 }
   )).toEqual([
@@ -106,8 +103,8 @@ test('two swiped boosters activate from both swapped destinations', () => {
 
 test('two identical swiped boosters activate from both swapped destinations', () => {
   expect(getBoosterSwipeActivations(
-    BOOSTER_TYPE.AREA_KETTLE,
-    BOOSTER_TYPE.AREA_KETTLE,
+    BoosterType.AreaKettle,
+    BoosterType.AreaKettle,
     { row: 2, column: 3 },
     { row: 2, column: 2 }
   )).toEqual([
@@ -118,8 +115,8 @@ test('two identical swiped boosters activate from both swapped destinations', ()
 
 test('button box uses random selection when swiped with a special object', () => {
   expect(getBoosterSwipeActivations(
-    BOOSTER_TYPE.BUTTON_BOX,
-    SPECIAL_TILE_TYPE.COOKIE,
+    BoosterType.ButtonBox,
+    SpecialTileType.Cookie,
     { row: 0, column: 1 },
     { row: 0, column: 0 }
   )).toEqual([{

@@ -1,6 +1,6 @@
-import type { Board } from '@/entities/Match3Engine'
+import type { Board } from '@/domain/types'
 
-import type { BoardTileType } from '@/enums/game'
+import type { BoardTileType } from '@/domain/enums'
 
 import { expect, test } from '@playwright/test'
 
@@ -8,13 +8,13 @@ import {
   getBoosterEffect,
   getButtonBoxEffect,
   getPresentTileTypes,
-} from '@/entities/Match3BoosterEffects'
+} from '@/entities/BoosterEffects'
 
-import { BOOSTER_TYPE, SPECIAL_TILE_TYPE, TILE_TYPE } from '@/enums/game'
+import { BoosterType, SpecialTileType, TileType } from '@/domain/enums'
 
 test('row and column firecrackers cover their full lines', () => {
   expect(getBoosterEffect(
-    BOOSTER_TYPE.ROW_FIRECRACKER,
+    BoosterType.RowFirecracker,
     { row: 2, column: 3 },
     5,
     4
@@ -27,7 +27,7 @@ test('row and column firecrackers cover their full lines', () => {
   ])
 
   expect(getBoosterEffect(
-    BOOSTER_TYPE.COLUMN_FIRECRACKER,
+    BoosterType.ColumnFirecracker,
     { row: 2, column: 3 },
     5,
     4
@@ -41,7 +41,7 @@ test('row and column firecrackers cover their full lines', () => {
 
 test('kettle has a clipped 3 by 3 area at board edges', () => {
   expect(getBoosterEffect(
-    BOOSTER_TYPE.AREA_KETTLE,
+    BoosterType.AreaKettle,
     { row: 0, column: 0 },
     5,
     4
@@ -55,10 +55,10 @@ test('kettle has a clipped 3 by 3 area at board edges', () => {
 
 test('button box targets only the selected ordinary tile type and its source', () => {
   const board: Board<BoardTileType> = [
-    [TILE_TYPE.SWEETS_FISH, SPECIAL_TILE_TYPE.MUG, TILE_TYPE.SWEETS_FISH],
-    [BOOSTER_TYPE.BUTTON_BOX, SPECIAL_TILE_TYPE.COOKIE, TILE_TYPE.SWEETS_BIRD],
+    [TileType.SweetsFish, SpecialTileType.Mug, TileType.SweetsFish],
+    [BoosterType.ButtonBox, SpecialTileType.Cookie, TileType.SweetsBird],
   ]
-  const effect = getButtonBoxEffect(board, { row: 1, column: 0 }, TILE_TYPE.SWEETS_FISH)
+  const effect = getButtonBoxEffect(board, { row: 1, column: 0 }, TileType.SweetsFish)
 
   expect(effect.positions).toEqual([
     { row: 1, column: 0 },
@@ -66,7 +66,7 @@ test('button box targets only the selected ordinary tile type and its source', (
     { row: 0, column: 2 },
   ])
   expect(getPresentTileTypes(board)).toEqual([
-    TILE_TYPE.SWEETS_FISH,
-    TILE_TYPE.SWEETS_BIRD,
+    TileType.SweetsFish,
+    TileType.SweetsBird,
   ])
 })

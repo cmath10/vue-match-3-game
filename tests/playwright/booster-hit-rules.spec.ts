@@ -1,14 +1,13 @@
-import type { Counter, Tile } from '@/types/game'
-
-import type { BoardTileType } from '@/enums/game'
-import type { ObjectiveCollection } from '@/entities/Match3ObjectiveCollection'
+import type { BoardTileType } from '@/domain/enums'
+import type { Counter, ObjectiveCollection, Tile } from '@/domain/types'
 
 import { expect, test } from '@playwright/test'
 
-import { applyBoosterEffectPositions } from '@/entities/Match3BoardHits'
+import { applyBoosterEffectPositions } from '@/entities/BoardHits'
 
-import { BOOSTER_TYPE, SPECIAL_TILE_TYPE, TILE_TYPE } from '@/enums/game'
+import { BoosterType, SpecialTileType } from '@/domain/enums'
 import TileGrid from '@/entities/TileGrid'
+import { TileType } from '@/domain/enums'
 
 const createTile = (id: number, type: BoardTileType, row: number, column: number): Tile => ({
   id,
@@ -20,10 +19,10 @@ const createTile = (id: number, type: BoardTileType, row: number, column: number
 
 test('effect wave applies blockers, cookies, counters and boosters once', () => {
   const grid = new TileGrid(4, 2)
-  const packaged = createTile(1, TILE_TYPE.SWEETS_FISH, 0, 0)
-  const ordinary = createTile(2, TILE_TYPE.SWEETS_BIRD, 0, 1)
-  const cookie = createTile(3, SPECIAL_TILE_TYPE.COOKIE, 1, 1)
-  const booster = createTile(4, BOOSTER_TYPE.AREA_KETTLE, 0, 2)
+  const packaged = createTile(1, TileType.SweetsFish, 0, 0)
+  const ordinary = createTile(2, TileType.SweetsBird, 0, 1)
+  const cookie = createTile(3, SpecialTileType.Cookie, 1, 1)
+  const booster = createTile(4, BoosterType.AreaKettle, 0, 2)
   const counters: Counter[] = []
   const collectObjective = ({ type }: ObjectiveCollection) => {
     const counter = counters.find(item => item.type === type)
@@ -35,7 +34,7 @@ test('effect wave applies blockers, cookies, counters and boosters once', () => 
     }
   }
 
-  packaged.blocker = { type: SPECIAL_TILE_TYPE.PACKAGE, health: 1 }
+  packaged.blocker = { type: SpecialTileType.Package, health: 1 }
   cookie.health = 3
   grid.setTile(packaged, 0, 0)
   grid.setTile(ordinary, 0, 1)
@@ -55,7 +54,7 @@ test('effect wave applies blockers, cookies, counters and boosters once', () => 
   expect(grid.getTileByIndex(0, 2)).toBeNull()
   expect(cookie.health).toBe(2)
   expect(counters).toEqual(expect.arrayContaining([
-    { type: SPECIAL_TILE_TYPE.PACKAGE, count: 1 },
-    { type: TILE_TYPE.SWEETS_BIRD, count: 1 },
+    { type: SpecialTileType.Package, count: 1 },
+    { type: TileType.SweetsBird, count: 1 },
   ]))
 })

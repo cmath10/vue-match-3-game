@@ -1,30 +1,30 @@
-import type { ObjectiveCollection } from '@/entities/Match3ObjectiveCollection'
+import type { ObjectiveCollection } from '@/domain/types'
 
 import { expect, test } from '@playwright/test'
 
 import {
   getCookieBreakEffectStyle,
-  useMatch3CookieBreakAnimation,
-} from '@/composables/useMatch3CookieBreakAnimation'
+  useCookieBreakAnimation,
+} from '@/composables/useCookieBreakAnimation'
 
-import { SPECIAL_TILE_TYPE, TILE_TYPE } from '@/enums/game'
+import { SpecialTileType, TileType } from '@/domain/enums'
 
 const cookieCollection: ObjectiveCollection = {
   tileId: 42,
-  type: SPECIAL_TILE_TYPE.COOKIE,
+  type: SpecialTileType.Cookie,
   position: { row: 2, column: 3 },
 }
 
 test('cookie collection animates fragments and clears them after the board transition', async () => {
   let finishAnimation: (() => void) | undefined
-  const animation = useMatch3CookieBreakAnimation({
+  const animation = useCookieBreakAnimation({
     nextAnimationFrame: () => Promise.resolve(),
     waitAnimation: () => new Promise<void>(resolve => finishAnimation = resolve),
   })
 
   animation.collect({
     ...cookieCollection,
-    type: TILE_TYPE.SWEETS_BARBARIS,
+    type: TileType.SweetsBarbaris,
   })
   await animation.animatePending()
   expect(animation.effects.value).toHaveLength(0)
@@ -42,7 +42,7 @@ test('cookie collection animates fragments and clears them after the board trans
 
 test('cancelling cookie fragments prevents an obsolete animation from returning', async () => {
   let finishAnimation: (() => void) | undefined
-  const animation = useMatch3CookieBreakAnimation({
+  const animation = useCookieBreakAnimation({
     nextAnimationFrame: () => Promise.resolve(),
     waitAnimation: () => new Promise<void>(resolve => finishAnimation = resolve),
   })
