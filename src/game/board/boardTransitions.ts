@@ -1,8 +1,8 @@
 import type { Board, Position, Tile } from '@/domain/types'
-import type TileGrid from '@/entities/TileGrid'
+import type TileGrid from '@/game/board/TileGrid'
 import type { TileMovement } from '@/domain/types'
 
-import { collapseBoard } from '@/entities/Engine'
+import { collapseBoard } from '@/domain/board/transitions'
 
 type SpawnTile = (row: number, column: number, spawnRow: number) => Tile
 

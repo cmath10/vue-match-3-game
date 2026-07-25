@@ -5,14 +5,12 @@ import type { BoardTileType, ObjectiveType } from '@/domain/enums'
 import { expect, test } from '@playwright/test'
 
 import { BoosterType } from '@/domain/enums'
-import {
-  clearMatchedPositions,
-  collectDroppedMugs,
-  isMovableTile,
-} from '@/entities/SpecialTiles'
-import { placeCreatedBoosters } from '@/entities/BoardBoosters'
+import { clearMatchedPositions } from '@/game/board/boardHits'
+import { collectDroppedMugs } from '@/game/board/specialTiles'
+import { isMovableTile } from '@/domain/tiles'
+import { placeCreatedBoosters } from '@/game/board/boardBoosters'
 import { SpecialTileType } from '@/domain/enums'
-import TileGrid from '@/entities/TileGrid'
+import TileGrid from '@/game/board/TileGrid'
 import { TileType } from '@/domain/enums'
 
 const createTile = (id: number, type: BoardTileType = TileType.SweetsBarbaris): Tile => ({

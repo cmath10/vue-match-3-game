@@ -3,10 +3,10 @@ import type { Counter, ObjectiveCollection, Tile } from '@/domain/types'
 
 import { expect, test } from '@playwright/test'
 
-import { applyBoosterEffectPositions } from '@/entities/BoardHits'
+import { applyBoosterEffectPositions } from '@/game/board/boardHits'
 
 import { BoosterType, SpecialTileType } from '@/domain/enums'
-import TileGrid from '@/entities/TileGrid'
+import TileGrid from '@/game/board/TileGrid'
 import { TileType } from '@/domain/enums'
 
 const createTile = (id: number, type: BoardTileType, row: number, column: number): Tile => ({

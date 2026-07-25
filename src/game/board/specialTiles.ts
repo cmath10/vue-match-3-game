@@ -1,17 +1,11 @@
-import type TileGrid from '@/entities/TileGrid'
-export { clearMatchedPositions } from '@/entities/BoardHits'
 import type { BoardTileType } from '@/domain/enums'
 import type { CollectObjective, Position, Tile } from '@/domain/types'
+import type TileGrid from '@/game/board/TileGrid'
 
-import {
-  COOKIE_HEALTH,
-  isMatchableTile,
-  PACKAGE_HEALTH,
-  SPECIAL_TARGETS,
-} from '@/entities/SpecialTileConfig'
+import { COOKIE_HEALTH } from '@/domain/config'
+import { isMatchableTile } from '@/domain/tiles'
+import { PACKAGE_HEALTH, SPECIAL_TARGETS } from '@/domain/config'
 import { SpecialTileType } from '@/domain/enums'
-
-export { AVAILABLE_TILE_TYPES, COUNTER_TYPES, isMatchableTile, isMovableTile, SPECIAL_OBJECTIVE_TYPES, SPECIAL_TARGETS } from '@/entities/SpecialTileConfig'
 
 type CreateTile = (type: BoardTileType, row: number, column: number) => Tile
 

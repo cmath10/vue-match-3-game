@@ -2,7 +2,7 @@ import type { Counter, Objective } from '@/domain/types'
 
 import { expect, test } from '@playwright/test'
 
-import { getGameResult } from '@/entities/GameResult'
+import { getGameResult } from '@/domain/objectives'
 import { TileType } from '@/domain/enums'
 
 const objective = (type: TileType, count: number): Objective => ({ type, count })

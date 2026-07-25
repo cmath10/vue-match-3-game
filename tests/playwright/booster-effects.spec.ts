@@ -8,7 +8,7 @@ import {
   getBoosterEffect,
   getButtonBoxEffect,
   getPresentTileTypes,
-} from '@/entities/BoosterEffects'
+} from '@/domain/boosters/effects'
 
 import { BoosterType, SpecialTileType, TileType } from '@/domain/enums'
 

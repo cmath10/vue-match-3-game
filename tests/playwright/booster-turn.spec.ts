@@ -2,8 +2,8 @@ import type { Position, Tile } from '@/domain/types'
 
 import { expect, test } from '@playwright/test'
 
-import { createMatch3BoosterTurn } from '@/entities/BoosterTurn'
-import TileGrid from '@/entities/TileGrid'
+import { createMatch3BoosterTurn } from '@/game/turns/boosterTurn'
+import TileGrid from '@/game/board/TileGrid'
 
 import { BoosterType, TileType } from '@/domain/enums'
 

@@ -1,14 +1,11 @@
 import type { Counter, Objective, Tile } from '@/domain/types'
-import type TileGrid from '@/entities/TileGrid'
+import type TileGrid from '@/game/board/TileGrid'
 import type { TileType } from '@/domain/enums'
 
-import { COUNTER_TYPES } from '@/entities/SpecialTileConfig'
-import { generateObjectives } from '@/entities/Objectives'
-import {
-  isMatchableTile,
-  SPECIAL_OBJECTIVE_TYPES,
-  SPECIAL_TARGETS,
-} from '@/entities/SpecialTileConfig'
+import { COUNTER_TYPES } from '@/domain/config'
+import { generateObjectives } from '@/domain/objectives'
+import { isMatchableTile } from '@/domain/tiles'
+import { SPECIAL_OBJECTIVE_TYPES, SPECIAL_TARGETS } from '@/domain/config'
 
 type SelectRandom = <T>(items: T[]) => T
 

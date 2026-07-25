@@ -3,7 +3,7 @@ import type { BoosterWave, Tile } from '@/domain/types'
 import { expect, test } from '@playwright/test'
 
 import { getButtonFlights } from '@/composables/useButtonCollection'
-import TileGrid from '@/entities/TileGrid'
+import TileGrid from '@/game/board/TileGrid'
 
 import { BoosterType, SpecialTileType, TileType } from '@/domain/enums'
 

@@ -1,13 +1,13 @@
 import type { TileType } from '@/domain/enums'
 
 import type { BoardEffect, BoosterWave, Position } from '@/domain/types'
-import type TileGrid from '@/entities/TileGrid'
+import type TileGrid from '@/game/board/TileGrid'
 
 import type { Ref } from 'vue'
 
 import { computed, nextTick, ref } from 'vue'
 
-import { isMatchableTile } from '@/entities/SpecialTileConfig'
+import { isMatchableTile } from '@/domain/tiles'
 
 import { BoosterType } from '@/domain/enums'
 

@@ -4,7 +4,7 @@ import type { BoardTileType } from '@/domain/enums'
 
 import { expect, test } from '@playwright/test'
 
-import { getBoosterSwipeActivations, resolveBoosterWave } from '@/entities/BoosterWave'
+import { getBoosterSwipeActivations, resolveBoosterWave } from '@/domain/boosters/chain'
 
 import { BoosterType, SpecialTileType, TileType } from '@/domain/enums'
 

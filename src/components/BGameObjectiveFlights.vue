@@ -14,11 +14,11 @@
 </template>
 
 <script lang="ts" setup>
-import type { ObjectiveFlight } from '@/entities/ObjectiveFlightPresentation'
+import type { ObjectiveFlight } from '@/presentation/objectiveFlights'
 
 import BGameTile from '@/components/BGameTile.vue'
 
-import { getObjectiveFlightStyle } from '@/entities/ObjectiveFlightPresentation'
+import { getObjectiveFlightStyle } from '@/presentation/objectiveFlights'
 
 defineProps<{
   flights: ObjectiveFlight[]

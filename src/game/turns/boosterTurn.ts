@@ -7,12 +7,12 @@ import type {
   TileMovement,
 } from '@/domain/types'
 
-import type TileGrid from '@/entities/TileGrid'
+import type TileGrid from '@/game/board/TileGrid'
 
-import { getBoardTileTypeBoard } from '@/entities/GridBoard'
-import { getBoosterSwipeActivations } from '@/entities/BoosterWave'
-import { getGridTilePosition } from '@/entities/GridBoard'
-import { resolveBoosterWave } from '@/entities/BoosterWave'
+import { getBoardTileTypeBoard } from '@/game/board/boardProjection'
+import { getBoosterSwipeActivations } from '@/domain/boosters/chain'
+import { getGridTilePosition } from '@/game/board/boardProjection'
+import { resolveBoosterWave } from '@/domain/boosters/chain'
 
 type BoosterTurnOptions = {
   grid: TileGrid

@@ -1,5 +1,5 @@
 import type { BoosterWave, GeometricBoosterType, Position } from '@/domain/types'
-import type TileGrid from '@/entities/TileGrid'
+import type TileGrid from '@/game/board/TileGrid'
 
 import type { Ref } from 'vue'
 

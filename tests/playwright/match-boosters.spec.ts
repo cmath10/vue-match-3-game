@@ -6,10 +6,10 @@ import {
   getBoosterCreation,
   getCascadeBoosterCreations,
   getMoveMatch,
-} from '@/entities/BoosterRules'
+} from '@/domain/boosters/creation'
 
 import { BoosterType } from '@/domain/enums'
-import { findMatchLines } from '@/entities/Matches'
+import { findMatchLines } from '@/domain/board/matches'
 
 const parseBoard = (rows: string[]): Board<string> => {
   return rows.map(row => [...row].map(tile => tile === '.' ? null : tile))

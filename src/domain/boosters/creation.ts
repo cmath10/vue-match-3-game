@@ -14,7 +14,7 @@ import {
   findMatchGroups,
   findMoveMatchLines,
   getMatchPositions,
-} from '@/entities/Matches'
+} from '@/domain/board/matches'
 
 const FIRECRACKER_MATCH_LENGTH = 4
 const BUTTON_BOX_MATCH_LENGTH = 5

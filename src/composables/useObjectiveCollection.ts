@@ -1,12 +1,12 @@
 import type { Counter, Objective, ObjectiveCollection } from '@/domain/types'
-import type { ObjectiveFlight } from '@/entities/ObjectiveFlightPresentation'
+import type { ObjectiveFlight } from '@/presentation/objectiveFlights'
 import type { ObjectiveType } from '@/domain/enums'
 
 import type { Ref } from 'vue'
 
 import { nextTick, ref } from 'vue'
 
-import { createObjectiveFlight } from '@/entities/ObjectiveFlightPresentation'
+import { createObjectiveFlight } from '@/presentation/objectiveFlights'
 
 import { SpecialTileType, TileType } from '@/domain/enums'
 

@@ -7,7 +7,9 @@ import type {
 
 import type { BoardTileType } from '@/domain/enums'
 
-import { BoosterType, TileType } from '@/domain/enums'
+import { BoosterType } from '@/domain/enums'
+import { isTileType } from '@/domain/tiles'
+import { TileType } from '@/domain/enums'
 
 export const getBoosterEffect = (
   booster: GeometricBoosterType,
@@ -45,10 +47,6 @@ export const getPresentTileTypes = (board: Board<BoardTileType>): TileType[] => 
   }))
 
   return [...presentTypes]
-}
-
-export const isBoosterType = (type: BoardTileType | null): type is BoosterType => {
-  return Object.values(BoosterType).includes(type as BoosterType)
 }
 
 const getEffectPositions = (
@@ -100,8 +98,4 @@ const getTileTypePositions = (board: Board<BoardTileType>, targetType: TileType)
   }))
 
   return positions
-}
-
-export const isTileType = (type: BoardTileType | null): type is TileType => {
-  return Object.values(TileType).includes(type as TileType)
 }

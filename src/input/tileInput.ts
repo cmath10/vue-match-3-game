@@ -1,9 +1,8 @@
-import type { PointerPosition } from '@/entities/TileGesture'
+import type { PointerPosition } from '@/input/tileGesture'
 import type { Tile } from '@/domain/types'
-import type TileGrid from '@/entities/TileGrid'
+import type TileGrid from '@/game/board/TileGrid'
 
-import { isBoosterType } from '@/entities/BoosterEffects'
-import { isMovableTile } from '@/entities/SpecialTileConfig'
+import { isBoosterType, isMovableTile } from '@/domain/tiles'
 
 type TileInputOptions = {
   grid: TileGrid

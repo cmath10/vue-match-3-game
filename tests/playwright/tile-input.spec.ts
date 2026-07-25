@@ -3,8 +3,8 @@ import type { Tile } from '@/domain/types'
 import { expect, test } from '@playwright/test'
 
 import { BoosterType } from '@/domain/enums'
-import { createMatch3TileInput } from '@/entities/TileInput'
-import TileGrid from '@/entities/TileGrid'
+import { createMatch3TileInput } from '@/input/tileInput'
+import TileGrid from '@/game/board/TileGrid'
 import { TileType } from '@/domain/enums'
 
 const createTile = (id: number, type: Tile['type'], column: number): Tile => ({

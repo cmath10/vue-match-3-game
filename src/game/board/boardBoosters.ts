@@ -1,5 +1,5 @@
 import type { BoosterCreation } from '@/domain/types'
-import type TileGrid from '@/entities/TileGrid'
+import type TileGrid from '@/game/board/TileGrid'
 
 export const placeCreatedBoosters = (
   grid: TileGrid,

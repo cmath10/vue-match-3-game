@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-import { generateObjectives } from '@/entities/Objectives'
+import { generateObjectives } from '@/domain/objectives'
 import { TileType } from '@/domain/enums'
 
 const repeatType = (type: TileType, count: number): TileType[] => Array(count).fill(type)

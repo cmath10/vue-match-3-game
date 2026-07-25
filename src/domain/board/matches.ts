@@ -31,7 +31,11 @@ export const getMatchPositions = <T extends BoardTile>(lines: Array<MatchLine<T>
   return [...matched.values()]
 }
 
-export const findMoveMatchedPositions = <T extends BoardTile>(board: Board<T>, from: Position, to: Position): Position[] => {
+export const findMoveMatchedPositions = <T extends BoardTile>(
+  board: Board<T>,
+  from: Position,
+  to: Position
+): Position[] => {
   return getMatchPositions(findMoveMatchLines(board, from, to))
 }
 

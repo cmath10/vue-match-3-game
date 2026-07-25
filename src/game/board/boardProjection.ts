@@ -1,10 +1,10 @@
 import type { Board, Position, Tile } from '@/domain/types'
 
 import type { BoardTileType } from '@/domain/enums'
-import type TileGrid from '@/entities/TileGrid'
+import type TileGrid from '@/game/board/TileGrid'
 import type { TileType } from '@/domain/enums'
 
-import { isMatchableTile } from '@/entities/SpecialTileConfig'
+import { isMatchableTile } from '@/domain/tiles'
 
 export const getMatchableTileBoard = (grid: TileGrid): Board<TileType> => {
   return grid.getTileList()

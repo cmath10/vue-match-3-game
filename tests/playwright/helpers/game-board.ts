@@ -2,8 +2,8 @@ import type { Page } from '@playwright/test'
 
 import type { Board } from '@/domain/types'
 
-import { BOARD_HEIGHT, BOARD_WIDTH } from '@/entities/BoardConfig'
-import { getMoveMatch } from '@/entities/BoosterRules'
+import { BOARD_HEIGHT, BOARD_WIDTH } from '@/domain/config'
+import { getMoveMatch } from '@/domain/boosters/creation'
 
 import { BoosterType, TileType } from '@/domain/enums'
 

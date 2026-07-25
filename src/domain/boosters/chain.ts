@@ -9,15 +9,13 @@ import type {
 
 import type { BoardTileType } from '@/domain/enums'
 
+import { BoosterType } from '@/domain/enums'
 import {
   getBoosterEffect,
   getButtonBoxEffect,
   getPresentTileTypes,
-  isBoosterType,
-  isTileType,
-} from '@/entities/BoosterEffects'
-
-import { BoosterType } from '@/domain/enums'
+} from '@/domain/boosters/effects'
+import { isBoosterType, isTileType } from '@/domain/tiles'
 
 export const getBoosterSwipeActivations = (
   sourceType: BoardTileType,

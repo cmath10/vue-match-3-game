@@ -1,8 +1,7 @@
 import type { CollectObjective, Position, Tile } from '@/domain/types'
-import type TileGrid from '@/entities/TileGrid'
+import type TileGrid from '@/game/board/TileGrid'
 
-import { isBoosterType } from '@/entities/BoosterEffects'
-import { isMatchableTile } from '@/entities/SpecialTileConfig'
+import { isBoosterType, isMatchableTile } from '@/domain/tiles'
 import { SpecialTileType, TileType } from '@/domain/enums'
 
 type HitMode = 'match' | 'effect'

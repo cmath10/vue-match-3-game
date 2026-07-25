@@ -1,4 +1,4 @@
-import type { Objective } from '@/domain/types'
+import type { Counter, GameResult, Objective } from '@/domain/types'
 
 import { TileType } from '@/domain/enums'
 
@@ -29,6 +29,18 @@ export const generateObjectives = (tileTypes: TileType[]): Objective[] => {
     type: tileTypeCount.type,
     count: targets[index],
   }))
+}
+
+export const getGameResult = (
+  objectives: Objective[],
+  counters: Counter[],
+  turns: number
+): GameResult | null => {
+  if (areObjectivesCompleted(objectives, counters)) {
+    return 'win'
+  }
+
+  return turns === 0 ? 'lose' : null
 }
 
 const getObjectiveTypePool = (tileTypes: TileType[]): TileTypeCount[] => {
@@ -63,6 +75,14 @@ const distributeObjectiveTargets = (objectiveTypes: TileTypeCount[]): number[] =
     remainingBudget -= target
 
     return target
+  })
+}
+
+const areObjectivesCompleted = (objectives: Objective[], counters: Counter[]): boolean => {
+  return objectives.every((objective) => {
+    const counter = counters.find((item: Counter) => item.type === objective.type)
+
+    return (counter?.count || 0) >= objective.count
   })
 }
 

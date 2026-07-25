@@ -7,7 +7,7 @@ import { resolve } from 'node:path'
 
 import { expect, test } from '@playwright/test'
 
-import { applyMove } from '@/entities/Engine'
+import { applyMove } from '@/domain/board/move'
 
 type TileCounts = Record<string, number>
 type MoveFixture = {

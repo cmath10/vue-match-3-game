@@ -2,8 +2,8 @@ import type { Tile } from '@/domain/types'
 
 import { expect, test } from '@playwright/test'
 
-import { collapseGrid, refillGrid } from '@/entities/GridTransitions'
-import TileGrid from '@/entities/TileGrid'
+import { collapseGrid, refillGrid } from '@/game/board/boardTransitions'
+import TileGrid from '@/game/board/TileGrid'
 import { TileType } from '@/domain/enums'
 
 const createTile = (id: number, row: number, column: number): Tile => ({
