@@ -1,0 +1,38 @@
+<template>
+    <div
+        v-for="effect in effects"
+        :key="effect.id"
+        :class="{ 'b-game-cookie-break--active': effect.active }"
+        :data-cookie-break-active="effect.active"
+        :style="getCookieBreakEffectStyle(effect)"
+        class="b-game-cookie-break"
+    >
+        <span
+            v-for="fragment in fragments"
+            :key="fragment"
+            :class="`b-game-cookie-break__fragment--${fragment}`"
+            class="b-game-cookie-break__fragment"
+        />
+    </div>
+</template>
+
+<script lang="ts" setup>
+import type { CookieBreakEffect } from '@/composables/useMatch3CookieBreakAnimation'
+
+import { getCookieBreakEffectStyle } from '@/composables/useMatch3CookieBreakAnimation'
+
+const COOKIE_FRAGMENT_COUNT = 5
+const fragments = Array.from({ length: COOKIE_FRAGMENT_COUNT }, (_, index) => index + 1)
+
+defineProps<{
+  effects: CookieBreakEffect[]
+}>()
+
+defineOptions({
+  name: 'BGameCookieBreakEffects',
+})
+</script>
+
+<style lang="scss">
+@import "../../assets/scss/blocks/b-game-cookie-break";
+</style>

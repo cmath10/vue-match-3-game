@@ -43,6 +43,7 @@
 
                         <b-game-button-flights :flights="buttonFlights" />
                         <b-game-booster-effects :effects="boosterVisualEffects" />
+                        <b-game-cookie-break-effects :effects="cookieBreakEffects" />
                     </div>
 
                     <b-game-result-overlay
@@ -79,6 +80,8 @@ import type { BoardTileType } from '@/enums/game'
 
 import type { GameResult } from '@/entities/Match3GameResult'
 
+import type { ObjectiveCollection } from '@/entities/Match3ObjectiveCollection'
+
 import type { ObjectiveType } from '@/enums/game'
 
 import type { Position } from '@/entities/Match3Engine'
@@ -95,12 +98,16 @@ import { useI18n } from 'vue-i18n'
 
 import BGameBoosterEffects from '@/components/blocks/BGameBoosterEffects.vue'
 import BGameButtonFlights from '@/components/blocks/BGameButtonFlights.vue'
+import BGameCookieBreakEffects from '@/components/blocks/BGameCookieBreakEffects.vue'
 import BGameMenu from '@/components/blocks/BGameMenu.vue'
 import BGameObjectiveFlights from '@/components/blocks/BGameObjectiveFlights.vue'
 import BGameResultOverlay from '@/components/blocks/BGameResultOverlay.vue'
 import BGameTile from '@/components/blocks/BGameTile.vue'
 
 import { useMatch3BoosterAnimation } from '@/composables/useMatch3BoosterAnimation'
+import {
+  useMatch3CookieBreakAnimation,
+} from '@/composables/useMatch3CookieBreakAnimation'
 import { useMatch3ObjectiveCollection } from '@/composables/useMatch3ObjectiveCollection'
 
 import { applyBoosterEffectPositions } from '@/entities/Match3BoardHits'
@@ -222,6 +229,18 @@ const {
   nextAnimationFrame,
 })
 
+const {
+  effects: cookieBreakEffects,
+  animatePending: animateCookieBreaks,
+  cancel: cancelCookieBreakAnimation,
+  collect: collectCookieBreak,
+} = useMatch3CookieBreakAnimation({ waitAnimation, nextAnimationFrame })
+
+const collectTile = (collection: ObjectiveCollection): void => {
+  collectCookieBreak(collection)
+  collectObjective(collection)
+}
+
 const spawnTile = (i: number, j: number, spawnRow: number): Tile => {
   const tile = createTile(generateType(i, j), spawnRow, j)
 
@@ -262,11 +281,17 @@ const updateGrid = async (
   }
 }
 
+const waitForResolutionAnimations = () => Promise.all([
+  waitAnimation(),
+  animateObjectiveCollections(),
+  animateCookieBreaks(),
+])
+
 const settleGrid = async (version: number, initialMovements: TileMovement[]) => {
   let movements = initialMovements
 
   while (true) {
-    await Promise.all([waitAnimation(), animateObjectiveCollections()])
+    await waitForResolutionAnimations()
 
     if (version !== gameVersion.value) {
       return
@@ -293,19 +318,19 @@ const getCascadePositions = (movements: TileMovement[]): Position[] => {
 }
 
 const resolveMatchedPositions = (positions: Position[]): TileMovement[] => {
-  clearMatchedPositions(grid, positions, BOARD_WIDTH, BOARD_HEIGHT, collectObjective)
+  clearMatchedPositions(grid, positions, BOARD_WIDTH, BOARD_HEIGHT, collectTile)
   return transitionGrid()
 }
 
 const resolveBoosterPositions = (positions: Position[]): TileMovement[] => {
-  applyBoosterEffectPositions(grid, positions, BOARD_WIDTH, BOARD_HEIGHT, collectObjective)
+  applyBoosterEffectPositions(grid, positions, BOARD_WIDTH, BOARD_HEIGHT, collectTile)
   return transitionGrid()
 }
 
 const transitionGrid = (): TileMovement[] => {
   const movements = collapseGrid(grid)
 
-  collectDroppedMugs(grid, BOARD_WIDTH, BOARD_HEIGHT, collectObjective)
+  collectDroppedMugs(grid, BOARD_WIDTH, BOARD_HEIGHT, collectTile)
   movements.push(...collapseGrid(grid, movements.length))
   movements.push(...refillGrid(grid, BOARD_WIDTH, BOARD_HEIGHT, spawnTile, movements.length))
 
@@ -408,6 +433,7 @@ const startNewGame = () => {
   gameResult.value = null
   turns.value = COUNT_TURNS
   cancelObjectiveCollection()
+  cancelCookieBreakAnimation()
   objectives.splice(0)
   counters.splice(0)
   cancelBoosterAnimation()

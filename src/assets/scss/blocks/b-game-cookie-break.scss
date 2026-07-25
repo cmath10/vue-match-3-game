@@ -1,0 +1,72 @@
+.b-game-cookie-break {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  width: var(--tile-size);
+  height: var(--tile-size);
+  pointer-events: none;
+
+  &__fragment {
+    position: absolute;
+    inset: 0;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    filter: drop-shadow(0 0.12rem 0.12rem rgba(0, 0, 0, 0.22));
+    opacity: 1;
+    transition:
+      transform var(--tile-transition-duration) cubic-bezier(0.2, 0.7, 0.25, 1),
+      opacity calc(var(--tile-transition-duration) * 0.8) ease
+        calc(var(--tile-transition-duration) * 0.2);
+    will-change: transform, opacity;
+
+    &--1 {
+      --cookie-fragment-x: -42%;
+      --cookie-fragment-y: -34%;
+      --cookie-fragment-rotation: -18deg;
+
+      background-image: url("../../images/tile-cookie-fragment-1.png");
+    }
+
+    &--2 {
+      --cookie-fragment-x: -8%;
+      --cookie-fragment-y: -48%;
+      --cookie-fragment-rotation: -8deg;
+
+      background-image: url("../../images/tile-cookie-fragment-2.png");
+    }
+
+    &--3 {
+      --cookie-fragment-x: 42%;
+      --cookie-fragment-y: -28%;
+      --cookie-fragment-rotation: 20deg;
+
+      background-image: url("../../images/tile-cookie-fragment-3.png");
+    }
+
+    &--4 {
+      --cookie-fragment-x: -38%;
+      --cookie-fragment-y: 38%;
+      --cookie-fragment-rotation: 16deg;
+
+      background-image: url("../../images/tile-cookie-fragment-4.png");
+    }
+
+    &--5 {
+      --cookie-fragment-x: 34%;
+      --cookie-fragment-y: 46%;
+      --cookie-fragment-rotation: -16deg;
+
+      background-image: url("../../images/tile-cookie-fragment-5.png");
+    }
+  }
+
+  &--active &__fragment {
+    opacity: 0;
+    transform:
+      translate(var(--cookie-fragment-x), var(--cookie-fragment-y))
+      rotate(var(--cookie-fragment-rotation))
+      scale(0.92);
+  }
+}
