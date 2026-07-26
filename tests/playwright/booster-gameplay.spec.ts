@@ -117,6 +117,113 @@ for (const scenario of boosterScenarios.filter(({ type }) => (
       expect(origin.y).toBeCloseTo(expected.y, 0)
     }
   })
+
+  test(`${scenario.type} animation sends two lit firecrackers in opposite directions`, async ({ page }, testInfo) => {
+    const booster = await startBoosterScenario(page, scenario)
+
+    await booster.dblclick()
+
+    const effect = page.locator(`.b-game-booster-effect--${scenario.type}`)
+
+    await expect(effect).toBeVisible()
+
+    const motion = await effect.evaluate(async (element) => {
+      const fragments = [
+        element.querySelector<HTMLElement>('.b-game-booster-effect__firecracker--negative'),
+        element.querySelector<HTMLElement>('.b-game-booster-effect__firecracker--positive'),
+      ]
+
+      if (fragments.some(fragment => fragment === null)) {
+        throw new Error('Firecracker animation should render both fragments')
+      }
+
+      const firecrackers = fragments as HTMLElement[]
+      const animations = firecrackers.map((fragment) => {
+        const animation = fragment.getAnimations().find((candidate) => {
+          return candidate.effect instanceof KeyframeEffect
+            && candidate.effect.pseudoElement === null
+        })
+
+        if (animation === undefined) {
+          throw new Error('Firecracker fragment should have a movement animation')
+        }
+
+        animation.pause()
+        animation.currentTime = 0
+
+        return animation
+      })
+      const measure = () => firecrackers.map((fragment) => {
+        const style = getComputedStyle(fragment)
+        const matrix = new DOMMatrixReadOnly(style.transform)
+        const rect = fragment.getBoundingClientRect()
+
+        return {
+          x: rect.x + rect.width / 2,
+          y: rect.y + rect.height / 2,
+          scale: Math.sqrt(Math.abs(matrix.a * matrix.d - matrix.b * matrix.c)),
+        }
+      })
+      const effectRect = element.getBoundingClientRect()
+      const bounds = {
+        top: effectRect.top,
+        right: effectRect.right,
+        bottom: effectRect.bottom,
+        left: effectRect.left,
+      }
+
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+
+      const start = measure()
+
+      animations.forEach((animation) => {
+        animation.currentTime = 480
+      })
+
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+
+      const end = measure()
+      const styles = firecrackers.map((fragment) => ({
+        backgroundImage: getComputedStyle(fragment).backgroundImage,
+        flameAnimation: getComputedStyle(fragment, '::before').animationName,
+        flameBackground: getComputedStyle(fragment, '::before').backgroundImage,
+        sparkAnimation: getComputedStyle(fragment, '::after').animationName,
+      }))
+
+      animations.forEach((animation) => {
+        animation.currentTime = 320
+      })
+
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+
+      return { bounds, start, end, styles }
+    })
+
+    expect(motion.styles[0].backgroundImage).toContain('tile-booster-firecracker-left')
+    expect(motion.styles[1].backgroundImage).toContain('tile-booster-firecracker-right')
+
+    for (const style of motion.styles) {
+      expect(style.flameAnimation).toBe('b-game-firecracker-flame')
+      expect(style.flameBackground).toContain('radial-gradient(')
+      expect(style.sparkAnimation).toBe('b-game-firecracker-sparks')
+    }
+
+    expect(motion.end[0].scale).toBeCloseTo(motion.start[0].scale, 2)
+    expect(motion.end[1].scale).toBeCloseTo(motion.start[1].scale, 2)
+
+    if (scenario.type === BoosterType.RowFirecracker) {
+      expect(motion.end[0].x).toBeCloseTo(motion.bounds.left, 0)
+      expect(motion.end[1].x).toBeCloseTo(motion.bounds.right, 0)
+    } else {
+      expect(motion.end[0].y).toBeCloseTo(motion.bounds.top, 0)
+      expect(motion.end[1].y).toBeCloseTo(motion.bounds.bottom, 0)
+    }
+
+    await testInfo.attach(`${scenario.type}-split-animation`, {
+      body: await page.screenshot(),
+      contentType: 'image/png',
+    })
+  })
 }
 
 test('area kettle has a continuous circular animation across its 5 by 5 zone', async ({ page }, testInfo) => {
@@ -128,11 +235,6 @@ test('area kettle has a continuous circular animation across its 5 by 5 zone', a
   const effect = page.locator(`.b-game-booster-effect--${BoosterType.AreaKettle}`)
 
   await expect(effect).toBeVisible()
-  await page.waitForTimeout(240)
-  await testInfo.attach('area-kettle-animation', {
-    body: await page.screenshot(),
-    contentType: 'image/png',
-  })
 
   const geometry = await effect.evaluate((element) => {
     const cells = document.querySelectorAll<HTMLElement>('.b-game-ground__cell')
@@ -150,6 +252,13 @@ test('area kettle has a continuous circular animation across its 5 by 5 zone', a
       clipPath: getComputedStyle(element, '::before').clipPath,
     }
   })
+
+  await page.waitForTimeout(180)
+  await testInfo.attach('area-kettle-animation', {
+    body: await page.screenshot(),
+    contentType: 'image/png',
+  })
+
   const expectedSize = geometry.cellSize + geometry.cellStep * 4
 
   expect(geometry.width).toBeCloseTo(expectedSize, 0)
