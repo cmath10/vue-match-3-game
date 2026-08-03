@@ -1,50 +1,14 @@
 import { createI18n } from 'vue-i18n'
 
+import { en } from '@/locales/en'
+import { ru } from '@/locales/ru'
+
 const DEFAULT_LOCALE = 'en'
 const SUPPORTED_LOCALES = ['en', 'ru'] as const
 
 type SupportedLocale = typeof SUPPORTED_LOCALES[number]
 
-const messages = {
-  en: {
-    app: {
-      title: 'Game',
-    },
-    menu: {
-      turns: 'Turns',
-      newGame: 'New game',
-      language: 'Language',
-    },
-    footer: {
-      code: 'Code:',
-      artwork: 'Artwork:',
-    },
-    result: {
-      win: 'You win!',
-      lose: 'Game over',
-      playAgain: 'Play again',
-    },
-  },
-  ru: {
-    app: {
-      title: 'Игра',
-    },
-    menu: {
-      turns: 'Ходы',
-      newGame: 'Новая игра',
-      language: 'Язык',
-    },
-    footer: {
-      code: 'Код:',
-      artwork: 'Графика:',
-    },
-    result: {
-      win: 'Победа!',
-      lose: 'Игра окончена',
-      playAgain: 'Играть снова',
-    },
-  },
-}
+const messages = { en, ru }
 
 export const localeOptions: Array<{ code: SupportedLocale; flag: string; label: string }> = [
   { code: 'en', flag: '🇬🇧', label: 'English' },

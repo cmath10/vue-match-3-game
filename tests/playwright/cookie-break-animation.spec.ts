@@ -60,7 +60,7 @@ test('cancelling cookie fragments prevents an obsolete animation from returning'
 })
 
 test('cookie fragments use all five artist assets and scatter when activated', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/game/1')
 
   await page.evaluate(() => {
     const effect = document.createElement('div')

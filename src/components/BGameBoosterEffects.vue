@@ -2,9 +2,11 @@
     <div
         v-for="effect in effects"
         :key="effect.id"
-        :class="`b-game-booster-effect--${effect.type}`"
+        :class="{
+            'b-game-booster-effect': true,
+            [`b-game-booster-effect--${effect.type}`]: true,
+        }"
         :style="getBoosterVisualEffectStyle(effect)"
-        class="b-game-booster-effect"
     >
         <template v-if="isFirecracker(effect)">
             <span

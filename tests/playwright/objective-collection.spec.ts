@@ -28,7 +28,7 @@ const getRemainingCount = async (objective: Locator): Promise<number> => {
 
 test('ordinary objective tiles reach the counter before it changes', async ({ page }) => {
   await seedMathRandom(page)
-  await page.goto('/')
+  await page.goto('/game/1')
 
   const objectiveType = (await getObjectiveTypes(page))
     .find(type => Object.values(TileType).includes(type as TileType))
@@ -59,7 +59,7 @@ test('only ordinary tiles and mugs use objective flights', () => {
 })
 
 test('mug drops past the board edge before flying to its counter', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/game/1')
 
   const result = await page.evaluate(async ({ boardWidth, modulePath, mugType }) => {
     const { useObjectiveCollection } = await import(modulePath)

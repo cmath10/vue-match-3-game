@@ -2,9 +2,11 @@
     <div
         v-for="flight in flights"
         :key="flight.id"
-        :class="`b-game-button--${flight.type}`"
+        :class="{
+            'b-game-button': true,
+            [`b-game-button--${flight.type}`]: true,
+        }"
         :style="getButtonFlightStyle(flight)"
-        class="b-game-button"
     />
 </template>
 

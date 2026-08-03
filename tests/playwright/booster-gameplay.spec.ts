@@ -37,7 +37,7 @@ const startBoosterScenario = async (
   scenario: BoosterScenario
 ): Promise<Locator> => {
   await seedMathRandom(page, scenario.seed)
-  await page.goto('/')
+  await page.goto('/game/1')
   await expect(page.locator('.b-game-ground')).toBeVisible()
 
   const move = findBoosterMove(await getTiles(page), scenario.type)

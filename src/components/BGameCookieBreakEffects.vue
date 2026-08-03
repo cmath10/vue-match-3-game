@@ -2,16 +2,20 @@
     <div
         v-for="effect in effects"
         :key="effect.id"
-        :class="{ 'b-game-cookie-break--active': effect.active }"
+        :class="{
+            'b-game-cookie-break': true,
+            'b-game-cookie-break--active': effect.active,
+        }"
         :data-cookie-break-active="effect.active"
         :style="getCookieBreakEffectStyle(effect)"
-        class="b-game-cookie-break"
     >
         <span
             v-for="fragment in fragments"
             :key="fragment"
-            :class="`b-game-cookie-break__fragment--${fragment}`"
-            class="b-game-cookie-break__fragment"
+            :class="{
+                'b-game-cookie-break__fragment': true,
+                [`b-game-cookie-break__fragment--${fragment}`]: true,
+            }"
         />
     </div>
 </template>

@@ -57,7 +57,7 @@ test('button flights include only ordinary tiles actually collected by the box',
 })
 
 test('each ordinary tile type has its corresponding button asset', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/game/1')
 
   const buttonAssets = [
     [TileType.SweetsBarbaris, 'tile-button-barbaris'],

@@ -15,8 +15,10 @@
   "dependencies": {
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.8",
+    "swiper": "^14.0.6",
     "vue": "^3.5.39",
-    "vue-i18n": "^11.4.6"
+    "vue-i18n": "^11.4.6",
+    "vue-router": "^5.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

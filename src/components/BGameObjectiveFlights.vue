@@ -1,16 +1,18 @@
 <template>
-    <teleport to="body">
-        <b-game-tile
+    <Teleport to="body">
+        <BGameTile
             v-for="flight in flights"
             :key="flight.id"
-            :class="`b-game-objective-flight--${flight.phase}`"
+            :class="{
+                'b-game-objective-flight': true,
+                [`b-game-objective-flight--${flight.phase}`]: true,
+            }"
             :data-objective-flight-phase="flight.phase"
             :data-objective-type="flight.type"
             :style="getObjectiveFlightStyle(flight)"
             :type="flight.type"
-            class="b-game-objective-flight"
         />
-    </teleport>
+    </Teleport>
 </template>
 
 <script lang="ts" setup>

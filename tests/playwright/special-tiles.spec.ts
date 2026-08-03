@@ -6,7 +6,7 @@ import { seedMathRandom } from './helpers/game-board'
 
 test('new game renders special tile mechanics', async ({ page }) => {
   await seedMathRandom(page)
-  await page.goto('/')
+  await page.goto('/game/1')
 
   await expect(page.locator('.b-game-ground__tile.b-game-tile--special-mug')).toHaveCount(3)
   await expect(page.locator('.b-game-ground__tile.b-game-tile--special-cookie')).toHaveCount(4)
@@ -21,7 +21,7 @@ test('new game renders special tile mechanics', async ({ page }) => {
 
 test('package blockers cover the whole cell and cannot be selected', async ({ page }) => {
   await seedMathRandom(page)
-  await page.goto('/')
+  await page.goto('/game/1')
 
   const packagedTile = page.locator('.b-game-ground__tile.b-game-tile--blocker-special-package').first()
   const cell = page.locator('.b-game-ground__cell').first()
@@ -49,7 +49,7 @@ test('package blockers cover the whole cell and cannot be selected', async ({ pa
 
 test('mugs use highlighted assets when selected for a swap', async ({ page }) => {
   await seedMathRandom(page)
-  await page.goto('/')
+  await page.goto('/game/1')
 
   const mugTile = page.locator('.b-game-ground__tile.b-game-tile--special-mug').first()
 
@@ -61,7 +61,7 @@ test('mugs use highlighted assets when selected for a swap', async ({ page }) =>
 
 test('cookies use highlighted assets when selected for a swap', async ({ page }) => {
   await seedMathRandom(page)
-  await page.goto('/')
+  await page.goto('/game/1')
 
   const cookieTile = page.locator(
     '.b-game-ground__tile.b-game-tile--special-cookie.b-game-tile--cookie-jam-2'
@@ -77,7 +77,7 @@ test('cookies use highlighted assets when selected for a swap', async ({ page })
 })
 
 test('boosters have regular and highlighted game assets', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/game/1')
 
   const boosterTypes = Object.values(BoosterType)
 

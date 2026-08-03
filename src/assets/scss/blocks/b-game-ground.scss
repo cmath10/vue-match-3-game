@@ -45,6 +45,12 @@
     inset: var(--panel-padding);
   }
 
+  &__tiles > &__tile {
+    position: absolute;
+    width: var(--tile-size);
+    height: var(--tile-size);
+  }
+
   &__tile {
     position: absolute;
     top: 0;
@@ -57,16 +63,16 @@
       transform var(--tile-transition-duration) cubic-bezier(0.22, 1, 0.36, 1),
       opacity var(--tile-transition-duration) ease;
 
-    &--selected {
-      background-image: var(--tile-selected-background);
-
-      &::after {
-        background-image: var(--tile-selected-overlay-background, var(--tile-overlay-background));
-      }
-    }
-
     &--collecting {
       opacity: 0;
+    }
+  }
+
+  &__tile--selected#{&}__tile--selected {
+    background-image: var(--tile-selected-background);
+
+    &::after {
+      background-image: var(--tile-selected-overlay-background, var(--tile-overlay-background));
     }
   }
 

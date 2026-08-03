@@ -2,37 +2,23 @@
     <div class="b-game-menu">
         <h1 class="b-game-menu__title">
             {{ t('app.title') }}
+            <small>{{ t('menu.level', { level: levelId }) }}</small>
         </h1>
 
-        <div
-            :aria-label="t('menu.language')"
-            class="b-game-menu__language"
-            role="group"
-        >
-            <button
-                v-for="option in localeOptions"
-                :key="option.code"
-                :aria-label="option.label"
-                :aria-pressed="locale === option.code"
-                :class="{ 'b-game-menu__language-button--active': locale === option.code }"
-                class="b-game-menu__language-button"
-                type="button"
-                @click="setLocale(option.code)"
-            >
-                {{ option.flag }}
-            </button>
-        </div>
+        <BLocaleSwitcher class="b-game-menu__language" />
 
         <div class="b-game-menu__objectives">
             <div
                 v-for="(objective, index) in objectivesComputed"
                 :key="index"
-                :class="{ 'b-game-menu__objective--completed': objective.completed }"
+                :class="{
+                    'b-game-menu__objective': true,
+                    'b-game-menu__objective--completed': objective.completed,
+                }"
                 :data-objective-type="objective.type"
-                class="b-game-menu__objective"
             >
                 <span class="b-game-menu__objective-tile">
-                    <b-game-tile :type="objective.type" :small="true" />
+                    <BGameTile :type="objective.type" :small="true" />
                 </span>
 
                 <span v-if="!objective.completed">&times; {{ objective.count }}</span>
@@ -49,13 +35,23 @@
             </div>
         </div>
 
-        <button
-            class="b-game-menu__button btn btn-outline-light"
-            type="button"
-            @click="emit('new-game')"
-        >
-            {{ t('menu.newGame') }}
-        </button>
+        <div class="b-game-menu__actions">
+            <button
+                class="b-game-menu__button btn btn-outline-light"
+                type="button"
+                @click="emit('new-game')"
+            >
+                {{ t('menu.newGame') }}
+            </button>
+
+            <button
+                class="b-game-menu__button btn btn-outline-light"
+                type="button"
+                @click="emit('main-menu')"
+            >
+                {{ t('menu.mainMenu') }}
+            </button>
+        </div>
     </div>
 </template>
 
@@ -66,21 +62,22 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import BGameTile from '@/components/BGameTile.vue'
-
-import { localeOptions, setLocale } from '@/i18n'
+import BLocaleSwitcher from '@/components/BLocaleSwitcher.vue'
 
 const props = defineProps<{
   objectives: Objective[]
   counters: Counter[]
   turns: number
+  levelId: number
 }>()
 const emit = defineEmits<{
   'new-game': []
+  'main-menu': []
 }>()
 
 defineOptions({ name: 'BGameMenu' })
 
-const { locale, t } = useI18n()
+const { t } = useI18n()
 
 const countersByType = computed(() => {
   const countersByType = new Map<Counter['type'], number>()

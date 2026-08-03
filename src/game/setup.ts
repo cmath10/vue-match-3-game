@@ -1,13 +1,46 @@
+import type { BoardTileType } from '@/domain/enums'
 import type { Counter, Objective, Tile } from '@/domain/types'
 import type TileGrid from '@/game/board/TileGrid'
 import type { TileType } from '@/domain/enums'
 
 import { COUNTER_TYPES } from '@/domain/config'
 import { generateObjectives } from '@/domain/objectives'
+import { getMatchableTileBoard, getMovableTileBoard } from '@/game/board/boardProjection'
+import { hasAvailableMove } from '@/domain/board/availableMoves'
 import { isMatchableTile } from '@/domain/tiles'
+import { placeSpecialTiles } from '@/game/board/specialTiles'
 import { SPECIAL_OBJECTIVE_TYPES, SPECIAL_TARGETS } from '@/domain/config'
 
 type SelectRandom = <T>(items: T[]) => T
+type CreateTile = (type: BoardTileType, row: number, column: number) => Tile
+
+type PlayableLevelOptions = {
+  grid: TileGrid
+  width: number
+  height: number
+  objectives: Objective[]
+  counters: Counter[]
+  createTile: CreateTile
+  fillGrid: () => void
+  resetTileIds: () => void
+  selectRandom: SelectRandom
+}
+
+export const initializePlayableLevel = (options: PlayableLevelOptions): void => {
+  do {
+    options.grid.clear()
+    options.objectives.splice(0)
+    options.counters.splice(0)
+    options.resetTileIds()
+    options.fillGrid()
+    placeSpecialTiles(options.grid, options.width, options.height, options.createTile)
+  } while (!hasAvailableMove(
+    getMatchableTileBoard(options.grid),
+    getMovableTileBoard(options.grid)
+  ))
+
+  initializeGameGoals(options.grid, options.objectives, options.counters, options.selectRandom)
+}
 
 export const initializeGameGoals = (
   grid: TileGrid,

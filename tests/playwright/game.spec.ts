@@ -65,7 +65,7 @@ const expectSwapAnimationStarted = async (page: Page, move: Move) => {
 test('expanded board keeps an 11 by 9 grid readable on mobile', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await seedMathRandom(page)
-  await page.goto('/')
+  await page.goto('/game/1')
 
   const cells = page.locator('.b-game-ground__cell')
 
@@ -100,7 +100,7 @@ test('expanded board keeps an 11 by 9 grid readable on mobile', async ({ page })
 
 test('valid moves keep animated tiles inside the board', async ({ page }, testInfo) => {
   await seedMathRandom(page)
-  await page.goto('/')
+  await page.goto('/game/1')
   await expect(page.locator('.b-game-ground')).toBeVisible()
 
   const objectiveTypes = await getObjectiveTypes(page)
@@ -160,7 +160,7 @@ test('valid moves keep animated tiles inside the board', async ({ page }, testIn
 
 test('vertical valid moves animate before settling', async ({ page }) => {
   await seedMathRandom(page)
-  await page.goto('/')
+  await page.goto('/game/1')
   await expect(page.locator('.b-game-ground')).toBeVisible()
 
   const move = findVerticalValidMove(await getTiles(page))
@@ -173,7 +173,7 @@ test('vertical valid moves animate before settling', async ({ page }) => {
 
 test('directional mouse drag performs a valid ordinary move', async ({ page }) => {
   await seedMathRandom(page)
-  await page.goto('/')
+  await page.goto('/game/1')
   await expect(page.locator('.b-game-ground')).toBeVisible()
 
   const move = findValidMove(await getTiles(page))

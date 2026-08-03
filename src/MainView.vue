@@ -1,78 +1,63 @@
 <template>
-    <div :style="boardStyle" class="b-game-layout">
+    <div
+        v-if="entry.ready"
+        :style="boardStyle"
+        class="b-game-layout"
+    >
         <aside class="b-game-layout__menu">
-            <b-game-menu
+            <BGameMenu
                 :counters="counters"
+                :level-id="props.levelId"
                 :objectives="objectives"
                 :turns="turns"
+                @main-menu="openRoute('home')"
                 @new-game="startNewGame"
             />
         </aside>
 
         <main class="b-game-layout__field">
             <div class="b-game-layout__board">
-                <div class="b-game-ground">
-                    <div class="b-game-ground__cells">
-                        <div
-                            v-for="cell in cells"
-                            :key="cell.key"
-                            class="b-game-ground__cell"
-                        />
-                    </div>
-
-                    <div class="b-game-ground__tiles">
-                        <b-game-tile
-                            v-for="tile in activeTiles"
-                            :key="tile.id"
-                            :class="{
-                                'b-game-ground__tile--selected': tile.selected,
-                                'b-game-ground__tile--collecting': collectingTileIds.has(tile.id),
-                            }"
-                            :data-tile-id="tile.id"
-                            :blocker="tile.blocker?.type"
-                            :health="tile.health"
-                            :style="getTileStyle(tile)"
-                            :type="tile.type"
-                            class="b-game-ground__tile"
-                            @click="onTileClick(tile)"
-                            @dblclick="onTileDoubleClick(tile)"
-                            @pointercancel="onTilePointerCancel"
-                            @pointerdown="onTilePointerDown(tile, $event)"
-                            @pointerup="onTilePointerUp($event)"
-                        />
-
-                        <b-game-button-flights :flights="buttonFlights" />
-                        <b-game-booster-effects :effects="boosterVisualEffects" />
-                        <b-game-cookie-break-effects :effects="cookieBreakEffects" />
-                    </div>
-
-                    <b-game-result-overlay
-                        v-if="gameResult"
-                        :result="gameResult"
-                        @play-again="startNewGame"
-                    />
-                </div>
+                <BGameBoard
+                    :booster-effects="boosterVisualEffects"
+                    :button-flights="buttonFlights"
+                    :cells="cells"
+                    :collecting-tile-ids="collectingTileIds"
+                    :cookie-break-effects="cookieBreakEffects"
+                    :result="gameResult"
+                    :tiles="activeTiles"
+                    @play-again="startNewGame"
+                    @tile-click="onTileClick"
+                    @tile-double-click="onTileDoubleClick"
+                    @tile-pointer-cancel="onTilePointerCancel"
+                    @tile-pointer-down="onTilePointerDown"
+                    @tile-pointer-up="onTilePointerUp"
+                />
             </div>
 
-            <footer class="b-game-layout__footer">
-                <div class="b-game-layout__footer-panel">
-                    <span>
-                        {{ t('footer.code') }} <a href="https://github.com/cmath10" class="b-game-layout__link">https://github.com/cmath10</a>
-                    </span>
-
-                    <span>
-                        {{ t('footer.artwork') }} <a href="https://www.artstation.com/jackhook" class="b-game-layout__link">https://www.artstation.com/jackhook</a>
-                    </span>
-                </div>
-            </footer>
+            <BGameFooter />
         </main>
 
-        <b-game-objective-flights :flights="objectiveFlights" />
+        <BGameObjectiveFlights :flights="objectiveFlights" />
     </div>
+
+    <BLevelAttemptPrompt
+        v-else-if="entry.pendingAttempt"
+        :snapshot="entry.pendingAttempt"
+        @back="openRoute('levels')"
+        @continue="entry.continueAttempt"
+        @restart="entry.restartAttempt"
+    />
+
+    <main v-else class="b-app-screen b-app-screen--immersive">
+        <section class="b-app-screen__panel">
+            {{ t('welcome.preparing') }}
+        </section>
+    </main>
 </template>
 
 <script lang="ts" setup>
 import type {
+  BoosterWave,
   Counter,
   GameResult,
   MoveMatch,
@@ -83,7 +68,9 @@ import type {
   TileMovement,
 } from '@/domain/types'
 
-import type { BoardTileType, ObjectiveType } from '@/domain/enums'
+import type { BoardTileType } from '@/domain/enums'
+import type { GameSnapshot } from '@/domain/progress'
+import type { ObjectiveType } from '@/domain/enums'
 
 import {
   computed,
@@ -92,22 +79,25 @@ import {
   ref,
 } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 
-import BGameBoosterEffects from '@/components/BGameBoosterEffects.vue'
-import BGameButtonFlights from '@/components/BGameButtonFlights.vue'
-import BGameCookieBreakEffects from '@/components/BGameCookieBreakEffects.vue'
+import BGameBoard from '@/components/BGameBoard.vue'
+import BGameFooter from '@/components/BGameFooter.vue'
 import BGameMenu from '@/components/BGameMenu.vue'
 import BGameObjectiveFlights from '@/components/BGameObjectiveFlights.vue'
-import BGameResultOverlay from '@/components/BGameResultOverlay.vue'
-import BGameTile from '@/components/BGameTile.vue'
+import BLevelAttemptPrompt from '@/components/BLevelAttemptPrompt.vue'
+
+import TileGrid from '@/game/board/TileGrid'
 
 import { useBoosterAnimation } from '@/composables/useBoosterAnimation'
 import { useCookieBreakAnimation } from '@/composables/useCookieBreakAnimation'
+import { useGameProgress } from '@/composables/useGameProgress'
+import { useLevelEntry } from '@/composables/useLevelEntry'
 import { useObjectiveCollection } from '@/composables/useObjectiveCollection'
 
 import { applyBoosterEffectPositions } from '@/game/board/boardHits'
-import { AVAILABLE_TILE_TYPES, BOARD_HEIGHT, BOARD_WIDTH } from '@/domain/config'
 import { clearMatchedPositions } from '@/game/board/boardHits'
+import { cloneBoard } from '@/domain/progress'
 import { collapseGrid } from '@/game/board/boardTransitions'
 import { collectDroppedMugs } from '@/game/board/specialTiles'
 import { createMatch3BoosterTurn } from '@/game/turns/boosterTurn'
@@ -121,20 +111,29 @@ import { getGridTilePosition, getMatchableTileBoard } from '@/game/board/boardPr
 import { getMatchPositions } from '@/domain/board/matches'
 import { getMoveMatch } from '@/domain/boosters/creation'
 import { getPointerTargetTile } from '@/input/tilePointerTarget'
-import { getTileStyle } from '@/presentation/tiles'
-import { initializeGameGoals } from '@/game/setup'
+import { initializePlayableLevel } from '@/game/setup'
 import { placeCreatedBoosters } from '@/game/board/boardBoosters'
-import { placeSpecialTiles } from '@/game/board/specialTiles'
 import { refillGrid } from '@/game/board/boardTransitions'
-import TileGrid from '@/game/board/TileGrid'
+import { usePlayerProgress } from '@/state/playerProgress'
+
 import { TileType } from '@/domain/enums'
+
+import { AVAILABLE_TILE_TYPES } from '@/domain/config'
+import { BOARD_HEIGHT, BOARD_WIDTH } from '@/domain/config'
 
 const COUNT_TURNS = 25
 const ANIMATION_DELAY = 480
+
 const random = <T>(array: T[]): T => array[Math.floor(Math.random() * array.length)]
-defineOptions({ name: 'MainView' })
+
+const props = defineProps<{
+  levelId: number;
+  resumeRequested: boolean;
+}>()
 
 const { t } = useI18n()
+const router = useRouter()
+const { state: playerState } = usePlayerProgress()
 
 const grid = reactive(new TileGrid(BOARD_WIDTH, BOARD_HEIGHT)) as TileGrid
 const objectives = reactive<Objective[]>([])
@@ -145,6 +144,21 @@ const gameResult = ref<GameResult | null>(null)
 const gameVersion = ref(0)
 const nextTileId = ref(0)
 const boardStyle = getBoardStyle(BOARD_WIDTH, BOARD_HEIGHT)
+const {
+  begin: beginProgress,
+  persist: persistProgress,
+  recordBooster,
+  recordCollection,
+  recordTurn,
+  restore: restoreProgress,
+} = useGameProgress({
+  getLevelId: () => props.levelId,
+  getBoard: () => grid.getTileList(),
+  objectives,
+  counters,
+  turns,
+  nextTileId,
+})
 
 const locked = computed(() => evaluating.value || gameResult.value !== null)
 const activeTiles = computed(() => grid.getTiles().sort((a, b) => a.id - b.id))
@@ -227,6 +241,7 @@ const {
 } = useCookieBreakAnimation({ waitAnimation, nextAnimationFrame })
 
 const collectTile = (collection: ObjectiveCollection): void => {
+  recordCollection(collection.type)
   collectCookieBreak(collection)
   collectObjective(collection)
 }
@@ -364,8 +379,10 @@ const updateGameResult = () => {
 
 const finishTurn = () => {
   turns.value--
+  recordTurn()
   updateGameResult()
   evaluating.value = false
+  persistProgress(gameResult.value)
 }
 
 const revertFailedMove = async (a: Tile, b: Tile, version: number) => {
@@ -379,6 +396,11 @@ const revertFailedMove = async (a: Tile, b: Tile, version: number) => {
   evaluating.value = false
 }
 
+const animateTrackedBoosterWave = async (wave: BoosterWave): Promise<void> => {
+  wave.effects.forEach(effect => recordBooster(effect.booster))
+  await animateBoosterWave(wave)
+}
+
 const { activateBooster, swipeBooster } = createMatch3BoosterTurn({
   grid,
   getVersion: () => gameVersion.value,
@@ -387,7 +409,7 @@ const { activateBooster, swipeBooster } = createMatch3BoosterTurn({
   waitAnimation,
   settleGrid,
   resolvePositions: resolveBoosterPositions,
-  animateWave: animateBoosterWave,
+  animateWave: animateTrackedBoosterWave,
   finishTurn,
   swapTiles,
   selectButtonBoxTarget: types => types.length === 0 ? null : random(types),
@@ -417,30 +439,48 @@ const fillGrid = () => {
   })
 }
 
-const startNewGame = () => {
+const resetRuntime = (): void => {
   gameVersion.value++
   evaluating.value = false
   gameResult.value = null
-  turns.value = COUNT_TURNS
   cancelObjectiveCollection()
   cancelCookieBreakAnimation()
+  cancelBoosterAnimation()
   objectives.splice(0)
   counters.splice(0)
-  cancelBoosterAnimation()
   grid.clear()
-  fillGrid()
-  placeSpecialTiles(grid, BOARD_WIDTH, BOARD_HEIGHT, createTile)
-  initializeGameGoals(grid, objectives, counters, random)
 }
 
-startNewGame()
-</script>
+const startNewGame = () => {
+  resetRuntime()
+  turns.value = COUNT_TURNS
+  initializePlayableLevel({
+    grid, width: BOARD_WIDTH, height: BOARD_HEIGHT, objectives, counters, createTile, fillGrid,
+    resetTileIds: () => nextTileId.value = 0, selectRandom: random,
+  })
+  beginProgress()
+}
 
-<style lang="scss">
-@import "assets/scss/variables";
-@import "bootstrap/scss/bootstrap";
-@import "assets/scss/normalize";
-@import "assets/scss/blocks/b-game-layout";
-@import "assets/scss/blocks/b-game-ground";
-@import "assets/scss/transitions/t-game-fade";
-</style>
+const restoreGame = (snapshot: GameSnapshot): void => {
+  resetRuntime()
+  turns.value = snapshot.turns
+  nextTileId.value = snapshot.nextTileId
+  restoreProgress(snapshot)
+  objectives.push(...snapshot.objectives.map(objective => ({ ...objective })))
+  counters.push(...snapshot.counters.map(counter => ({ ...counter })))
+  cloneBoard(snapshot.board).forEach((row, rowIndex) => row.forEach((tile, columnIndex) => {
+    grid.setTile(tile, rowIndex, columnIndex)
+  }))
+}
+
+const openRoute = (name: 'home' | 'levels'): void => void router.push({ name })
+
+const entry = reactive(useLevelEntry({
+  getLevelId: () => props.levelId,
+  isResumeRequested: () => props.resumeRequested,
+  playerState,
+  restoreGame,
+  startGame: startNewGame,
+  onLocked: () => void router.replace({ name: 'levels' }),
+}))
+</script>

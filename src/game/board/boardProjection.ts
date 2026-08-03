@@ -15,6 +15,10 @@ export const getBoardTileTypeBoard = (grid: TileGrid): Board<BoardTileType> => {
   return grid.getTileList().map(row => row.map(tile => tile?.type ?? null))
 }
 
+export const getMovableTileBoard = (grid: TileGrid): boolean[][] => {
+  return grid.getTileList().map(row => row.map(tile => tile !== null && !tile.blocker))
+}
+
 export const getGridTilePosition = (grid: TileGrid, tile: Tile): Position | null => {
   const index = grid.indexOf(tile)
 

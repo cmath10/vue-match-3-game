@@ -146,6 +146,10 @@ export default [
           lang: 'ts',
         },
       }],
+      'vue/component-name-in-template-casing': ['error', 'PascalCase', {
+        globals: ['RouterLink', 'RouterView'],
+        registeredComponentsOnly: true,
+      }],
       'vue/html-closing-bracket-spacing': ['error', {
         startTag: 'never',
         endTag: 'never',
@@ -160,7 +164,7 @@ export default [
           max: 1,
         },
       }],
-      'vue/multi-word-component-names': 'off',
+      'vue/multi-word-component-names': 'error',
       'vue/multiline-html-element-content-newline': ['error', {
         ignoreWhenEmpty: true,
         allowEmptyLines: true,

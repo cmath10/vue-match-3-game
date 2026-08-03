@@ -1,7 +1,8 @@
 import { createApp } from 'vue'
 
-import MainView from './MainView.vue'
+import App from './App.vue'
 
 import { i18n } from './i18n'
+import { router } from './router'
 
-createApp(MainView).use(i18n).mount('#app')
+createApp(App).use(i18n).use(router).mount('#app')
