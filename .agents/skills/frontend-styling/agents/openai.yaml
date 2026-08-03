@@ -1,0 +1,4 @@
+interface:
+  display_name: "Match-3 Frontend Styling"
+  short_description: "SCSS, Vue classes, BEM, and visual validation"
+  default_prompt: "Use $frontend-styling to implement or review Vue match-3 styles with homogeneous class bindings, BEM ownership, and browser-verified layout."
