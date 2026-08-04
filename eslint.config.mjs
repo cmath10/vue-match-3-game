@@ -5,6 +5,7 @@ import pluginImport from 'eslint-plugin-import-x'
 import pluginJs from '@eslint/js'
 import pluginTs from 'typescript-eslint'
 import pluginVue from 'eslint-plugin-vue'
+import pluginVueI18n from '@intlify/eslint-plugin-vue-i18n'
 
 import vueParser from 'vue-eslint-parser'
 
@@ -29,6 +30,7 @@ export default [
       },
     },
     plugins: {
+      '@intlify/vue-i18n': pluginVueI18n,
       dependencies: pluginDependencies,
       'import-x': pluginImport,
     },
@@ -55,6 +57,7 @@ export default [
       ...pluginImport.flatConfigs.recommended.rules,
       ...pluginImport.flatConfigs.typescript.rules,
       '@typescript-eslint/explicit-function-return-type': 'off',
+      '@intlify/vue-i18n/no-dynamic-keys': 'error',
       'brace-style': ['error', '1tbs', { allowSingleLine: true }],
       'comma-dangle': ['error', {
         arrays: 'always-multiline',

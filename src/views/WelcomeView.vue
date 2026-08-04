@@ -46,7 +46,7 @@
                     type="button"
                     @click="openPrimaryAction"
                 >
-                    {{ t(primaryAction.label) }}
+                    {{ primaryAction.label }}
                 </button>
 
                 <RouterLink
@@ -107,10 +107,10 @@ const progress = computed(() => Math.round(completedOperations.value / operation
 const ready = computed(() => completedOperations.value === operationCount)
 const primaryAction = computed(() => {
   if (latestInProgressGame.value) {
-    return { label: 'welcome.continue', levelId: latestInProgressGame.value.levelId }
+    return { label: t('welcome.continue'), levelId: latestInProgressGame.value.levelId }
   }
 
-  return hasPlayed.value ? null : { label: 'welcome.start', levelId: 1 }
+  return hasPlayed.value ? null : { label: t('welcome.start'), levelId: 1 }
 })
 
 const markAssetReady = (url: string): void => {

@@ -144,6 +144,13 @@ const isBeginning = ref(true)
 const isEnd = ref(false)
 const activePage = ref(1)
 const pageCount = ref(1)
+const statusLabels = computed(() => ({
+  locked: t('levels.status.locked'),
+  new: t('levels.status.new'),
+  'in-progress': t('levels.status.in-progress'),
+  completed: t('levels.status.completed'),
+  lose: t('levels.status.lose'),
+}))
 const breakpoints: Record<number, ResponsiveSwiperOptions> = {
   0: {
     slidesPerView: MOBILE_SLIDES,
@@ -180,7 +187,7 @@ const initialSlide = computed(() => Math.max(0, state.value.highestUnlockedLevel
 
 const isUnlocked = (levelId: number): boolean => isLevelUnlocked(state.value, levelId)
 const getStatusLabel = (levelId: number): string => (
-  t(`levels.status.${getLevelDisplayStatus(state.value, levelId)}`)
+  statusLabels.value[getLevelDisplayStatus(state.value, levelId)]
 )
 const updateSwiperState = (instance: SwiperClass): void => {
   isBeginning.value = instance.isBeginning

@@ -33,7 +33,7 @@
                     <h2>{{ t('statistics.tilesCollected') }}</h2>
                     <dl>
                         <div v-for="type in objectiveTypes" :key="type">
-                            <dt>{{ t(`tiles.${type}`) }}</dt>
+                            <dt>{{ tileLabels[type] }}</dt>
                             <dd>{{ statistics.tilesCollected[type] ?? 0 }}</dd>
                         </div>
                     </dl>
@@ -43,7 +43,7 @@
                     <h2>{{ t('statistics.boostersUsed') }}</h2>
                     <dl>
                         <div v-for="type in boosterTypes" :key="type">
-                            <dt>{{ t(`tiles.${type}`) }}</dt>
+                            <dt>{{ tileLabels[type] }}</dt>
                             <dd>{{ statistics.boostersUsed[type] ?? 0 }}</dd>
                         </div>
                     </dl>
@@ -72,6 +72,20 @@ const { state } = usePlayerProgress()
 const statistics = computed(() => state.value.statistics)
 const objectiveTypes = [...Object.values(TileType), ...Object.values(SpecialTileType)]
 const boosterTypes = Object.values(BoosterType)
+const tileLabels = computed(() => ({
+  [TileType.SweetsBarbaris]: t('tiles.sweets-barbaris'),
+  [TileType.SweetsFish]: t('tiles.sweets-fish'),
+  [TileType.SweetsRooster]: t('tiles.sweets-rooster'),
+  [TileType.SweetsPillow]: t('tiles.sweets-pillow'),
+  [TileType.SweetsBird]: t('tiles.sweets-bird'),
+  [SpecialTileType.Mug]: t('tiles.special-mug'),
+  [SpecialTileType.Package]: t('tiles.special-package'),
+  [SpecialTileType.Cookie]: t('tiles.special-cookie'),
+  [BoosterType.RowFirecracker]: t('tiles.booster-row-firecracker'),
+  [BoosterType.ColumnFirecracker]: t('tiles.booster-column-firecracker'),
+  [BoosterType.AreaKettle]: t('tiles.booster-area-kettle'),
+  [BoosterType.ButtonBox]: t('tiles.booster-button-box'),
+}))
 const summary = computed(() => [
   { label: t('statistics.gamesStarted'), value: statistics.value.gamesStarted },
   { label: t('statistics.gamesCompleted'), value: statistics.value.gamesCompleted },
