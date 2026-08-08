@@ -32,6 +32,7 @@
             <BGameButtonFlights :flights="buttonFlights" />
             <BGameBoosterEffects :effects="boosterEffects" />
             <BGameCookieBreakEffects :effects="cookieBreakEffects" />
+            <BGameTileBreakEffects :effects="tileBreakEffects" />
         </div>
 
         <BGameResultOverlay
@@ -47,6 +48,7 @@ import type { BoosterVisualEffect } from '@/composables/useBoosterAnimation'
 import type { ButtonFlight } from '@/composables/useButtonCollection'
 import type { CookieBreakEffect } from '@/composables/useCookieBreakAnimation'
 import type { GameCell } from '@/presentation/tiles'
+import type { TileBreakEffect } from '@/composables/useTileBreakAnimation'
 
 import type { GameResult, Tile } from '@/domain/types'
 
@@ -55,6 +57,7 @@ import BGameButtonFlights from '@/components/BGameButtonFlights.vue'
 import BGameCookieBreakEffects from '@/components/BGameCookieBreakEffects.vue'
 import BGameResultOverlay from '@/components/BGameResultOverlay.vue'
 import BGameTile from '@/components/BGameTile.vue'
+import BGameTileBreakEffects from '@/components/BGameTileBreakEffects.vue'
 
 import { getTileStyle } from '@/presentation/tiles'
 
@@ -65,6 +68,7 @@ defineProps<{
   buttonFlights: ButtonFlight[]
   boosterEffects: BoosterVisualEffect[]
   cookieBreakEffects: CookieBreakEffect[]
+  tileBreakEffects: TileBreakEffect[]
   result: GameResult | null
 }>()
 

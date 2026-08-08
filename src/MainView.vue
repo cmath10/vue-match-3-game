@@ -24,6 +24,7 @@
                     :collecting-tile-ids="collectingTileIds"
                     :cookie-break-effects="cookieBreakEffects"
                     :result="gameResult"
+                    :tile-break-effects="tileBreakEffects"
                     :tiles="activeTiles"
                     @play-again="startNewGame"
                     @tile-click="onTileClick"
@@ -94,6 +95,7 @@ import { useCookieBreakAnimation } from '@/composables/useCookieBreakAnimation'
 import { useGameProgress } from '@/composables/useGameProgress'
 import { useLevelEntry } from '@/composables/useLevelEntry'
 import { useObjectiveCollection } from '@/composables/useObjectiveCollection'
+import { useTileBreakAnimation } from '@/composables/useTileBreakAnimation'
 
 import { applyBoosterEffectPositions } from '@/game/board/boardHits'
 import { clearMatchedPositions } from '@/game/board/boardHits'
@@ -240,10 +242,18 @@ const {
   collect: collectCookieBreak,
 } = useCookieBreakAnimation({ waitAnimation, nextAnimationFrame })
 
+const {
+  effects: tileBreakEffects,
+  animatePending: animateTileBreaks,
+  cancel: cancelTileBreakAnimation,
+  collect: collectTileBreak,
+} = useTileBreakAnimation({ waitAnimation, nextAnimationFrame })
+
 const collectTile = (collection: ObjectiveCollection): void => {
   recordCollection(collection.type)
   collectCookieBreak(collection)
   collectObjective(collection)
+  collectTileBreak(collection)
 }
 
 const spawnTile = (i: number, j: number, spawnRow: number): Tile => {
@@ -290,6 +300,7 @@ const waitForResolutionAnimations = () => Promise.all([
   waitAnimation(),
   animateObjectiveCollections(),
   animateCookieBreaks(),
+  animateTileBreaks(),
 ])
 
 const settleGrid = async (version: number, initialMovements: TileMovement[]) => {
@@ -445,6 +456,7 @@ const resetRuntime = (): void => {
   gameResult.value = null
   cancelObjectiveCollection()
   cancelCookieBreakAnimation()
+  cancelTileBreakAnimation()
   cancelBoosterAnimation()
   objectives.splice(0)
   counters.splice(0)

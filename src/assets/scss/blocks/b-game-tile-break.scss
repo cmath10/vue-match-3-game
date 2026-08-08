@@ -1,0 +1,150 @@
+.b-game-tile-break {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  width: var(--tile-size);
+  height: var(--tile-size);
+  pointer-events: none;
+
+  &__tile,
+  &__fragment {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    will-change: transform, opacity;
+  }
+
+  &__tile {
+    opacity: 1;
+    transform: scale(1);
+    transform-origin: center;
+    transition:
+      transform calc(var(--tile-transition-duration) * 0.34) ease-in,
+      opacity calc(var(--tile-transition-duration) * 0.28) ease-in;
+  }
+
+  &__fragment {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    filter: drop-shadow(0 0.12rem 0.12rem rgba(0, 0, 0, 0.2));
+    opacity: 0;
+    transform: scale(0.15);
+
+    &--1 {
+      --tile-break-fragment-x: -72%;
+      --tile-break-fragment-y: -58%;
+      --tile-break-fragment-rotation: -34deg;
+
+      background-image: var(--tile-break-fragment-1);
+    }
+
+    &--2 {
+      --tile-break-fragment-x: -26%;
+      --tile-break-fragment-y: -92%;
+      --tile-break-fragment-rotation: -16deg;
+
+      background-image: var(--tile-break-fragment-2);
+    }
+
+    &--3 {
+      --tile-break-fragment-x: 18%;
+      --tile-break-fragment-y: -108%;
+      --tile-break-fragment-rotation: 14deg;
+
+      background-image: var(--tile-break-fragment-3);
+    }
+
+    &--4 {
+      --tile-break-fragment-x: 72%;
+      --tile-break-fragment-y: -62%;
+      --tile-break-fragment-rotation: 32deg;
+
+      background-image: var(--tile-break-fragment-4);
+    }
+
+    &--5 {
+      --tile-break-fragment-x: 36%;
+      --tile-break-fragment-y: 44%;
+      --tile-break-fragment-rotation: 22deg;
+
+      background-image: var(--tile-break-fragment-5);
+    }
+  }
+
+  &--sweets-barbaris {
+    --tile-break-fragment-1: url("../../images/tile-sweets-barbaris-fragment-1.png");
+    --tile-break-fragment-2: url("../../images/tile-sweets-barbaris-fragment-2.png");
+    --tile-break-fragment-3: url("../../images/tile-sweets-barbaris-fragment-3.png");
+    --tile-break-fragment-4: url("../../images/tile-sweets-barbaris-fragment-4.png");
+    --tile-break-fragment-5: url("../../images/tile-sweets-barbaris-fragment-5.png");
+  }
+
+  &--sweets-fish {
+    --tile-break-fragment-1: url("../../images/tile-sweets-fish-fragment-1.png");
+    --tile-break-fragment-2: url("../../images/tile-sweets-fish-fragment-2.png");
+    --tile-break-fragment-3: url("../../images/tile-sweets-fish-fragment-3.png");
+    --tile-break-fragment-4: url("../../images/tile-sweets-fish-fragment-4.png");
+    --tile-break-fragment-5: url("../../images/tile-sweets-fish-fragment-5.png");
+  }
+
+  &--sweets-rooster {
+    --tile-break-fragment-1: url("../../images/tile-sweets-rooster-fragment-1.png");
+    --tile-break-fragment-2: url("../../images/tile-sweets-rooster-fragment-2.png");
+    --tile-break-fragment-3: url("../../images/tile-sweets-rooster-fragment-3.png");
+    --tile-break-fragment-4: url("../../images/tile-sweets-rooster-fragment-4.png");
+    --tile-break-fragment-5: url("../../images/tile-sweets-rooster-fragment-5.png");
+  }
+
+  &--sweets-pillow {
+    --tile-break-fragment-1: url("../../images/tile-sweets-pillow-fragment-1.png");
+    --tile-break-fragment-2: url("../../images/tile-sweets-pillow-fragment-2.png");
+    --tile-break-fragment-3: url("../../images/tile-sweets-pillow-fragment-3.png");
+    --tile-break-fragment-4: url("../../images/tile-sweets-pillow-fragment-4.png");
+    --tile-break-fragment-5: url("../../images/tile-sweets-pillow-fragment-5.png");
+  }
+
+  &--sweets-bird {
+    --tile-break-fragment-1: url("../../images/tile-sweets-bird-fragment-1.png");
+    --tile-break-fragment-2: url("../../images/tile-sweets-bird-fragment-2.png");
+    --tile-break-fragment-3: url("../../images/tile-sweets-bird-fragment-3.png");
+    --tile-break-fragment-4: url("../../images/tile-sweets-bird-fragment-4.png");
+    --tile-break-fragment-5: url("../../images/tile-sweets-bird-fragment-5.png");
+  }
+
+  &--active &__tile {
+    opacity: 0;
+    transform: scale(0.08);
+  }
+
+  &--active &__fragment {
+    animation: b-game-tile-break-fragment
+      calc(var(--tile-transition-duration) * 0.82)
+      cubic-bezier(0.18, 0.72, 0.3, 1)
+      calc(var(--tile-transition-duration) * 0.12)
+      both;
+  }
+}
+
+@keyframes b-game-tile-break-fragment {
+  0% {
+    opacity: 0;
+    transform: scale(0.15);
+  }
+
+  18% {
+    opacity: 1;
+    transform: scale(0.96);
+  }
+
+  100% {
+    opacity: 0;
+    transform:
+      translate(var(--tile-break-fragment-x), var(--tile-break-fragment-y))
+      rotate(var(--tile-break-fragment-rotation))
+      scale(0.78);
+  }
+}
