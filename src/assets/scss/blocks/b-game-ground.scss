@@ -69,6 +69,9 @@
   }
 
   &__tile--selected#{&}__tile--selected {
+    --tile-current-background: var(--tile-selected-background);
+    --tile-current-overlay-background: var(--tile-selected-overlay-background, var(--tile-overlay-background));
+
     background-image: var(--tile-selected-background);
 
     &::after {

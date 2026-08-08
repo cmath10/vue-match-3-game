@@ -23,6 +23,7 @@
                     :cells="cells"
                     :collecting-tile-ids="collectingTileIds"
                     :cookie-break-effects="cookieBreakEffects"
+                    :landing-tile-ids="landingTileIds"
                     :result="gameResult"
                     :tile-break-effects="tileBreakEffects"
                     :tiles="activeTiles"
@@ -97,6 +98,7 @@ import { useGameProgress } from '@/composables/useGameProgress'
 import { useLevelEntry } from '@/composables/useLevelEntry'
 import { useObjectiveCollection } from '@/composables/useObjectiveCollection'
 import { useTileBreakAnimation } from '@/composables/useTileBreakAnimation'
+import { useTileLandingAnimation } from '@/composables/useTileLandingAnimation'
 
 import { applyBoosterMovePositions } from '@/game/board/boardHits'
 import { clearMatchedPositions } from '@/game/board/boardHits'
@@ -252,6 +254,11 @@ const {
   cancel: cancelTileBreakAnimation,
   collect: collectTileBreak,
 } = useTileBreakAnimation({ waitAnimation: waitTileBreakAnimation, nextAnimationFrame })
+const {
+  tileIds: landingTileIds,
+  animate: animateTileLandings,
+  cancel: cancelTileLandingAnimation,
+} = useTileLandingAnimation({ waitAnimation })
 
 const collectTile = (collection: ObjectiveCollection): void => {
   recordCollection(collection.type)
@@ -353,6 +360,7 @@ const transitionGrid = (): TileMovement[] => {
   collectDroppedMugs(grid, BOARD_WIDTH, BOARD_HEIGHT, collectTile)
   movements.push(...collapseGrid(grid, movements.length))
   movements.push(...refillGrid(grid, BOARD_WIDTH, BOARD_HEIGHT, spawnTile, movements.length))
+  animateTileLandings(movements)
 
   return movements
 }
@@ -461,6 +469,7 @@ const resetRuntime = (): void => {
   cancelObjectiveCollection()
   cancelCookieBreakAnimation()
   cancelTileBreakAnimation()
+  cancelTileLandingAnimation()
   cancelBoosterAnimation()
   objectives.splice(0)
   counters.splice(0)

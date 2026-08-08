@@ -16,6 +16,7 @@
                     'b-game-ground__tile': true,
                     'b-game-ground__tile--selected': tile.selected,
                     'b-game-ground__tile--collecting': collectingTileIds.has(tile.id),
+                    'b-game-tile--landing': landingTileIds.has(tile.id),
                 }"
                 :data-tile-id="tile.id"
                 :blocker="tile.blocker?.type"
@@ -65,6 +66,7 @@ defineProps<{
   cells: GameCell[]
   tiles: Tile[]
   collectingTileIds: Set<number>
+  landingTileIds: Set<number>
   buttonFlights: ButtonFlight[]
   boosterEffects: BoosterVisualEffect[]
   cookieBreakEffects: CookieBreakEffect[]

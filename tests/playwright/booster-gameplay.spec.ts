@@ -406,6 +406,24 @@ test('starting a new game cancels a geometric booster effect', async ({ page }) 
   await expect(page.locator('.b-game-ground__tile')).toHaveCount(BOARD_WIDTH * BOARD_HEIGHT)
 })
 
+test('tiles refilled after a booster use the landing animation', async ({ page }) => {
+  const booster = await startBoosterScenario(page, boosterScenarios[2])
+  const existingIds = new Set((await getTiles(page)).map(tile => tile.id))
+
+  await booster.dblclick()
+
+  await page.waitForFunction((ids) => [...document.querySelectorAll<HTMLElement>('.b-game-ground__tile')]
+    .some((tile) => {
+      const tileId = tile.dataset.tileId
+      const hasLandingAnimation = getComputedStyle(tile, '::before').animationName
+        === 'b-game-tile-landing'
+
+      return tileId !== undefined
+        && !ids.includes(tileId)
+        && hasLandingAnimation
+    }), [...existingIds])
+})
+
 const findOrdinaryNeighbor = (
   tiles: TileSnapshot[],
   source: TileSnapshot

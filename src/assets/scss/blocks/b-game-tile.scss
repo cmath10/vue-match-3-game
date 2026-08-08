@@ -13,15 +13,39 @@
     height: 2rem;
   }
 
+  &::before,
   &::after {
     position: absolute;
     inset: 0;
     content: "";
-    background-image: var(--tile-overlay-background);
     background-position: center;
     background-repeat: no-repeat;
-    background-size: contain;
+    transform-origin: center 85%;
     pointer-events: none;
+  }
+
+  &::before {
+    background-image: var(--tile-current-background, var(--tile-background));
+    background-size: cover;
+    opacity: 0;
+  }
+
+  &::after {
+    background-image: var(--tile-current-overlay-background, var(--tile-overlay-background));
+    background-size: contain;
+  }
+
+  &--landing {
+    background-image: none;
+
+    &::before,
+    &::after {
+      animation: b-game-tile-landing var(--tile-transition-duration) linear both;
+    }
+
+    &::before {
+      opacity: 1;
+    }
   }
 
   &--sweets-barbaris {
@@ -74,6 +98,10 @@
     --tile-selected-background: url("../../images/tile-special-mug-selected.png");
 
     background-size: contain;
+
+    &::before {
+      background-size: contain;
+    }
   }
 
   &--special-package {
@@ -81,6 +109,10 @@
     --tile-selected-background: url("../../images/tile-blocker-package.png");
 
     background-size: contain;
+
+    &::before {
+      background-size: contain;
+    }
   }
 
   &--special-cookie {
@@ -104,5 +136,19 @@
   &--cookie-jam-2 {
     --tile-overlay-background: url("../../images/tile-cookie-jam-2.png");
     --tile-selected-overlay-background: url("../../images/tile-cookie-jam-2-selected.png");
+  }
+}
+
+@keyframes b-game-tile-landing {
+  0%, 70% {
+    transform: scale(1);
+  }
+
+  86% {
+    transform: scaleX(1.06) scaleY(0.82);
+  }
+
+  100% {
+    transform: scale(1);
   }
 }

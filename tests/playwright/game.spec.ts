@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import type { Move } from './helpers/game-board'
 
@@ -47,6 +47,20 @@ const waitForNewTiles = async (page: Page, existingIds: Set<string>) => {
     return [...document.querySelectorAll('.b-game-ground__tile')]
       .some(element => !ids.includes(element.getAttribute('data-tile-id') || ''))
   }, [...existingIds])
+}
+
+const getNewTile = async (page: Page, existingIds: Set<string>): Promise<Locator> => {
+  await waitForNewTiles(page, existingIds)
+
+  const tileId = await page.locator('.b-game-ground__tile').evaluateAll((tiles, ids) => (
+    tiles.map(tile => tile.getAttribute('data-tile-id')).find(id => id !== null && !ids.includes(id))
+  ), [...existingIds])
+
+  if (tileId === undefined) {
+    throw new Error('A refilled tile should appear after the move')
+  }
+
+  return page.locator(`.b-game-ground__tile[data-tile-id="${tileId}"]`)
 }
 
 const expectSwapAnimationStarted = async (page: Page, move: Move) => {
@@ -169,6 +183,87 @@ test('vertical valid moves animate before settling', async ({ page }) => {
   await clickTile(page, move.to)
   await page.waitForTimeout(80)
   await expectSwapAnimationStarted(page, move)
+})
+
+test('refilled tiles compress shortly before landing and restore their shape', async ({ page }, testInfo) => {
+  await seedMathRandom(page)
+  await page.goto('/game/1')
+
+  const initialTileIds = new Set((await getTiles(page)).map(tile => tile.id))
+
+  await makeValidMove(page)
+
+  const tile = await getNewTile(page, initialTileIds)
+  const motion = await tile.evaluate(async (element) => {
+    const animation = element.ownerDocument.getAnimations().find(candidate => (
+      candidate instanceof CSSAnimation
+        && candidate.animationName === 'b-game-tile-landing'
+        && candidate.effect instanceof KeyframeEffect
+        && candidate.effect.target === element
+        && candidate.effect.pseudoElement === '::before'
+    ))
+
+    if (animation === undefined) {
+      throw new Error('Refilled tile should have a landing animation')
+    }
+
+    const duration = Number(animation.effect?.getTiming().duration)
+    const measureScale = () => {
+      const transform = getComputedStyle(element, '::before').transform
+      const matrix = transform === 'none' ? new DOMMatrixReadOnly() : new DOMMatrixReadOnly(transform)
+
+      return {
+        x: Math.hypot(matrix.a, matrix.b),
+        y: Math.hypot(matrix.c, matrix.d),
+      }
+    }
+    const seek = async (time: number) => {
+      animation.currentTime = time
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+
+      return measureScale()
+    }
+
+    animation.pause()
+
+    const resting = await seek(0)
+    const compressed = await seek(duration * 0.86)
+
+    return { resting, compressed }
+  })
+
+  await testInfo.attach('tile-before-landing', {
+    body: await page.screenshot(),
+    contentType: 'image/png',
+  })
+
+  const landed = await tile.evaluate(async (element) => {
+    const animation = element.ownerDocument.getAnimations().find(candidate => (
+      candidate instanceof CSSAnimation
+        && candidate.animationName === 'b-game-tile-landing'
+        && candidate.effect instanceof KeyframeEffect
+        && candidate.effect.target === element
+        && candidate.effect.pseudoElement === '::before'
+    ))
+
+    if (animation === undefined) {
+      throw new Error('Landing animation should remain active until the tile settles')
+    }
+
+    animation.currentTime = Number(animation.effect?.getTiming().duration)
+    await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+
+    const transform = getComputedStyle(element, '::before').transform
+    const matrix = transform === 'none' ? new DOMMatrixReadOnly() : new DOMMatrixReadOnly(transform)
+
+    return Math.hypot(matrix.c, matrix.d)
+  })
+
+  expect(motion.resting.y).toBeCloseTo(1, 2)
+  expect(motion.compressed.y).toBeLessThan(motion.resting.y)
+  expect(motion.compressed.x).toBeGreaterThan(motion.resting.x)
+  expect(landed).toBeCloseTo(1, 2)
+  await expect(page.locator('.b-game-tile--landing')).toHaveCount(0)
 })
 
 test('directional mouse drag performs a valid ordinary move', async ({ page }) => {
