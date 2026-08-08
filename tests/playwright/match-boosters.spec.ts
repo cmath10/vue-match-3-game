@@ -123,7 +123,7 @@ test('move match includes the connected arm of a T shape', () => {
   }])
 })
 
-test('move creates a kettle from an asymmetric T at the swap origin', () => {
+test('move creates a kettle at the swap destination inside an asymmetric T', () => {
   const match = getMoveMatch(parseBoard([
     '..A...',
     '..A...',
@@ -134,11 +134,11 @@ test('move creates a kettle from an asymmetric T at the swap origin', () => {
   expect(match.positions).toHaveLength(6)
   expect(match.boosters).toEqual([{
     type: BoosterType.AreaKettle,
-    position: { row: 3, column: 2 },
+    position: { row: 2, column: 2 },
   }])
 })
 
-test('move creates a box from a vertical five at the swap origin', () => {
+test('move creates a box at the swap destination inside a vertical five', () => {
   const match = getMoveMatch(parseBoard([
     '..A..',
     '..A..',
@@ -151,8 +151,42 @@ test('move creates a box from a vertical five at the swap origin', () => {
   expect(match.positions).toHaveLength(5)
   expect(match.boosters).toEqual([{
     type: BoosterType.ButtonBox,
-    position: { row: 5, column: 2 },
+    position: { row: 4, column: 2 },
   }])
+})
+
+test('special tile at the other swap destination does not suppress a created booster', () => {
+  const match = getMoveMatch(parseBoard([
+    '..A...',
+    '..A...',
+    '.AAAA.',
+    '......',
+  ]), { row: 3, column: 2 }, { row: 2, column: 2 })
+
+  expect(match.positions).toHaveLength(6)
+  expect(match.boosters).toEqual([{
+    type: BoosterType.AreaKettle,
+    position: { row: 2, column: 2 },
+  }])
+})
+
+test('move creates a booster for each independently matched swap destination', () => {
+  const match = getMoveMatch(parseBoard([
+    '.AAAA.',
+    '.BBBB.',
+  ]), { row: 0, column: 2 }, { row: 1, column: 2 })
+
+  expect(match.positions).toHaveLength(8)
+  expect(match.boosters).toEqual([
+    {
+      type: BoosterType.ColumnFirecracker,
+      position: { row: 0, column: 2 },
+    },
+    {
+      type: BoosterType.ColumnFirecracker,
+      position: { row: 1, column: 2 },
+    },
+  ])
 })
 
 test('cascade creates a booster at the last causal movement destination', () => {

@@ -49,7 +49,7 @@ const startBoosterScenario = async (
   await makeMove(page, move)
   await expect(page.locator('.b-game-menu__turns-value')).toHaveText('24', { timeout: 10_000 })
 
-  const booster = page.locator(`.b-game-ground__tile[data-tile-id="${move.from.id}"]`)
+  const booster = page.locator(`.b-game-ground__tile[data-tile-id="${move.boosterTileId}"]`)
 
   await expect(booster).toHaveClass(new RegExp(`b-game-tile--${scenario.type}`))
   await expect(page.locator('.b-game-ground__tile')).toHaveCount(BOARD_WIDTH * BOARD_HEIGHT)

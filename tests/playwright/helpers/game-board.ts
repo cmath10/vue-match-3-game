@@ -24,6 +24,10 @@ export type Move = {
   to: TileSnapshot
 }
 
+export type BoosterMove = Move & {
+  boosterTileId: string
+}
+
 export { BOARD_HEIGHT, BOARD_WIDTH }
 
 const MATCHABLE_TILE_TYPES = new Set<string>(Object.values(TileType))
@@ -179,12 +183,26 @@ export const findVerticalValidMove = (tiles: TileSnapshot[]): Move => {
   return move
 }
 
-export const findBoosterMove = (tiles: TileSnapshot[], type: BoosterType): Move | null => {
+export const findBoosterMove = (tiles: TileSnapshot[], type: BoosterType): BoosterMove | null => {
   const board = getBoard(tiles)
 
-  return getMoveCandidates(tiles).find(candidate => (
-    getMoveResult(board, candidate).boosters.some(booster => booster.type === type)
-  )) ?? null
+  for (const candidate of getMoveCandidates(tiles)) {
+    const booster = getMoveResult(board, candidate).boosters.find(item => item.type === type)
+
+    if (booster === undefined) {
+      continue
+    }
+
+    const createdAtSourceDestination = booster.position.row === candidate.to.row
+      && booster.position.column === candidate.to.column
+
+    return {
+      ...candidate,
+      boosterTileId: createdAtSourceDestination ? candidate.from.id : candidate.to.id,
+    }
+  }
+
+  return null
 }
 
 export const clickTile = async (page: Page, tile: TileSnapshot) => {

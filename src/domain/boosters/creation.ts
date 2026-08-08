@@ -21,14 +21,14 @@ const BUTTON_BOX_MATCH_LENGTH = 5
 
 export const getMoveMatch = <T extends BoardTile>(
   board: Board<T>,
-  movedPosition: Position,
-  swappedPosition: Position
+  sourceDestination: Position,
+  targetDestination: Position
 ): MoveMatch => {
-  const lines = findMoveMatchLines(board, movedPosition, swappedPosition)
+  const lines = findMoveMatchLines(board, sourceDestination, targetDestination)
 
   return {
     positions: getMatchPositions(lines),
-    boosters: toArray(getMoveBoosterCreation(board, lines, movedPosition)),
+    boosters: getMoveBoosterCreations(lines, sourceDestination, targetDestination),
   }
 }
 
@@ -58,23 +58,16 @@ export const getBoosterCreation = <T extends BoardTile>(
   return type === null ? null : { type, position }
 }
 
-const getMoveBoosterCreation = <T extends BoardTile>(
-  board: Board<T>,
+const getMoveBoosterCreations = <T extends BoardTile>(
   lines: Array<MatchLine<T>>,
-  movedPosition: Position
-): BoosterCreation | null => {
-  const destinationCreation = getBoosterCreation(lines, movedPosition)
+  sourceDestination: Position,
+  targetDestination: Position
+): BoosterCreation[] => findMatchGroups(lines).flatMap((group) => {
+  const anchor = [sourceDestination, targetDestination]
+    .find(position => group.some(line => line.positions.some(item => isSamePosition(item, position))))
 
-  if (destinationCreation !== null || board[movedPosition.row]?.[movedPosition.column] === null) {
-    return destinationCreation
-  }
-
-  const fallbackType = findMatchGroups(lines)
-    .map(getBoosterType)
-    .find((type): type is BoosterType => type !== null)
-
-  return fallbackType === undefined ? null : { type: fallbackType, position: movedPosition }
-}
+  return anchor === undefined ? [] : toArray(getBoosterCreation(group, anchor))
+})
 
 const getBoosterType = <T extends BoardTile>(group: Array<MatchLine<T>>): BoosterType | null => {
   if (hasIntersectingOrientations(group)) {
@@ -118,3 +111,4 @@ const findCausalMovement = <T extends BoardTile>(
 
 const toArray = <T>(value: T | null): T[] => value === null ? [] : [value]
 const getPositionKey = ({ row, column }: Position): string => `${row}-${column}`
+const isSamePosition = (a: Position, b: Position): boolean => a.row === b.row && a.column === b.column
