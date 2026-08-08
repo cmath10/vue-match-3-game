@@ -4,9 +4,15 @@ import type { BoardTileType } from '@/domain/enums'
 
 import { expect, test } from '@playwright/test'
 
-import { getBoosterSwipeActivations, resolveBoosterWave } from '@/domain/boosters/chain'
+import { getBoosterSwipe } from '@/domain/boosters/combinations'
+import { resolveBoosterWave } from '@/domain/boosters/chain'
 
-import { BoosterType, SpecialTileType, TileType } from '@/domain/enums'
+import {
+  BoosterCombinationType,
+  BoosterType,
+  SpecialTileType,
+  TileType,
+} from '@/domain/enums'
 
 test('booster wave activates each hit booster once and deduplicates positions', () => {
   const board: Board<BoardTileType> = [
@@ -78,48 +84,60 @@ test('button box is still consumed when no ordinary tile type is present', () =>
 })
 
 test('button box swipe carries the selected ordinary type to its destination', () => {
-  expect(getBoosterSwipeActivations(
+  expect(getBoosterSwipe(
     BoosterType.ButtonBox,
     TileType.SweetsRooster,
     { row: 1, column: 2 },
     { row: 1, column: 1 }
-  )).toEqual([{
-    source: { row: 1, column: 2 },
-    targetType: TileType.SweetsRooster,
-  }])
+  )).toEqual({
+    activations: [{
+      source: { row: 1, column: 2 },
+      targetType: TileType.SweetsRooster,
+    }],
+    combination: null,
+  })
 })
 
-test('two swiped boosters activate from both swapped destinations', () => {
-  expect(getBoosterSwipeActivations(
+test('a swiped kettle and firecracker form a combination at the source destination', () => {
+  expect(getBoosterSwipe(
     BoosterType.AreaKettle,
     BoosterType.RowFirecracker,
     { row: 2, column: 3 },
     { row: 2, column: 2 }
-  )).toEqual([
-    { source: { row: 2, column: 3 } },
-    { source: { row: 2, column: 2 } },
-  ])
+  )).toEqual({
+    activations: [],
+    combination: {
+      type: BoosterCombinationType.KettleFirecracker,
+      source: { row: 2, column: 3 },
+      participants: [{ row: 2, column: 3 }, { row: 2, column: 2 }],
+      boosters: [BoosterType.AreaKettle, BoosterType.RowFirecracker],
+    },
+  })
 })
 
-test('two identical swiped boosters activate from both swapped destinations', () => {
-  expect(getBoosterSwipeActivations(
+test('two kettles keep their two base activations until their combination is defined', () => {
+  expect(getBoosterSwipe(
     BoosterType.AreaKettle,
     BoosterType.AreaKettle,
     { row: 2, column: 3 },
     { row: 2, column: 2 }
-  )).toEqual([
-    { source: { row: 2, column: 3 } },
-    { source: { row: 2, column: 2 } },
-  ])
+  )).toEqual({
+    activations: [
+      { source: { row: 2, column: 3 } },
+      { source: { row: 2, column: 2 } },
+    ],
+    combination: null,
+  })
 })
 
 test('button box uses random selection when swiped with a special object', () => {
-  expect(getBoosterSwipeActivations(
+  expect(getBoosterSwipe(
     BoosterType.ButtonBox,
     SpecialTileType.Cookie,
     { row: 0, column: 1 },
     { row: 0, column: 0 }
-  )).toEqual([{
-    source: { row: 0, column: 1 },
-  }])
+  )).toEqual({
+    activations: [{ source: { row: 0, column: 1 } }],
+    combination: null,
+  })
 })

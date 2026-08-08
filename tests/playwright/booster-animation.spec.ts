@@ -30,6 +30,8 @@ test('visual effects include geometric boosters but keep button collection separ
       },
     ],
     positions: [],
+    activatedBoosters: [],
+    combination: null,
   }
 
   expect(getBoosterVisualEffects(wave)).toEqual([

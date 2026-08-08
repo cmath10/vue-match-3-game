@@ -2,6 +2,7 @@ import type {
   Board,
   BoardEffect,
   BoosterActivation,
+  BoosterCombination,
   BoosterWave,
   Position,
   SelectButtonBoxTarget,
@@ -10,56 +11,71 @@ import type {
 import type { BoardTileType } from '@/domain/enums'
 
 import { BoosterType } from '@/domain/enums'
+import { getBoosterCombinationEffects } from '@/domain/boosters/combinations'
 import {
   getBoosterEffect,
   getButtonBoxEffect,
   getPresentTileTypes,
 } from '@/domain/boosters/effects'
-import { isBoosterType, isTileType } from '@/domain/tiles'
+import { isBoosterType } from '@/domain/tiles'
 
-export const getBoosterSwipeActivations = (
-  sourceType: BoardTileType,
-  targetType: BoardTileType,
-  sourceDestination: Position,
-  targetDestination: Position
-): BoosterActivation[] | null => {
-  if (!isBoosterType(sourceType)) {
-    return null
-  }
-
-  const source = getSourceActivation(sourceType, targetType, sourceDestination)
-
-  return isBoosterType(targetType)
-    ? [source, { source: targetDestination }]
-    : [source]
+type WaveResolution = {
+  queue: BoosterActivation[]
+  activated: Set<string>
+  positions: Map<string, Position>
+  effects: BoardEffect[]
+  activatedBoosters: BoosterType[]
 }
 
 export const resolveBoosterWave = (
   board: Board<BoardTileType>,
   activations: BoosterActivation[],
-  selectButtonBoxTarget: SelectButtonBoxTarget
+  selectButtonBoxTarget: SelectButtonBoxTarget,
+  combination: BoosterCombination | null = null
 ): BoosterWave => {
-  const queue = [...activations]
-  const activated = new Set<string>()
-  const positions = new Map<string, Position>()
-  const effects: BoardEffect[] = []
+  const resolution = createWaveResolution(board, activations, combination)
 
-  while (queue.length > 0) {
-    resolveNextActivation(board, queue, activated, positions, effects, selectButtonBoxTarget)
+  resolution.effects.forEach(effect => enqueueEffect(
+    effect, board, resolution.queue, resolution.positions
+  ))
+  resolveActivationQueue(board, resolution, selectButtonBoxTarget)
+
+  return {
+    effects: resolution.effects,
+    positions: [...resolution.positions.values()],
+    activatedBoosters: resolution.activatedBoosters,
+    combination,
   }
+}
 
-  return { effects, positions: [...positions.values()] }
+const createWaveResolution = (
+  board: Board<BoardTileType>,
+  activations: BoosterActivation[],
+  combination: BoosterCombination | null
+): WaveResolution => ({
+  queue: [...activations],
+  activated: new Set(combination?.participants.map(getPositionKey) ?? []),
+  positions: new Map(),
+  effects: getBoosterCombinationEffects(combination, board[0].length, board.length),
+  activatedBoosters: [...(combination?.boosters ?? [])],
+})
+
+const resolveActivationQueue = (
+  board: Board<BoardTileType>,
+  resolution: WaveResolution,
+  selectButtonBoxTarget: SelectButtonBoxTarget
+): void => {
+  while (resolution.queue.length > 0) {
+    resolveNextActivation(board, resolution, selectButtonBoxTarget)
+  }
 }
 
 const resolveNextActivation = (
   board: Board<BoardTileType>,
-  queue: BoosterActivation[],
-  activated: Set<string>,
-  positions: Map<string, Position>,
-  effects: BoardEffect[],
+  resolution: WaveResolution,
   selectButtonBoxTarget: SelectButtonBoxTarget
 ): void => {
-  const pending = getPendingBooster(board, queue, activated)
+  const pending = getPendingBooster(board, resolution.queue, resolution.activated)
 
   if (pending === null) {
     return
@@ -67,8 +83,9 @@ const resolveNextActivation = (
 
   const effect = createEffect(board, pending.booster, pending.activation, selectButtonBoxTarget)
 
-  effects.push(effect)
-  enqueueEffect(effect, board, queue, positions)
+  resolution.effects.push(effect)
+  resolution.activatedBoosters.push(pending.booster)
+  enqueueEffect(effect, board, resolution.queue, resolution.positions)
 }
 
 const getPendingBooster = (
@@ -143,13 +160,3 @@ const getBoardTile = (board: Board<BoardTileType>, position: Position): BoardTil
 }
 
 const getPositionKey = ({ row, column }: Position): string => `${row}-${column}`
-
-const getSourceActivation = (
-  sourceType: BoosterType,
-  targetType: BoardTileType,
-  source: Position
-): BoosterActivation => {
-  return sourceType === BoosterType.ButtonBox && isTileType(targetType)
-    ? { source, targetType }
-    : { source }
-}

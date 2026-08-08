@@ -1,5 +1,7 @@
 import type {
   BoosterActivation,
+  BoosterCombination,
+  BoosterSwipe,
   BoosterWave,
   MoveMatch,
   Position,
@@ -11,7 +13,7 @@ import type {
 import type TileGrid from '@/game/board/TileGrid'
 
 import { getBoardTileTypeBoard } from '@/game/board/boardProjection'
-import { getBoosterSwipeActivations } from '@/domain/boosters/chain'
+import { getBoosterSwipe } from '@/domain/boosters/combinations'
 import { getGridTilePosition } from '@/game/board/boardProjection'
 import { getMatchableTileBoard } from '@/game/board/boardProjection'
 import { getMoveMatch } from '@/domain/boosters/creation'
@@ -40,7 +42,7 @@ const activateBooster = (options: BoosterTurnOptions, tile: Tile): void => {
   const position = getGridTilePosition(options.grid, tile)
 
   if (position !== null) {
-    void runBoosterTurn(options, [{ source: position }], false, { positions: [], boosters: [] })
+    void runBoosterTurn(options, [{ source: position }], false, { positions: [], boosters: [] }, null)
   }
 }
 
@@ -62,24 +64,24 @@ const startBoosterSwipe = (
   sourceDestination: Position,
   targetDestination: Position
 ): void => {
-  const activations = getSwipeActivations(source, target, sourceDestination, targetDestination)
+  const swipe = getSwipe(source, target, sourceDestination, targetDestination)
 
-  if (activations === null) {
+  if (swipe === null) {
     return
   }
 
   options.swapTiles(source, target)
   const match = getBoosterMoveMatch(options, sourceDestination, targetDestination)
 
-  void runBoosterTurn(options, activations, true, match)
+  void runBoosterTurn(options, swipe.activations, true, match, swipe.combination)
 }
 
-const getSwipeActivations = (
+const getSwipe = (
   source: Tile,
   target: Tile,
   sourceDestination: Position,
   targetDestination: Position
-): BoosterActivation[] | null => getBoosterSwipeActivations(
+): BoosterSwipe | null => getBoosterSwipe(
   source.type,
   target.type,
   sourceDestination,
@@ -90,14 +92,15 @@ const runBoosterTurn = async (
   options: BoosterTurnOptions,
   activations: BoosterActivation[],
   animateSwap: boolean,
-  match: MoveMatch
+  match: MoveMatch,
+  combination: BoosterCombination | null
 ): Promise<void> => {
   const version = options.getVersion()
   options.setEvaluating(true)
   if (!await waitForSwap(options, version, animateSwap)) {
     return
   }
-  const wave = resolveTurnWave(options, activations)
+  const wave = resolveTurnWave(options, activations, combination)
   if (!await animateTurnWave(options, wave, version)) {
     return
   }
@@ -134,12 +137,14 @@ const animateTurnWave = async (
 
 const resolveTurnWave = (
   options: BoosterTurnOptions,
-  activations: BoosterActivation[]
+  activations: BoosterActivation[],
+  combination: BoosterCombination | null
 ) => {
   return resolveBoosterWave(
     getBoardTileTypeBoard(options.grid),
     activations,
-    options.selectButtonBoxTarget
+    options.selectButtonBoxTarget,
+    combination
   )
 }
 

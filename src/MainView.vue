@@ -19,10 +19,13 @@
             <div class="b-game-layout__board">
                 <BGameBoard
                     :booster-effects="boosterVisualEffects"
+                    :booster-combination="boosterCombination"
                     :button-flights="buttonFlights"
                     :cells="cells"
                     :collecting-tile-ids="collectingTileIds"
+                    :combining-booster-tile-ids="combiningBoosterTileIds"
                     :cookie-break-effects="cookieBreakEffects"
+                    :detonating-kettle-tile-ids="detonatingKettleTileIds"
                     :landing-tile-ids="landingTileIds"
                     :result="gameResult"
                     :tile-break-effects="tileBreakEffects"
@@ -194,7 +197,9 @@ const waitTileBreakAnimation = () => new Promise<void>(
 )
 const nextAnimationFrame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
 const {
-  visualEffects: boosterVisualEffects, flights: buttonFlights, collectingTileIds,
+  visualEffects: boosterVisualEffects, combination: boosterCombination,
+  flights: buttonFlights, collectingTileIds, combiningTileIds: combiningBoosterTileIds,
+  detonatingKettleTileIds,
   animateWave: animateBoosterWave, cancel: cancelBoosterAnimation,
 } = useBoosterAnimation({ grid, waitAnimation, nextAnimationFrame })
 
@@ -420,7 +425,7 @@ const revertFailedMove = async (a: Tile, b: Tile, version: number) => {
 }
 
 const animateTrackedBoosterWave = async (wave: BoosterWave): Promise<void> => {
-  wave.effects.forEach(effect => recordBooster(effect.booster))
+  wave.activatedBoosters.forEach(recordBooster)
   await animateBoosterWave(wave)
 }
 

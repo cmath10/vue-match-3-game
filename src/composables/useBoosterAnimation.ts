@@ -1,4 +1,9 @@
-import type { BoosterWave, GeometricBoosterType, Position } from '@/domain/types'
+import type {
+  BoosterCombination,
+  BoosterWave,
+  GeometricBoosterType,
+  Position,
+} from '@/domain/types'
 import type TileGrid from '@/game/board/TileGrid'
 
 import type { Ref } from 'vue'
@@ -22,6 +27,14 @@ type BoosterAnimationOptions = {
   nextAnimationFrame: () => Promise<void>
 }
 
+type BoosterAnimationState = {
+  version: number
+  visualEffects: Ref<BoosterVisualEffect[]>
+  combination: Ref<BoosterCombination | null>
+  combiningTileIds: Ref<Set<number>>
+  detonatingKettleTileIds: Ref<Set<number>>
+}
+
 const GEOMETRIC_BOOSTERS = new Set<BoosterType>([
   BoosterType.RowFirecracker,
   BoosterType.ColumnFirecracker,
@@ -29,40 +42,108 @@ const GEOMETRIC_BOOSTERS = new Set<BoosterType>([
 ])
 
 export const useBoosterAnimation = (options: BoosterAnimationOptions) => {
-  const visualEffects = ref<BoosterVisualEffect[]>([])
+  const state = createAnimationState()
   const buttonCollection = useButtonCollection(options)
 
   return {
-    visualEffects,
+    visualEffects: state.visualEffects,
+    combination: state.combination,
+    combiningTileIds: state.combiningTileIds,
+    detonatingKettleTileIds: state.detonatingKettleTileIds,
     flights: buttonCollection.flights,
     collectingTileIds: buttonCollection.collectingTileIds,
-    animateWave: (wave: BoosterWave) => animateWave(options, buttonCollection, visualEffects, wave),
-    cancel: () => cancelAnimation(buttonCollection, visualEffects),
+    animateWave: (wave: BoosterWave) => animateWave(options, buttonCollection, state, wave),
+    cancel: () => cancelAnimation(buttonCollection, state),
   }
 }
+
+const createAnimationState = (): BoosterAnimationState => ({
+  version: 0,
+  visualEffects: ref([]),
+  combination: ref(null),
+  combiningTileIds: ref(new Set()),
+  detonatingKettleTileIds: ref(new Set()),
+})
 
 const animateWave = async (
   options: BoosterAnimationOptions,
   buttonCollection: ReturnType<typeof useButtonCollection>,
-  visualEffects: Ref<BoosterVisualEffect[]>,
+  state: BoosterAnimationState,
   wave: BoosterWave
 ): Promise<void> => {
-  visualEffects.value = getBoosterVisualEffects(wave)
-  const visualAnimation = visualEffects.value.length > 0
-    ? options.waitAnimation()
-    : Promise.resolve()
+  const version = state.version
+
+  startCombinationPhase(options.grid, state, wave)
+  if (wave.combination !== null) {
+    await options.waitAnimation()
+    if (version !== state.version) {
+      return
+    }
+    state.combination.value = null
+  }
+  await animateEffects(options, buttonCollection, state, wave)
+  finishAnimation(state, version)
+}
+
+const animateEffects = async (
+  options: BoosterAnimationOptions,
+  buttonCollection: ReturnType<typeof useButtonCollection>,
+  state: BoosterAnimationState,
+  wave: BoosterWave
+): Promise<void> => {
+  state.visualEffects.value = getBoosterVisualEffects(wave)
+  state.detonatingKettleTileIds.value = getDetonatingKettleTileIds(options.grid, wave)
+  const visualAnimation = state.visualEffects.value.length > 0
+    ? options.waitAnimation() : Promise.resolve()
 
   await Promise.all([visualAnimation, buttonCollection.animateWave(wave)])
-  visualEffects.value = []
 }
 
 const cancelAnimation = (
   buttonCollection: ReturnType<typeof useButtonCollection>,
-  visualEffects: Ref<BoosterVisualEffect[]>
+  state: BoosterAnimationState
 ): void => {
-  visualEffects.value = []
+  state.version++
+  clearAnimationState(state)
   buttonCollection.cancel()
 }
+
+const startCombinationPhase = (
+  grid: TileGrid,
+  state: BoosterAnimationState,
+  wave: BoosterWave
+): void => {
+  state.combination.value = wave.combination
+  state.combiningTileIds.value = getTileIds(grid, wave.combination?.participants ?? [])
+}
+
+const finishAnimation = (state: BoosterAnimationState, version: number): void => {
+  if (version === state.version) {
+    clearAnimationState(state)
+  }
+}
+
+const clearAnimationState = (state: BoosterAnimationState): void => {
+  state.visualEffects.value = []
+  state.combination.value = null
+  state.combiningTileIds.value = new Set()
+  state.detonatingKettleTileIds.value = new Set()
+}
+
+const getDetonatingKettleTileIds = (grid: TileGrid, wave: BoosterWave): Set<number> => getTileIds(
+  grid,
+  wave.effects
+    .filter(effect => effect.booster === BoosterType.AreaKettle)
+    .map(effect => effect.source)
+)
+
+const getTileIds = (grid: TileGrid, positions: Position[]): Set<number> => new Set(
+  positions.flatMap((position) => {
+    const tile = grid.getTileByIndex(position.row, position.column)
+
+    return tile === null ? [] : [tile.id]
+  })
+)
 
 export const getBoosterVisualEffects = (wave: BoosterWave): BoosterVisualEffect[] => {
   return wave.effects.flatMap((effect, index) => {

@@ -16,6 +16,8 @@
                     'b-game-ground__tile': true,
                     'b-game-ground__tile--selected': tile.selected,
                     'b-game-ground__tile--collecting': collectingTileIds.has(tile.id),
+                    'b-game-tile--combining': combiningBoosterTileIds.has(tile.id),
+                    'b-game-tile--detonating-kettle': detonatingKettleTileIds.has(tile.id),
                     'b-game-tile--landing': landingTileIds.has(tile.id),
                 }"
                 :data-tile-id="tile.id"
@@ -30,6 +32,10 @@
                 @pointerup="emit('tile-pointer-up', $event)"
             />
 
+            <BGameBoosterCombination
+                v-if="boosterCombination"
+                :combination="boosterCombination"
+            />
             <BGameButtonFlights :flights="buttonFlights" />
             <BGameBoosterEffects :effects="boosterEffects" />
             <BGameCookieBreakEffects :effects="cookieBreakEffects" />
@@ -45,6 +51,7 @@
 </template>
 
 <script lang="ts" setup>
+import type { BoosterCombination } from '@/domain/types'
 import type { BoosterVisualEffect } from '@/composables/useBoosterAnimation'
 import type { ButtonFlight } from '@/composables/useButtonCollection'
 import type { CookieBreakEffect } from '@/composables/useCookieBreakAnimation'
@@ -53,6 +60,7 @@ import type { TileBreakEffect } from '@/composables/useTileBreakAnimation'
 
 import type { GameResult, Tile } from '@/domain/types'
 
+import BGameBoosterCombination from '@/components/BGameBoosterCombination.vue'
 import BGameBoosterEffects from '@/components/BGameBoosterEffects.vue'
 import BGameButtonFlights from '@/components/BGameButtonFlights.vue'
 import BGameCookieBreakEffects from '@/components/BGameCookieBreakEffects.vue'
@@ -66,9 +74,12 @@ defineProps<{
   cells: GameCell[]
   tiles: Tile[]
   collectingTileIds: Set<number>
+  combiningBoosterTileIds: Set<number>
+  detonatingKettleTileIds: Set<number>
   landingTileIds: Set<number>
   buttonFlights: ButtonFlight[]
   boosterEffects: BoosterVisualEffect[]
+  boosterCombination: BoosterCombination | null
   cookieBreakEffects: CookieBreakEffect[]
   tileBreakEffects: TileBreakEffect[]
   result: GameResult | null

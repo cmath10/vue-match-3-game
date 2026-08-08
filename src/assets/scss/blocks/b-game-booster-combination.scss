@@ -1,0 +1,57 @@
+.b-game-booster-combination {
+  --combination-cell-step: calc(var(--cell-size) + var(--cell-gap));
+  --combination-x: calc(var(--combination-column) * var(--combination-cell-step) + var(--tile-offset));
+  --combination-y: calc(var(--combination-row) * var(--combination-cell-step) + var(--tile-offset));
+
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 0;
+  width: var(--tile-size);
+  height: var(--tile-size);
+  background-image: var(--combination-background);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  pointer-events: none;
+  transform-origin: center;
+  animation: b-game-booster-combination var(--tile-transition-duration) ease-out both;
+
+  &--firecrackers-row {
+    --combination-background: url("../../images/tile-booster-row-firecracker.png");
+  }
+
+  &--firecrackers-column {
+    --combination-background: url("../../images/tile-booster-column-firecracker.png");
+  }
+
+  &--firecrackers-cross {
+    --combination-background: url("../../images/tile-booster-combination-cross-firecrackers.png");
+  }
+
+  &--kettle-firecracker {
+    --combination-background: url("../../images/tile-booster-combination-kettle-firecracker.png");
+  }
+}
+
+@keyframes b-game-booster-combination {
+  0% {
+    opacity: 0;
+    transform: translate(var(--combination-x), var(--combination-y)) scale(0.72);
+  }
+
+  24% {
+    opacity: 1;
+    transform: translate(var(--combination-x), var(--combination-y)) scale(1.08);
+  }
+
+  68% {
+    opacity: 1;
+    transform: translate(var(--combination-x), var(--combination-y)) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(var(--combination-x), var(--combination-y)) scale(1.18);
+  }
+}

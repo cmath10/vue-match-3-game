@@ -1,5 +1,6 @@
 import type {
   BoardTileType,
+  BoosterCombinationType,
   BoosterType,
   ObjectiveType,
   SpecialTileType,
@@ -97,9 +98,23 @@ export type BoosterActivation = {
   targetType?: TileType
 }
 
+export type BoosterCombination = {
+  type: BoosterCombinationType
+  source: Position
+  participants: [Position, Position]
+  boosters: [BoosterType, BoosterType]
+}
+
+export type BoosterSwipe = {
+  activations: BoosterActivation[]
+  combination: BoosterCombination | null
+}
+
 export type BoosterWave = {
   effects: BoardEffect[]
   positions: Position[]
+  activatedBoosters: BoosterType[]
+  combination: BoosterCombination | null
 }
 
 export type SelectButtonBoxTarget = (types: TileType[]) => TileType | null

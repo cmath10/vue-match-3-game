@@ -37,6 +37,8 @@ test('button flights include only ordinary tiles actually collected by the box',
       { row: 0, column: 1 },
       { row: 0, column: 2 },
     ],
+    activatedBoosters: [BoosterType.ButtonBox],
+    combination: null,
   }
 
   packaged.blocker = { type: SpecialTileType.Package, health: 1 }

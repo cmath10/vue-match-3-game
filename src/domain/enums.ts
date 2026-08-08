@@ -19,6 +19,13 @@ export enum BoosterType {
   ButtonBox = 'booster-button-box',
 }
 
+export enum BoosterCombinationType {
+  RowFirecrackers = 'firecrackers-row',
+  ColumnFirecrackers = 'firecrackers-column',
+  CrossFirecrackers = 'firecrackers-cross',
+  KettleFirecracker = 'kettle-firecracker',
+}
+
 export type BoardTileType =
   | TileType
   | SpecialTileType.Mug
