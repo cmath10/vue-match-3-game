@@ -122,7 +122,7 @@
 
   &--active &__fragment {
     animation: b-game-tile-break-fragment
-      calc(var(--tile-transition-duration) * 0.82)
+      calc(var(--tile-break-animation-duration) * 0.82)
       cubic-bezier(0.18, 0.72, 0.3, 1)
       calc(var(--tile-transition-duration) * 0.12)
       both;

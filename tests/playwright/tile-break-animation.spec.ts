@@ -4,6 +4,7 @@ import { expect, test } from '@playwright/test'
 
 import {
   getTileBreakEffectStyle,
+  TILE_BREAK_ANIMATION_DURATION,
   useTileBreakAnimation,
 } from '@/composables/useTileBreakAnimation'
 
@@ -117,19 +118,29 @@ test('a real match shrinks ordinary tiles and bursts their fragments', async ({ 
   await expect(effect).toBeVisible({ timeout: 3_000 })
   await expect(fragments).toHaveCount(5)
   await expect(effect.locator('.b-game-tile-break__tile')).toHaveCSS('opacity', '0')
+  await expect(effect).toHaveCSS(
+    '--tile-break-animation-duration',
+    `${TILE_BREAK_ANIMATION_DURATION}ms`
+  )
   const fragmentFrame = await fragments.evaluateAll(async (elements) => {
     elements.forEach((element) => element.getAnimations().forEach((animation) => {
+      const duration = Number(animation.effect?.getComputedTiming().duration)
+
       animation.pause()
-      animation.currentTime = 220
+      animation.currentTime = duration / 2
     }))
     await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
 
     return elements.map((element) => ({
+      duration: Number(element.getAnimations()[0]?.effect?.getComputedTiming().duration),
       opacity: Number.parseFloat(getComputedStyle(element).opacity),
       transform: getComputedStyle(element).transform,
     }))
   })
 
+  fragmentFrame.forEach(fragment => (
+    expect(fragment.duration).toBeCloseTo(TILE_BREAK_ANIMATION_DURATION * 0.82)
+  ))
   expect(fragmentFrame.every(fragment => fragment.opacity > 0)).toBe(true)
   expect(new Set(fragmentFrame.map(fragment => fragment.transform)).size).toBe(5)
 

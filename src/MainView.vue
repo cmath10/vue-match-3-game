@@ -90,6 +90,7 @@ import BLevelAttemptPrompt from '@/components/BLevelAttemptPrompt.vue'
 
 import TileGrid from '@/game/board/TileGrid'
 
+import { TILE_BREAK_ANIMATION_DURATION } from '@/composables/useTileBreakAnimation'
 import { useBoosterAnimation } from '@/composables/useBoosterAnimation'
 import { useCookieBreakAnimation } from '@/composables/useCookieBreakAnimation'
 import { useGameProgress } from '@/composables/useGameProgress'
@@ -186,6 +187,9 @@ const swapTiles = (a: Tile, b: Tile) => {
 }
 
 const waitAnimation = () => new Promise<void>(resolve => setTimeout(resolve, ANIMATION_DELAY))
+const waitTileBreakAnimation = () => new Promise<void>(
+  resolve => setTimeout(resolve, TILE_BREAK_ANIMATION_DURATION)
+)
 const nextAnimationFrame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
 const {
   visualEffects: boosterVisualEffects, flights: buttonFlights, collectingTileIds,
@@ -247,7 +251,7 @@ const {
   animatePending: animateTileBreaks,
   cancel: cancelTileBreakAnimation,
   collect: collectTileBreak,
-} = useTileBreakAnimation({ waitAnimation, nextAnimationFrame })
+} = useTileBreakAnimation({ waitAnimation: waitTileBreakAnimation, nextAnimationFrame })
 
 const collectTile = (collection: ObjectiveCollection): void => {
   recordCollection(collection.type)

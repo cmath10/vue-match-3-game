@@ -26,6 +26,7 @@ type AnimationState = {
 }
 
 const ORDINARY_TILE_TYPES = new Set<ObjectiveType>(Object.values(TileTypeEnum))
+export const TILE_BREAK_ANIMATION_DURATION = 640
 
 export const useTileBreakAnimation = (options: TileBreakAnimationOptions) => {
   const effects = ref<TileBreakEffect[]>([])
@@ -47,6 +48,7 @@ export const useTileBreakAnimation = (options: TileBreakAnimationOptions) => {
 }
 
 export const getTileBreakEffectStyle = (effect: TileBreakEffect) => ({
+  '--tile-break-animation-duration': `${TILE_BREAK_ANIMATION_DURATION}ms`,
   transform: `translate(calc(${effect.position.column} * (var(--cell-size) + var(--cell-gap)) + var(--tile-offset)), calc(${effect.position.row} * (var(--cell-size) + var(--cell-gap)) + var(--tile-offset)))`,
 })
 
