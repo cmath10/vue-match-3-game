@@ -98,7 +98,7 @@ import { useLevelEntry } from '@/composables/useLevelEntry'
 import { useObjectiveCollection } from '@/composables/useObjectiveCollection'
 import { useTileBreakAnimation } from '@/composables/useTileBreakAnimation'
 
-import { applyBoosterEffectPositions } from '@/game/board/boardHits'
+import { applyBoosterMovePositions } from '@/game/board/boardHits'
 import { clearMatchedPositions } from '@/game/board/boardHits'
 import { cloneBoard } from '@/domain/progress'
 import { collapseGrid } from '@/game/board/boardTransitions'
@@ -342,8 +342,8 @@ const resolveMatchedPositions = (positions: Position[]): TileMovement[] => {
   return transitionGrid()
 }
 
-const resolveBoosterPositions = (positions: Position[]): TileMovement[] => {
-  applyBoosterEffectPositions(grid, positions, BOARD_WIDTH, BOARD_HEIGHT, collectTile)
+const resolveBoosterPositions = (positions: Position[], match: MoveMatch): TileMovement[] => {
+  applyBoosterMovePositions(grid, positions, match, BOARD_WIDTH, BOARD_HEIGHT, collectTile)
   return transitionGrid()
 }
 

@@ -1,7 +1,13 @@
-import type { CollectObjective, Position, Tile } from '@/domain/types'
+import type {
+  CollectObjective,
+  MoveMatch,
+  Position,
+  Tile,
+} from '@/domain/types'
 import type TileGrid from '@/game/board/TileGrid'
 
 import { isBoosterType, isMatchableTile } from '@/domain/tiles'
+import { placeCreatedBoosters } from '@/game/board/boardBoosters'
 import { SpecialTileType, TileType } from '@/domain/enums'
 
 type HitMode = 'match' | 'effect'
@@ -32,6 +38,22 @@ export const applyBoosterEffectPositions = (
   collectObjective: CollectObjective
 ): void => {
   applyHitPositions(grid, positions, width, height, collectObjective, 'effect')
+}
+
+export const applyBoosterMovePositions = (
+  grid: TileGrid,
+  effectPositions: Position[],
+  match: MoveMatch,
+  width: number,
+  height: number,
+  collectObjective: CollectObjective
+): void => {
+  const createdPositions = new Set(match.boosters.map(booster => getPositionKey(booster.position)))
+  const positionsToHit = effectPositions.filter(position => !createdPositions.has(getPositionKey(position)))
+
+  applyBoosterEffectPositions(grid, positionsToHit, width, height, collectObjective)
+  placeCreatedBoosters(grid, match.boosters)
+  clearMatchedPositions(grid, match.positions, width, height, collectObjective)
 }
 
 const applyHitPositions = (
@@ -162,3 +184,5 @@ const getNeighborPositions = (row: number, column: number, width: number, height
 const isInsideBoard = ({ row, column }: Position, width: number, height: number): boolean => {
   return row >= 0 && row < height && column >= 0 && column < width
 }
+
+const getPositionKey = ({ row, column }: Position): string => `${row}-${column}`

@@ -1,7 +1,8 @@
-import type { Position, Tile } from '@/domain/types'
+import type { MoveMatch, Position, Tile } from '@/domain/types'
 
 import { expect, test } from '@playwright/test'
 
+import { applyBoosterMovePositions } from '@/game/board/boardHits'
 import { createMatch3BoosterTurn } from '@/game/turns/boosterTurn'
 import TileGrid from '@/game/board/TileGrid'
 
@@ -104,4 +105,50 @@ test('swiping two identical boosters swaps and activates both in one turn', asyn
   expect(effectCount).toBe(2)
   expect(resolvedPositions).toHaveLength(1)
   expect(resolvedPositions[0]).toHaveLength(9)
+})
+
+test('swiping an ordinary tile into a booster keeps the booster created by the move match', async () => {
+  const grid = new TileGrid(5, 1)
+  const source = createTile(4, BoosterType.RowFirecracker, 3)
+  const target = createTile(5, TileType.SweetsFish, 4)
+  let resolvedMatch: MoveMatch | undefined
+  let finishedTurns = 0
+
+  grid.setTile(createTile(1, TileType.SweetsFish, 0), 0, 0)
+  grid.setTile(createTile(2, TileType.SweetsFish, 1), 0, 1)
+  grid.setTile(createTile(3, TileType.SweetsFish, 2), 0, 2)
+  grid.setTile(source, 0, 3)
+  grid.setTile(target, 0, 4)
+
+  const turn = createMatch3BoosterTurn({
+    grid,
+    getVersion: () => 1,
+    isVersionCurrent: version => version === 1,
+    setEvaluating: () => undefined,
+    waitAnimation: () => Promise.resolve(),
+    settleGrid: () => Promise.resolve(),
+    resolvePositions: (positions, match) => {
+      resolvedMatch = match
+      applyBoosterMovePositions(grid, positions, match, 5, 1, () => undefined)
+
+      return []
+    },
+    animateWave: () => Promise.resolve(),
+    finishTurn: () => finishedTurns++,
+    swapTiles: (a, b) => {
+      grid.setTile(a, 0, 4)
+      grid.setTile(b, 0, 3)
+    },
+    selectButtonBoxTarget: () => null,
+  })
+
+  turn.swipeBooster(source, target)
+
+  await expect.poll(() => finishedTurns).toBe(1)
+  expect(resolvedMatch?.boosters).toEqual([{
+    type: BoosterType.ColumnFirecracker,
+    position: { row: 0, column: 3 },
+  }])
+  expect(grid.getTileByIndex(0, 3)?.type).toBe(BoosterType.ColumnFirecracker)
+  expect(grid.getTileByIndex(0, 4)).toBeNull()
 })

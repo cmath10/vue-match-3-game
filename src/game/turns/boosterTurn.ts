@@ -1,6 +1,7 @@
 import type {
   BoosterActivation,
   BoosterWave,
+  MoveMatch,
   Position,
   SelectButtonBoxTarget,
   Tile,
@@ -12,6 +13,8 @@ import type TileGrid from '@/game/board/TileGrid'
 import { getBoardTileTypeBoard } from '@/game/board/boardProjection'
 import { getBoosterSwipeActivations } from '@/domain/boosters/chain'
 import { getGridTilePosition } from '@/game/board/boardProjection'
+import { getMatchableTileBoard } from '@/game/board/boardProjection'
+import { getMoveMatch } from '@/domain/boosters/creation'
 import { resolveBoosterWave } from '@/domain/boosters/chain'
 
 type BoosterTurnOptions = {
@@ -21,7 +24,7 @@ type BoosterTurnOptions = {
   setEvaluating: (evaluating: boolean) => void
   waitAnimation: () => Promise<void>
   settleGrid: (version: number, movements: TileMovement[]) => Promise<void>
-  resolvePositions: (positions: Position[]) => TileMovement[]
+  resolvePositions: (positions: Position[], match: MoveMatch) => TileMovement[]
   animateWave: (wave: BoosterWave) => Promise<void>
   finishTurn: () => void
   swapTiles: (a: Tile, b: Tile) => void
@@ -37,7 +40,7 @@ const activateBooster = (options: BoosterTurnOptions, tile: Tile): void => {
   const position = getGridTilePosition(options.grid, tile)
 
   if (position !== null) {
-    void runBoosterTurn(options, [{ source: position }], false)
+    void runBoosterTurn(options, [{ source: position }], false, { positions: [], boosters: [] })
   }
 }
 
@@ -59,23 +62,35 @@ const startBoosterSwipe = (
   sourceDestination: Position,
   targetDestination: Position
 ): void => {
-  const activations = getBoosterSwipeActivations(
-    source.type,
-    target.type,
-    sourceDestination,
-    targetDestination
-  )
+  const activations = getSwipeActivations(source, target, sourceDestination, targetDestination)
 
-  if (activations !== null) {
-    options.swapTiles(source, target)
-    void runBoosterTurn(options, activations, true)
+  if (activations === null) {
+    return
   }
+
+  options.swapTiles(source, target)
+  const match = getBoosterMoveMatch(options, sourceDestination, targetDestination)
+
+  void runBoosterTurn(options, activations, true, match)
 }
+
+const getSwipeActivations = (
+  source: Tile,
+  target: Tile,
+  sourceDestination: Position,
+  targetDestination: Position
+): BoosterActivation[] | null => getBoosterSwipeActivations(
+  source.type,
+  target.type,
+  sourceDestination,
+  targetDestination
+)
 
 const runBoosterTurn = async (
   options: BoosterTurnOptions,
   activations: BoosterActivation[],
-  animateSwap: boolean
+  animateSwap: boolean,
+  match: MoveMatch
 ): Promise<void> => {
   const version = options.getVersion()
   options.setEvaluating(true)
@@ -86,8 +101,22 @@ const runBoosterTurn = async (
   if (!await animateTurnWave(options, wave, version)) {
     return
   }
-  await options.settleGrid(version, options.resolvePositions(wave.positions))
+  await options.settleGrid(version, options.resolvePositions(wave.positions, match))
 
+  finishCurrentTurn(options, version)
+}
+
+const getBoosterMoveMatch = (
+  options: BoosterTurnOptions,
+  sourceDestination: Position,
+  targetDestination: Position
+): MoveMatch => getMoveMatch(
+  getMatchableTileBoard(options.grid),
+  sourceDestination,
+  targetDestination
+)
+
+const finishCurrentTurn = (options: BoosterTurnOptions, version: number): void => {
   if (options.isVersionCurrent(version)) {
     options.finishTurn()
   }
