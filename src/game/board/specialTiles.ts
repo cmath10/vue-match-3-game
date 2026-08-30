@@ -1,6 +1,6 @@
 import type { BoardTileType } from '@/domain/enums'
 import type { CollectObjective } from '@/domain/types'
-import type { CollectorDefinition, GravityGraph } from '@/domain/levels/types'
+import type { CollectorDefinition } from '@/domain/levels/types'
 import type { Position, Tile } from '@/domain/types'
 import type TileGrid from '@/game/board/TileGrid'
 
@@ -29,28 +29,11 @@ export const placeSpecialTiles = (
 
 export const collectDroppedMugs = (
   grid: TileGrid,
-  gravity: GravityGraph,
   collectors: readonly CollectorDefinition[],
   collectObjective: CollectObjective
-) => {
-  collectors.forEach(collector => collectMugsAtCollector(grid, gravity, collector, collectObjective))
-}
-
-const collectMugsAtCollector = (
-  grid: TileGrid,
-  gravity: GravityGraph,
-  collector: CollectorDefinition,
-  collectObjective: CollectObjective
-): void => {
-  let key: `${number}:${number}` | undefined = getCellKey(collector.cell)
-
-  while (key !== undefined) {
-    if (!collectMug(grid, key, collectObjective)) {
-      return
-    }
-    key = gravity.nodes.get(key)?.incoming[0]
-  }
-}
+): number => collectors.filter(collector => (
+  collectMug(grid, getCellKey(collector.cell), collectObjective)
+)).length
 
 const collectMug = (
   grid: TileGrid,

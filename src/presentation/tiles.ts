@@ -17,7 +17,8 @@ export const getBoardStyle = (width: number, height: number) => ({
   '--board-row-count': height,
 })
 
-export const getTileStyle = (tile: Tile) => ({
+export const getTileStyle = (tile: Tile, movementDuration?: number) => ({
+  '--tile-movement-duration': movementDuration === undefined ? undefined : `${movementDuration}ms`,
   transform: `translate(calc(${tile.column} * (var(--cell-size) + var(--cell-gap)) + var(--tile-offset)), calc(${tile.row} * (var(--cell-size) + var(--cell-gap)) + var(--tile-offset)))`,
 })
 

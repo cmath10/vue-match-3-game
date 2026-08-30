@@ -52,10 +52,19 @@ export type BoardEdgeAnchor =
   | { side: 'top' | 'bottom'; column: number }
   | { side: 'left' | 'right'; row: number }
 
-export type GravityDefinition = {
-  kind: 'direction'
-  direction: Direction
+export type GravityEdgeTargetDefinition = {
+  anchor: BoardEdgeAnchor
+  terminals: readonly [CellKey, ...CellKey[]]
 }
+
+export type GravityDefinition =
+  | { kind: 'direction'; direction: Direction }
+  | { kind: 'point'; target: BoardEdgeAnchor; tieBreak: readonly Direction[] }
+  | {
+      kind: 'flow'
+      nextByCell: Readonly<Record<CellKey, CellKey | null>>
+      edgeTargets: readonly GravityEdgeTargetDefinition[]
+    }
 
 export type GravityNode = {
   next: CellKey | null
@@ -65,6 +74,10 @@ export type GravityNode = {
 export type GravityGraph = {
   nodes: ReadonlyMap<CellKey, GravityNode>
   settlementOrder: readonly CellKey[]
+}
+
+export type GravityState = {
+  nextIncomingIndexByCell: Map<CellKey, number>
 }
 
 export type SpawnDefinition = {

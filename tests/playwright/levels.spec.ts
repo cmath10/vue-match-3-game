@@ -5,12 +5,14 @@ import { expect, test } from '@playwright/test'
 import { AttemptRandom } from '@/domain/random'
 import { BoosterType } from '@/domain/enums'
 import { compileLevel, compileLevelOrThrow } from '@/domain/levels/compiler'
+import { createGravityState } from '@/domain/levels/gravityState'
 import { getBoosterEffect } from '@/domain/boosters/effects'
 import { getGridCells } from '@/presentation/tiles'
 import { isBoardCompatibleWithLevel } from '@/domain/levels/restore'
 import { materializeInitialBoard } from '@/domain/levels/materializeInitialBoard'
 import { resolveGravity } from '@/domain/board/gravity'
 import { restoreAttemptRandom } from '@/domain/random'
+import { restoreGravityState, snapshotGravityState } from '@/domain/levels/gravityState'
 import { SpecialTileType } from '@/domain/enums'
 import TileGrid from '@/game/board/TileGrid'
 import { TileType } from '@/domain/enums'
@@ -139,6 +141,7 @@ test('vertical gravity treats cells separated by void as independent streams', (
       ],
     },
     graph: level.gravity,
+    gravityState: createGravityState(),
     spawns: [],
     spawnTile: () => 'spawned',
     getTileId: tile => tile,
@@ -150,6 +153,149 @@ test('vertical gravity treats cells separated by void as independent streams', (
     { row: 1, column: 0 },
     { row: 2, column: 0 },
   ])
+})
+
+test('point gravity routes deterministically around void using tieBreak', () => {
+  const level = compileLevelOrThrow(createDefinition({
+    gravity: {
+      kind: 'point',
+      target: { side: 'bottom', column: 1 },
+      tieBreak: ['right', 'down', 'left', 'up'],
+    },
+    spawns: [
+      { id: 'upper-left', entry: { row: 0, column: 0 }, pool: 'main' },
+      { id: 'upper-middle', entry: { row: 0, column: 1 }, pool: 'main' },
+    ],
+  }))
+
+  expect(level.gravity.nodes.get('0:1')?.next).toBe('0:2')
+  expect(level.gravity.nodes.get('0:2')?.next).toBe('1:2')
+  expect(level.gravity.nodes.get('1:2')?.next).toBe('2:2')
+  expect(level.gravity.nodes.get('2:2')?.next).toBe('2:1')
+  expect(level.edgeGuides).toContainEqual({
+    kind: 'collector',
+    anchor: { side: 'bottom', column: 1 },
+    terminal: { row: 2, column: 1 },
+    collectorId: 'mug-exit',
+  })
+})
+
+const createConvergingDefinition = (): LevelDefinition => createDefinition({
+  initialBoard: {
+    layout: ['A.A', 'AAA', '.A.'],
+    legend: { A: { kind: 'random', pool: 'main' } },
+  },
+  gravity: {
+    kind: 'flow',
+    nextByCell: {
+      '0:0': '1:0',
+      '0:2': '1:2',
+      '1:0': '1:1',
+      '1:1': '2:1',
+      '1:2': '1:1',
+      '2:1': null,
+    },
+    edgeTargets: [{ anchor: { side: 'bottom', column: 1 }, terminals: ['2:1'] }],
+  },
+  spawns: [
+    { id: 'left', entry: { row: 0, column: 0 }, pool: 'main' },
+    { id: 'right', entry: { row: 0, column: 2 }, pool: 'main' },
+  ],
+})
+
+test('flow gravity returns an indirect path and preserves round-robin cursor', () => {
+  const level = compileLevelOrThrow(createConvergingDefinition())
+  const gravityState = createGravityState()
+  const first = resolveGravity({
+    state: {
+      topology: level.topology,
+      occupancy: [['left', null, null], [null, null, null], [null, null, null]],
+    },
+    graph: level.gravity,
+    gravityState,
+    spawns: [],
+    spawnTile: () => 'spawned',
+    getTileId: tile => tile,
+  })
+
+  expect(first.movements[0]).toEqual(expect.objectContaining({
+    tileId: 'left',
+    path: [
+      { row: 1, column: 0 },
+      { row: 1, column: 1 },
+      { row: 2, column: 1 },
+    ],
+  }))
+  expect(gravityState.nextIncomingIndexByCell.get('1:1')).toBe(1)
+
+  const restored = restoreGravityState(snapshotGravityState(gravityState), level.gravity)
+  const second = resolveGravity({
+    state: {
+      topology: level.topology,
+      occupancy: [[null, null, 'right'], [null, null, null], [null, null, null]],
+    },
+    graph: level.gravity,
+    gravityState: restored,
+    spawns: [],
+    spawnTile: () => 'spawned',
+    getTileId: tile => tile,
+  })
+
+  expect(second.movements[0].tileId).toBe('right')
+  expect(restored.nextIncomingIndexByCell.get('1:1')).toBe(0)
+})
+
+test('flow gravity rejects cycles and unbound terminal cells', () => {
+  const cycle = compileLevel(createDefinition({
+    initialBoard: {
+      layout: ['AA'],
+      legend: { A: { kind: 'random', pool: 'main' } },
+    },
+    gravity: {
+      kind: 'flow',
+      nextByCell: { '0:0': '0:1', '0:1': '0:0' },
+      edgeTargets: [],
+    },
+    spawns: [{ id: 'left', entry: { row: 0, column: 0 }, pool: 'main' }],
+    collectors: [],
+  }))
+
+  const unbound = compileLevel(createDefinition({
+    initialBoard: {
+      layout: ['A'],
+      legend: { A: { kind: 'random', pool: 'main' } },
+    },
+    gravity: { kind: 'flow', nextByCell: { '0:0': null }, edgeTargets: [] },
+    spawns: [{ id: 'only', entry: { row: 0, column: 0 }, pool: 'main' }],
+    collectors: [],
+  }))
+
+  expect(cycle.ok).toBe(false)
+  expect(unbound.ok).toBe(false)
+  if (cycle.ok === false && unbound.ok === false) {
+    expect(cycle.errors).toContainEqual(expect.objectContaining({ code: 'gravity-cycle' }))
+    expect(unbound.errors).toContainEqual(expect.objectContaining({ code: 'invalid-edge-target' }))
+  }
+})
+
+test('point gravity requires a complete tieBreak and restore validates merge cursors', () => {
+  const invalidPoint = compileLevel(createDefinition({
+    gravity: {
+      kind: 'point',
+      target: { side: 'bottom', column: 1 },
+      tieBreak: ['left', 'right'],
+    },
+    spawns: [
+      { id: 'upper-left', entry: { row: 0, column: 0 }, pool: 'main' },
+      { id: 'upper-middle', entry: { row: 0, column: 1 }, pool: 'main' },
+    ],
+  }))
+  const flow = compileLevelOrThrow(createConvergingDefinition())
+
+  expect(invalidPoint.ok).toBe(false)
+  expect(() => restoreGravityState({
+    nextIncomingIndexByCell: { '1:1': 2 },
+  }, flow.gravity)).toThrow('Invalid gravity cursor at 1:1')
 })
 
 test('spatial effects stop at void while topology area can route around it', () => {

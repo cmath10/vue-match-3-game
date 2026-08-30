@@ -31,17 +31,32 @@ const animate = (
 ): void => {
   const version = ++state.version
 
-  tileIds.value = new Set(movements.map(movement => Number(movement.tileId)))
-  void clearAfterAnimation(options, tileIds, state, version)
+  void animatePhases(options, tileIds, state, movements, version)
 }
 
-const clearAfterAnimation = async (
+const getMovementPhases = (movements: TileMovement[]): TileMovement[][] => {
+  const phases = new Map<number, TileMovement[]>()
+
+  movements.forEach((movement) => {
+    phases.set(movement.phase, [...(phases.get(movement.phase) ?? []), movement])
+  })
+  return [...phases].sort(([first], [second]) => first - second).map(([, items]) => items)
+}
+
+const animatePhases = async (
   options: TileLandingAnimationOptions,
   tileIds: Ref<Set<number>>,
   state: AnimationState,
+  movements: TileMovement[],
   version: number
 ): Promise<void> => {
-  await options.waitAnimation()
+  for (const phase of getMovementPhases(movements)) {
+    if (version !== state.version) {
+      return
+    }
+    tileIds.value = new Set(phase.map(movement => Number(movement.tileId)))
+    await options.waitAnimation()
+  }
 
   if (version === state.version) {
     tileIds.value = new Set()

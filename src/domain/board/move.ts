@@ -1,10 +1,11 @@
 import type { BoardState, BoardTile } from '@/domain/types'
-import type { GravityGraph } from '@/domain/levels/types'
+import type { GravityGraph, GravityState } from '@/domain/levels/types'
 import type { MoveResult, Position } from '@/domain/types'
 import type { SpawnDefinition } from '@/domain/levels/types'
 
 import { cloneBoardState } from '@/domain/board/topology'
 import { collapseAndRefillBoard } from '@/domain/board/transitions'
+import { createGravityState } from '@/domain/levels/gravityState'
 import { findMatchedPositions, findMoveMatchedPositions } from '@/domain/board/matches'
 import { isNeighborPosition, swapBoardTiles } from '@/domain/board/transitions'
 
@@ -20,6 +21,16 @@ type ResolutionContext<T extends BoardTile> = {
   cleared: T[]
   refillIndex: number
   cascades: number
+  gravityState: GravityState
+}
+
+const applyCascadeResult = <T extends BoardTile>(
+  context: ResolutionContext<T>,
+  result: ReturnType<typeof collapseAndRefillBoard<T>>
+): void => {
+  context.state = result.state
+  context.refillIndex += result.refillCount
+  context.cascades++
 }
 
 const resolveNextCascade = <T extends BoardTile>(context: ResolutionContext<T>): boolean => {
@@ -34,12 +45,11 @@ const resolveNextCascade = <T extends BoardTile>(context: ResolutionContext<T>):
     context.state,
     context.rules.gravity,
     context.rules.spawns,
-    context.refillTiles.slice(context.refillIndex)
+    context.refillTiles.slice(context.refillIndex),
+    context.gravityState
   )
 
-  context.state = result.state
-  context.refillIndex += result.refillCount
-  context.cascades++
+  applyCascadeResult(context, result)
   return true
 }
 
@@ -53,10 +63,12 @@ const toMoveResult = <T extends BoardTile>(context: ResolutionContext<T>): MoveR
 export const resolveBoard = <T extends BoardTile>(
   state: BoardState<T>,
   rules: BoardRules,
-  refillTiles: readonly T[]
+  refillTiles: readonly T[],
+  gravityState = createGravityState()
 ): MoveResult<T> => {
   const context: ResolutionContext<T> = {
     state: cloneBoardState(state), rules, refillTiles, cleared: [], refillIndex: 0, cascades: 0,
+    gravityState,
   }
 
   let resolving = true
@@ -73,7 +85,8 @@ export const applyMove = <T extends BoardTile>(
   rules: BoardRules,
   from: Position,
   to: Position,
-  refillTiles: readonly T[]
+  refillTiles: readonly T[],
+  gravityState = createGravityState()
 ): MoveResult<T> => {
   if (!isNeighborPosition(state, from, to)) {
     return rejectedMove(state)
@@ -84,7 +97,7 @@ export const applyMove = <T extends BoardTile>(
     return rejectedMove(state)
   }
 
-  return resolveBoard(swappedState, rules, refillTiles)
+  return resolveBoard(swappedState, rules, refillTiles, gravityState)
 }
 
 const rejectedMove = <T extends BoardTile>(state: BoardState<T>): MoveResult<T> => ({

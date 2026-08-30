@@ -41,14 +41,19 @@ const getSpawnPoolErrors = (
 const validateSpawn = (
   spawn: SpawnDefinition,
   index: number,
-  duplicate: boolean,
+  duplicateId: boolean,
+  duplicateEntry: boolean,
   topology: BoardTopology,
   pools: ReadonlyMap<string, TilePoolDefinition>
 ): LevelCompilationError[] => {
   const path = ['spawns', index]
 
   return [
-    ...getSpawnIdErrors(spawn, duplicate, path),
+    ...getSpawnIdErrors(spawn, duplicateId, path),
+    ...errorWhen(
+      duplicateEntry,
+      levelError('invalid-spawn', [...path, 'entry'], 'Spawn entry must be unique')
+    ),
     ...getSpawnEntryErrors(spawn, topology, path),
     ...getSpawnPoolErrors(spawn, pools, path),
   ]
@@ -60,11 +65,16 @@ export const validateSpawns = (
   pools: ReadonlyMap<string, TilePoolDefinition>
 ): LevelCompilationError[] => {
   const ids = new Set<string>()
+  const entries = new Set<string>()
 
   return spawns.flatMap((spawn, index) => {
-    const errors = validateSpawn(spawn, index, ids.has(spawn.id), topology, pools)
+    const entry = getCellKey(spawn.entry)
+    const errors = validateSpawn(
+      spawn, index, ids.has(spawn.id), entries.has(entry), topology, pools
+    )
 
     ids.add(spawn.id)
+    entries.add(entry)
     return errors
   })
 }
@@ -95,24 +105,39 @@ const getCollectorErrors = (
   ...(!acceptsMugs ? [levelError('invalid-collector', [...path, 'accepts'], 'Collector must accept mugs')] : []),
 ]
 
+const validateCollector = (
+  definition: LevelDefinition,
+  index: number,
+  topology: BoardTopology,
+  gravity: GravityGraph,
+  externalTerminals: ReadonlySet<string>,
+  ids: Set<string>,
+  cells: Set<string>
+): LevelCompilationError[] => {
+  const collector = definition.collectors[index]
+  const key = getCellKey(collector.cell)
+  const duplicate = isDuplicateCollector(collector.id, key, ids, cells)
+  const terminal = isTerminalCollector(collector.cell, key, topology, gravity, externalTerminals)
+
+  ids.add(collector.id)
+  cells.add(key)
+  return getCollectorErrors(
+    ['collectors', index], duplicate, terminal, acceptsOnlyMugs(collector.accepts)
+  )
+}
+
 export const validateCollectors = (
   definition: LevelDefinition,
   topology: BoardTopology,
-  gravity: GravityGraph
+  gravity: GravityGraph,
+  externalTerminals: ReadonlySet<string>
 ): LevelCompilationError[] => {
   const ids = new Set<string>()
   const cells = new Set<string>()
 
-  return definition.collectors.flatMap((collector, index) => {
-    const key = getCellKey(collector.cell)
-    const duplicate = isDuplicateCollector(collector.id, key, ids, cells)
-    const terminal = isTerminalCollector(collector.cell, key, topology, gravity)
-    const acceptsMugs = acceptsOnlyMugs(collector.accepts)
-
-    ids.add(collector.id)
-    cells.add(key)
-    return getCollectorErrors(['collectors', index], duplicate, terminal, acceptsMugs)
-  })
+  return definition.collectors.flatMap((_, index) => validateCollector(
+    definition, index, topology, gravity, externalTerminals, ids, cells
+  ))
 }
 
 const isDuplicateCollector = (
@@ -126,8 +151,10 @@ const isTerminalCollector = (
   cell: LevelDefinition['collectors'][number]['cell'],
   key: `${number}:${number}`,
   topology: BoardTopology,
-  gravity: GravityGraph
-): boolean => isPlayablePosition(topology.playableCells, cell) && gravity.nodes.get(key)?.next === null
+  gravity: GravityGraph,
+  externalTerminals: ReadonlySet<string>
+): boolean => isPlayablePosition(topology.playableCells, cell) &&
+  gravity.nodes.get(key)?.next === null && externalTerminals.has(key)
 
 const acceptsOnlyMugs = (accepts: LevelDefinition['collectors'][number]['accepts']): boolean => (
   accepts.length > 0 && accepts.every(type => type === SpecialTileType.Mug)

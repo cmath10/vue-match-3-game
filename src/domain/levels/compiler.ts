@@ -1,14 +1,13 @@
-import type { BoardEdgeGuide, CompiledLevel, GravityGraph } from '@/domain/levels/types'
+import type { BoardEdgeGuide, CellKey, CompiledLevel } from '@/domain/levels/types'
 import type {
   LevelCompilationError,
   LevelCompilationResult,
 } from '@/domain/levels/errors'
 import type { LevelDefinition, TilePoolDefinition } from '@/domain/levels/types'
 
-import { compileDirectionalGravity } from '@/domain/levels/compileGravity'
+import { compileGravityDefinition } from '@/domain/levels/compileGravityDefinition'
 import { compileInitialBoard } from '@/domain/levels/compileInitialBoard'
 import { getCellKey } from '@/domain/levels/coordinates'
-import { getDirectionAnchor } from '@/domain/levels/compileGravity'
 import { levelError } from '@/domain/levels/errors'
 import { parseCellKey } from '@/domain/levels/coordinates'
 import { TileType } from '@/domain/enums'
@@ -45,66 +44,90 @@ const compileTilePools = (
 
 const compileEdgeGuides = (
   definition: LevelDefinition,
-  gravity: GravityGraph
+  edgeTargets: ReturnType<typeof compileGravityDefinition>['edgeTargets']
 ): BoardEdgeGuide[] => {
   const collectors = new Map(definition.collectors.map(item => [getCellKey(item.cell), item]))
 
-  return [...gravity.nodes].flatMap(([key, node]): BoardEdgeGuide[] => (
-    node.next === null ? [compileTerminalGuide(definition, collectors, key)] : []
-  ))
+  return edgeTargets.flatMap(target => compileTargetGuides(collectors, target))
 }
 
-const compileTerminalGuide = (
-  definition: LevelDefinition,
+const compileTargetGuides = (
   collectors: ReadonlyMap<string, LevelDefinition['collectors'][number]>,
-  key: `${number}:${number}`
-): BoardEdgeGuide => {
-  const terminal = parseCellKey(key)
-  const anchor = getDirectionAnchor(definition.gravity.direction, terminal)
+  target: ReturnType<typeof compileGravityDefinition>['edgeTargets'][number]
+): BoardEdgeGuide[] => {
+  const collectorGuides = target.terminals.flatMap(key => getCollectorGuide(collectors, target.anchor, key))
+  const gravityTerminals = target.terminals.filter(key => !collectors.has(key)).map(parseCellKey)
+  const gravityGuides: BoardEdgeGuide[] = gravityTerminals.length === 0 ? [] : [{
+    kind: 'gravity',
+    anchor: target.anchor,
+    terminals: gravityTerminals as [ReturnType<typeof parseCellKey>, ...ReturnType<typeof parseCellKey>[]],
+  }]
+
+  return [...gravityGuides, ...collectorGuides]
+}
+
+const getCollectorGuide = (
+  collectors: ReadonlyMap<string, LevelDefinition['collectors'][number]>,
+  anchor: ReturnType<typeof compileGravityDefinition>['edgeTargets'][number]['anchor'],
+  key: CellKey
+): BoardEdgeGuide[] => {
   const collector = collectors.get(key)
 
-  return collector === undefined
-    ? { kind: 'gravity', anchor, terminals: [terminal] }
-    : { kind: 'collector', anchor, terminal, collectorId: collector.id }
+  return collector === undefined ? [] : [{
+    kind: 'collector',
+    anchor,
+    terminal: parseCellKey(key),
+    collectorId: collector.id,
+  }]
 }
 
 const createCompiledLevel = (
   definition: LevelDefinition,
   initial: ReturnType<typeof compileInitialBoard>,
   pools: ReadonlyMap<string, TilePoolDefinition>,
-  gravity: GravityGraph
+  gravity: ReturnType<typeof compileGravityDefinition>
 ): CompiledLevel => ({
   id: definition.id,
   revision: definition.revision,
   topology: initial.topology,
   initialBoard: initial.initialBoard,
   tilePools: pools,
-  gravity,
-  edgeGuides: compileEdgeGuides(definition, gravity),
+  gravity: gravity.gravity,
+  edgeGuides: compileEdgeGuides(definition, gravity.edgeTargets),
   spawns: definition.spawns,
   collectors: definition.collectors,
   objectives: definition.objectives,
 })
 
+const getCompilationErrors = (
+  definition: LevelDefinition,
+  initial: ReturnType<typeof compileInitialBoard>,
+  pools: ReadonlyMap<string, TilePoolDefinition>,
+  poolErrors: LevelCompilationError[],
+  gravity: ReturnType<typeof compileGravityDefinition>
+): LevelCompilationError[] => {
+  const spawnErrors = validateSpawns(definition.spawns, initial.topology, pools)
+  const externalTerminals = new Set(gravity.edgeTargets.flatMap(target => target.terminals))
+  const collectorErrors = validateCollectors(
+    definition, initial.topology, gravity.gravity, externalTerminals
+  )
+
+  return initial.errors.concat(
+    poolErrors, validateRandomPools(definition, pools), spawnErrors, gravity.errors, collectorErrors
+  )
+}
+
 export const compileLevel = (definition: LevelDefinition): LevelCompilationResult<CompiledLevel> => {
   const initial = compileInitialBoard(definition.initialBoard)
   const { pools, errors: poolErrors } = compileTilePools(definition.tilePools)
-  const spawnErrors = validateSpawns(definition.spawns, initial.topology, pools)
-  const gravity = compileDirectionalGravity(initial.topology, definition.gravity.direction, definition.spawns)
-  const collectorErrors = validateCollectors(definition, initial.topology, gravity.gravity)
-  const errors = initial.errors.concat(
-    poolErrors,
-    validateRandomPools(definition, pools),
-    spawnErrors,
-    gravity.errors,
-    collectorErrors
-  )
+  const gravity = compileGravityDefinition(initial.topology, definition.gravity, definition.spawns)
+  const errors = getCompilationErrors(definition, initial, pools, poolErrors, gravity)
 
   if (errors.length > 0) {
     return { ok: false, errors }
   }
 
-  return { ok: true, level: createCompiledLevel(definition, initial, pools, gravity.gravity) }
+  return { ok: true, level: createCompiledLevel(definition, initial, pools, gravity) }
 }
 
 export const compileLevelOrThrow = (definition: LevelDefinition): CompiledLevel => {

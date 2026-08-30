@@ -6,8 +6,10 @@ import { expect, test } from '@playwright/test'
 
 import { BoosterType } from '@/domain/enums'
 import { clearMatchedPositions } from '@/game/board/boardHits'
+import { collapseGrid } from '@/game/board/boardTransitions'
 import { collectDroppedMugs } from '@/game/board/specialTiles'
 import { compileDirectionalGravity } from '@/domain/levels/compileGravity'
+import { createGravityState } from '@/domain/levels/gravityState'
 import { isMovableTile } from '@/domain/tiles'
 import { placeCreatedBoosters } from '@/game/board/boardBoosters'
 import { SpecialTileType } from '@/domain/enums'
@@ -134,7 +136,7 @@ test('mug is collected when it reaches the bottom row', () => {
   const collectObjective = createCollector(counters)
 
   grid.setTile(mug, 2, 1)
-  collectDroppedMugs(grid, createGravity(grid), createCollectors(3), collectObjective)
+  collectDroppedMugs(grid, createCollectors(3), collectObjective)
 
   expect(grid.getTileByIndex(2, 1)).toBeNull()
   expect(counters[0].count).toBe(1)
@@ -147,7 +149,12 @@ test('consecutive mugs at the bottom are collected in the same transition', () =
 
   grid.setTile(createTile(1, SpecialTileType.Mug), 1, 1)
   grid.setTile(createTile(2, SpecialTileType.Mug), 2, 1)
-  collectDroppedMugs(grid, createGravity(grid), createCollectors(3), collectObjective)
+  const gravity = createGravity(grid)
+  const gravityState = createGravityState()
+
+  while (collectDroppedMugs(grid, createCollectors(3), collectObjective) > 0) {
+    collapseGrid(grid, gravity, gravityState)
+  }
 
   expect(grid.getTileByIndex(1, 1)).toBeNull()
   expect(grid.getTileByIndex(2, 1)).toBeNull()

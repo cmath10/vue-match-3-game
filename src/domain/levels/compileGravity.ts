@@ -1,5 +1,4 @@
 import type {
-  BoardEdgeAnchor,
   BoardTopology,
   CellKey,
   Direction,
@@ -9,45 +8,14 @@ import type { LevelCompilationError } from '@/domain/levels/errors'
 import type { Position } from '@/domain/types'
 import type { SpawnDefinition } from '@/domain/levels/types'
 
+import { compileGravityGraph } from '@/domain/levels/gravityGraph'
 import { getCellKey } from '@/domain/levels/coordinates'
-import { levelError } from '@/domain/levels/errors'
+import { getDirectionAnchor, movePosition } from '@/domain/levels/gravityGeometry'
 import { parseCellKey } from '@/domain/levels/coordinates'
 
 type GravityCompilation = {
   gravity: GravityGraph
   errors: LevelCompilationError[]
-}
-
-const DELTAS: Record<Direction, Position> = {
-  down: { row: 1, column: 0 },
-  up: { row: -1, column: 0 },
-  left: { row: 0, column: -1 },
-  right: { row: 0, column: 1 },
-}
-
-const getNextPosition = (position: Position, direction: Direction): Position => ({
-  row: position.row + DELTAS[direction].row,
-  column: position.column + DELTAS[direction].column,
-})
-
-const getNextByCell = (topology: BoardTopology, direction: Direction): Map<CellKey, CellKey | null> => {
-  return new Map([...topology.playableCells].map((key) => {
-    const nextKey = getCellKey(getNextPosition(parseCellKey(key), direction))
-
-    return [key, topology.playableCells.has(nextKey) ? nextKey : null]
-  }))
-}
-
-const getIncomingByCell = (nextByCell: ReadonlyMap<CellKey, CellKey | null>): Map<CellKey, CellKey[]> => {
-  const incoming = new Map([...nextByCell.keys()].map(key => [key, [] as CellKey[]]))
-
-  nextByCell.forEach((next, key) => {
-    if (next !== null) {
-      incoming.get(next)?.push(key)
-    }
-  })
-
-  return incoming
 }
 
 const compareVertical = (a: Position, b: Position, direction: Direction): number => {
@@ -63,47 +31,21 @@ const compareHorizontal = (a: Position, b: Position, direction: Direction): numb
 }
 
 const compareByDirection = (a: CellKey, b: CellKey, direction: Direction): number => {
-  const aPosition = parseCellKey(a)
-  const bPosition = parseCellKey(b)
+  const first = parseCellKey(a)
+  const second = parseCellKey(b)
 
   return direction === 'down' || direction === 'up'
-    ? compareVertical(aPosition, bPosition, direction)
-    : compareHorizontal(aPosition, bPosition, direction)
+    ? compareVertical(first, second, direction)
+    : compareHorizontal(first, second, direction)
 }
 
-const getSettlementOrder = (keys: CellKey[], direction: Direction): CellKey[] => (
-  [...keys].sort((a, b) => compareByDirection(a, b, direction))
-)
+const getNextByCell = (topology: BoardTopology, direction: Direction): Map<CellKey, CellKey | null> => {
+  return new Map([...topology.playableCells].map((key) => {
+    const [row, column] = key.split(':').map(Number)
+    const nextKey = getCellKey(movePosition({ row, column }, direction))
 
-const getReachableCells = (
-  nextByCell: ReadonlyMap<CellKey, CellKey | null>,
-  spawns: readonly SpawnDefinition[]
-): Set<CellKey> => {
-  const reachable = new Set<CellKey>()
-
-  spawns.forEach((spawn) => {
-    let current: CellKey | null | undefined = getCellKey(spawn.entry)
-
-    while (current !== null && current !== undefined && !reachable.has(current)) {
-      reachable.add(current)
-      current = nextByCell.get(current)
-    }
-  })
-
-  return reachable
-}
-
-const getReachabilityErrors = (
-  nextByCell: ReadonlyMap<CellKey, CellKey | null>,
-  spawns: readonly SpawnDefinition[]
-): LevelCompilationError[] => {
-  const reachable = getReachableCells(nextByCell, spawns)
-
-  return [...nextByCell.keys()].flatMap(key => reachable.has(key) ? [] : [levelError(
-    'unreachable-cell',
-    ['gravity', key],
-    `Cell ${key} is not reachable from a spawn`
-  )])
+    return [key, topology.playableCells.has(nextKey) ? nextKey : null]
+  }))
 }
 
 export const compileDirectionalGravity = (
@@ -112,22 +54,17 @@ export const compileDirectionalGravity = (
   spawns: readonly SpawnDefinition[]
 ): GravityCompilation => {
   const nextByCell = getNextByCell(topology, direction)
-  const incomingByCell = getIncomingByCell(nextByCell)
-  const nodes = new Map([...nextByCell].map(([key, next]) => [key, {
-    next,
-    incoming: incomingByCell.get(key) ?? [],
-  }]))
+  const compilation = compileGravityGraph(topology, nextByCell, spawns)
 
   return {
-    gravity: { nodes, settlementOrder: getSettlementOrder([...nodes.keys()], direction) },
-    errors: getReachabilityErrors(nextByCell, spawns),
+    gravity: {
+      ...compilation.gravity,
+      settlementOrder: [...compilation.gravity.nodes.keys()].sort((a, b) => (
+        compareByDirection(a, b, direction)
+      )),
+    },
+    errors: compilation.errors,
   }
 }
 
-export const getDirectionAnchor = (direction: Direction, terminal: Position): BoardEdgeAnchor => {
-  if (direction === 'down' || direction === 'up') {
-    return { side: direction === 'down' ? 'bottom' : 'top', column: terminal.column }
-  }
-
-  return { side: direction === 'left' ? 'left' : 'right', row: terminal.row }
-}
+export { getDirectionAnchor }

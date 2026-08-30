@@ -25,7 +25,7 @@
                     :data-tile-id="tile.id"
                     :blocker="tile.blocker?.type"
                     :health="tile.health"
-                    :style="getTileStyle(tile)"
+                    :style="getTileStyle(tile, tileMovementDurations.get(tile.id))"
                     :type="tile.type"
                     @click="emit('tile-click', tile)"
                     @dblclick="emit('tile-double-click', tile)"
@@ -101,6 +101,7 @@ defineProps<{
   boosterCombination: BoosterCombination | null
   cookieBreakEffects: CookieBreakEffect[]
   tileBreakEffects: TileBreakEffect[]
+  tileMovementDurations: ReadonlyMap<number, number>
   result: GameResult | null
 }>()
 

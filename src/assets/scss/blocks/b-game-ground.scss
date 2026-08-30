@@ -51,7 +51,7 @@
     cursor: pointer;
     touch-action: none;
     transition:
-      transform var(--tile-transition-duration) cubic-bezier(0.22, 1, 0.36, 1),
+      transform var(--tile-movement-duration, var(--tile-transition-duration)) cubic-bezier(0.22, 1, 0.36, 1),
       opacity var(--tile-transition-duration) ease;
 
     &--collecting {

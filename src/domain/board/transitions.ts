@@ -4,6 +4,7 @@ import type { Position } from '@/domain/types'
 import type { SpawnDefinition } from '@/domain/levels/types'
 
 import { cloneBoardState } from '@/domain/board/topology'
+import { createGravityState } from '@/domain/levels/gravityState'
 import { getCellKey } from '@/domain/levels/coordinates'
 import { resolveGravity } from '@/domain/board/gravity'
 
@@ -43,10 +44,12 @@ const createRefillTile = <T extends BoardTile>(refillTiles: readonly T[], getInd
 
 export const collapseBoard = <T extends BoardTile>(
   state: BoardState<T>,
-  gravity: GravityGraph
+  gravity: GravityGraph,
+  gravityState = createGravityState()
 ): BoardState<T> => resolveGravity({
   state,
   graph: gravity,
+  gravityState,
   spawns: [],
   spawnTile: () => { throw new Error('Collapse cannot spawn tiles') },
   getTileId: tile => tile,
@@ -56,13 +59,15 @@ export const collapseAndRefillBoard = <T extends BoardTile>(
   state: BoardState<T>,
   gravity: GravityGraph,
   spawns: readonly SpawnDefinition[],
-  refillTiles: readonly T[]
+  refillTiles: readonly T[],
+  gravityState = createGravityState()
 ): { state: BoardState<T>; refillCount: number } => {
   let refillCount = 0
   const getRefillIndex = () => refillCount++
   const resolution = resolveGravity({
     state,
     graph: gravity,
+    gravityState,
     spawns,
     spawnTile: () => createRefillTile(refillTiles, getRefillIndex),
     getTileId: tile => tile,

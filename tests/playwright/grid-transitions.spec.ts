@@ -4,6 +4,7 @@ import { expect, test } from '@playwright/test'
 
 import { collapseGrid } from '@/game/board/boardTransitions'
 import { compileDirectionalGravity } from '@/domain/levels/compileGravity'
+import { createGravityState } from '@/domain/levels/gravityState'
 import { refillGrid } from '@/game/board/boardTransitions'
 import TileGrid from '@/game/board/TileGrid'
 import { TileType } from '@/domain/enums'
@@ -29,15 +30,17 @@ test('grid transitions retain stable ids and ordered logical movements', () => {
     pool: 'fixture',
   }))
   const gravity = compileDirectionalGravity(grid.getTopology(), 'down', spawns).gravity
+  const gravityState = createGravityState()
 
-  const collapseMovements = collapseGrid(grid, gravity)
+  const collapseMovements = collapseGrid(grid, gravity, gravityState)
   let nextId = 5
   const refillMovements = refillGrid(
     grid,
     gravity,
+    gravityState,
     spawns,
-    (_, column, spawnRow) => createTile(nextId++, spawnRow, column),
-    collapseMovements.length
+    (_, target, spawnIndex) => createTile(nextId++, -1 - spawnIndex, target.column),
+    { resolutionOrder: collapseMovements.length }
   )
 
   expect(collapseMovements).toEqual([{

@@ -30,6 +30,7 @@
                     :landing-tile-ids="landingTileIds"
                     :result="gameResult"
                     :tile-break-effects="tileBreakEffects"
+                    :tile-movement-durations="tileMovementDurations"
                     :tiles="activeTiles"
                     @play-again="startNewGame"
                     @tile-click="onTileClick"
@@ -77,14 +78,11 @@ import type {
 import type { BoardTileType } from '@/domain/enums'
 import type { FixedTileDefinition } from '@/domain/levels/types'
 import type { GameSnapshot } from '@/domain/progress'
+import type { GravityState } from '@/domain/levels/types'
 import type { ObjectiveType } from '@/domain/enums'
+import type { SpawnDefinition } from '@/domain/levels/types'
 
-import {
-  computed,
-  nextTick,
-  reactive,
-  ref,
-} from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
@@ -104,6 +102,7 @@ import { useLevelEntry } from '@/composables/useLevelEntry'
 import { useObjectiveCollection } from '@/composables/useObjectiveCollection'
 import { useTileBreakAnimation } from '@/composables/useTileBreakAnimation'
 import { useTileLandingAnimation } from '@/composables/useTileLandingAnimation'
+import { useTileMovementAnimation } from '@/composables/useTileMovementAnimation'
 
 import { applyBoosterMovePositions } from '@/game/board/boardHits'
 import { clearMatchedPositions } from '@/game/board/boardHits'
@@ -111,6 +110,7 @@ import { cloneBoard } from '@/domain/progress'
 import { collapseGrid } from '@/game/board/boardTransitions'
 import { collectDroppedMugs } from '@/game/board/specialTiles'
 import { createAttemptRandom } from '@/domain/random'
+import { createGravityState } from '@/domain/levels/gravityState'
 import { createMatch3BoosterTurn } from '@/game/turns/boosterTurn'
 import { createMatch3TileInput } from '@/input/tileInput'
 import { findMatchedPositions, findMatchLines } from '@/domain/board/matches'
@@ -129,6 +129,8 @@ import { materializeInitialBoard } from '@/domain/levels/materializeInitialBoard
 import { placeCreatedBoosters } from '@/game/board/boardBoosters'
 import { refillGrid } from '@/game/board/boardTransitions'
 import { restoreAttemptRandom } from '@/domain/random'
+import { restoreGravityState } from '@/domain/levels/gravityState'
+import { snapshotGravityState } from '@/domain/levels/gravityState'
 import { usePlayerProgress } from '@/state/playerProgress'
 
 import { TileType } from '@/domain/enums'
@@ -147,6 +149,7 @@ const { state: playerState } = usePlayerProgress()
 const level = getCatalogLevel(props.levelId)
 const { width: boardWidth, height: boardHeight } = level.topology.bounds
 let attemptRandom = createAttemptRandom()
+let gravityState: GravityState = createGravityState()
 
 const random = <T>(array: T[]): T => {
   if (array.length === 0) {
@@ -175,7 +178,7 @@ const {
 } = useGameProgress({
   getLevel: () => ({ kind: 'catalog', levelId: level.id, levelRevision: level.revision }),
   getRandom: () => attemptRandom.snapshot(),
-  getGravity: () => ({ nextIncomingIndexByCell: {} }),
+  getGravity: () => snapshotGravityState(gravityState),
   getBoard: () => grid.getTileList(),
   objectives,
   counters,
@@ -191,19 +194,18 @@ const createTile = (type: BoardTileType, row: number, column: number): Tile => (
   { id: nextTileId.value++, type, selected: false, row, column }
 )
 
-const getSpawnTileTypes = (column: number): TileType[] => {
-  const spawn = level.spawns.find(item => item.entry.column === column)
-  const pool = spawn === undefined ? undefined : level.tilePools.get(spawn.pool)
+const getSpawnTileTypes = (spawn: SpawnDefinition): TileType[] => {
+  const pool = level.tilePools.get(spawn.pool)
 
   if (pool === undefined) {
-    throw new Error(`Missing spawn pool for column ${column}`)
+    throw new Error(`Missing spawn pool for ${spawn.id}`)
   }
 
   return [...pool.types]
 }
 
-const generateType = (i: number, j: number): TileType => (
-  random(getSpawnTileTypes(j).filter(type => !createsMatch(type, i, j)))
+const generateType = (spawn: SpawnDefinition, i: number, j: number): TileType => (
+  random(getSpawnTileTypes(spawn).filter(type => !createsMatch(type, i, j)))
 )
 
 const swapTiles = (a: Tile, b: Tile) => {
@@ -224,6 +226,7 @@ const waitTileBreakAnimation = () => new Promise<void>(
   resolve => setTimeout(resolve, TILE_BREAK_ANIMATION_DURATION)
 )
 const nextAnimationFrame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+const waitDuration = (duration: number) => new Promise<void>(resolve => setTimeout(resolve, duration))
 const {
   visualEffects: boosterVisualEffects, combination: boosterCombination,
   flights: buttonFlights, collectingTileIds, combiningTileIds: combiningBoosterTileIds,
@@ -293,6 +296,27 @@ const {
   cancel: cancelTileLandingAnimation,
 } = useTileLandingAnimation({ waitAnimation })
 
+const getSpawnOriginById = (spawnId: string, spawnIndex: number): Position => {
+  const spawn = level.spawns.find(item => item.id === spawnId)
+
+  if (spawn === undefined) {
+    throw new Error(`Unknown spawn: ${spawnId}`)
+  }
+  return getSpawnOrigin(spawn, spawnIndex)
+}
+
+const {
+  durations: tileMovementDurations,
+  animate: animateTileMovements,
+  cancel: cancelTileMovementAnimation,
+} = useTileMovementAnimation({
+  duration: ANIMATION_DELAY,
+  getSpawnOrigin: getSpawnOriginById,
+  getTile: tileId => grid.getTiles().find(tile => tile.id.toString() === tileId),
+  nextFrame: nextAnimationFrame,
+  wait: waitDuration,
+})
+
 const collectTile = (collection: ObjectiveCollection): void => {
   recordCollection(collection.type)
   collectCookieBreak(collection)
@@ -300,33 +324,25 @@ const collectTile = (collection: ObjectiveCollection): void => {
   collectTileBreak(collection)
 }
 
-const spawnTile = (i: number, j: number, spawnRow: number): Tile => {
-  const tile = createTile(generateType(i, j), spawnRow, j)
+const getSpawnOrigin = (spawn: SpawnDefinition, spawnIndex: number): Position => {
+  const nextKey = level.gravity.nodes.get(`${spawn.entry.row}:${spawn.entry.column}`)?.next
 
-  grid.setTile(tile, i, j, {
-    row: spawnRow,
-    column: j,
-  })
+  if (nextKey === null || nextKey === undefined) {
+    return { ...spawn.entry }
+  }
+  const [nextRow, nextColumn] = nextKey.split(':').map(Number)
+  const distance = spawnIndex + 1
 
-  void moveSpawnedTileToCell(tile, i, j)
-
-  return tile
-}
-
-const moveSpawnedTileToCell = async (tile: Tile, i: number, j: number) => {
-  await nextTick()
-  await nextAnimationFrame()
-  await nextAnimationFrame()
-
-  const currentTile = grid.getTileByIndex(i, j)
-
-  if (currentTile?.id === tile.id) {
-    moveTileToCell(currentTile, i, j)
+  return {
+    row: spawn.entry.row - (nextRow - spawn.entry.row) * distance,
+    column: spawn.entry.column - (nextColumn - spawn.entry.column) * distance,
   }
 }
 
-const moveTileToCell = (tile: Tile, i: number, j: number) => {
-  tile.row = i; tile.column = j
+const spawnTile = (spawn: SpawnDefinition, target: Position, spawnIndex: number): Tile => {
+  const origin = getSpawnOrigin(spawn, spawnIndex)
+
+  return createTile(generateType(spawn, target.row, target.column), origin.row, origin.column)
 }
 
 const updateGrid = async (
@@ -340,8 +356,8 @@ const updateGrid = async (
   }
 }
 
-const waitForResolutionAnimations = () => Promise.all([
-  waitAnimation(),
+const waitForResolutionAnimations = (movements: TileMovement[]) => Promise.all([
+  animateTileMovements(movements),
   animateObjectiveCollections(),
   animateCookieBreaks(),
   animateTileBreaks(),
@@ -351,7 +367,7 @@ const settleGrid = async (version: number, initialMovements: TileMovement[]) => 
   let movements = initialMovements
 
   while (true) {
-    await waitForResolutionAnimations()
+    await waitForResolutionAnimations(movements)
 
     if (version !== gameVersion.value) {
       return
@@ -387,17 +403,32 @@ const resolveBoosterPositions = (positions: Position[], match: MoveMatch): TileM
   return transitionGrid()
 }
 
-const transitionGrid = (): TileMovement[] => {
-  const movements = collapseGrid(grid, level.gravity)
+const settleCollectors = (movements: TileMovement[]): number => {
+  let phase = 0
 
-  collectDroppedMugs(grid, level.gravity, level.collectors, collectTile)
-  movements.push(...collapseGrid(grid, level.gravity, movements.length))
+  while (collectDroppedMugs(grid, level.collectors, collectTile) > 0) {
+    phase++
+    const collapsed = collapseGrid(grid, level.gravity, gravityState, {
+      phase,
+      resolutionOrder: movements.length,
+    })
+
+    movements.push(...collapsed)
+  }
+  return phase
+}
+
+const transitionGrid = (): TileMovement[] => {
+  const movements = collapseGrid(grid, level.gravity, gravityState)
+  const refillPhase = settleCollectors(movements)
+
   movements.push(...refillGrid(
     grid,
     level.gravity,
+    gravityState,
     level.spawns,
     spawnTile,
-    movements.length
+    { phase: refillPhase, resolutionOrder: movements.length }
   ))
   animateTileLandings(movements)
 
@@ -521,6 +552,7 @@ const resetRuntime = (): void => {
   cancelCookieBreakAnimation()
   cancelTileBreakAnimation()
   cancelTileLandingAnimation()
+  cancelTileMovementAnimation()
   cancelBoosterAnimation()
   objectives.splice(0)
   counters.splice(0)
@@ -530,6 +562,7 @@ const resetRuntime = (): void => {
 const startNewGame = () => {
   resetRuntime()
   attemptRandom = createAttemptRandom()
+  gravityState = createGravityState()
   turns.value = COUNT_TURNS
   initializePlayableLevel({
     grid, width: boardWidth, height: boardHeight, objectives, counters, createTile, fillGrid,
@@ -549,6 +582,7 @@ const restoreGame = (snapshot: GameSnapshot): void => {
 
   resetRuntime()
   attemptRandom = restoreAttemptRandom(snapshot.random)
+  gravityState = restoreGravityState(snapshot.gravity, level.gravity)
   turns.value = snapshot.turns
   nextTileId.value = snapshot.nextTileId
   restoreProgress(snapshot)

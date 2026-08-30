@@ -1,5 +1,5 @@
 import type { BoardState } from '@/domain/types'
-import type { CellKey, GravityGraph } from '@/domain/levels/types'
+import type { CellKey, GravityGraph, GravityState } from '@/domain/levels/types'
 import type { MovementOrigin, Position } from '@/domain/types'
 import type { SpawnDefinition } from '@/domain/levels/types'
 import type { TileMovement } from '@/domain/types'
@@ -16,10 +16,12 @@ export type SpawnTile<T> = (
 type GravityOptions<T> = {
   state: BoardState<T>
   graph: GravityGraph
+  gravityState: GravityState
   spawns: readonly SpawnDefinition[]
   spawnTile: SpawnTile<T>
   getTileId: (tile: T) => string
   orderOffset?: number
+  phase?: number
 }
 
 export type GravityResolution<T> = {
@@ -52,16 +54,6 @@ const setTile = <T>(state: BoardState<T>, key: CellKey, tile: T | null): void =>
   const { row, column } = parseCellKey(key)
 
   state.occupancy[row][column] = tile
-}
-
-const getIncoming = (graph: GravityGraph, key: CellKey): CellKey | null => {
-  const incoming = graph.nodes.get(key)?.incoming ?? []
-
-  if (incoming.length > 1) {
-    throw new Error(`Converging gravity at ${key} requires GravityState`)
-  }
-
-  return incoming[0] ?? null
 }
 
 const createSpawnSupply = <T>(
@@ -97,7 +89,7 @@ const createCellSupply = <T>(
   }
 }
 
-const getTerminalSupply = <T>(
+const getSpawnSupply = <T>(
   context: GravityContext<T>,
   current: CellKey,
   target: CellKey,
@@ -108,24 +100,46 @@ const getTerminalSupply = <T>(
   return spawn === undefined ? null : createSpawnSupply(context, spawn, target, path)
 }
 
-const findSupply = <T>(context: GravityContext<T>, target: CellKey): Supply<T> | null => {
-  const path = [target]
-  let current = target
+const getIncomingIndexes = (context: GravityContext<unknown>, key: CellKey): number[] => {
+  const count = context.options.graph.nodes.get(key)?.incoming.length ?? 0
+  const start = context.options.gravityState.nextIncomingIndexByCell.get(key) ?? 0
 
-  while (true) {
-    const incoming = getIncoming(context.options.graph, current)
-    if (incoming === null) {
-      return getTerminalSupply(context, current, target, path)
-    }
+  return Array.from({ length: count }, (_, offset) => (start + offset) % count)
+}
 
-    const supply = createCellSupply(context.state, incoming, path)
+const advanceCursor = <T>(context: GravityContext<T>, key: CellKey, index: number): void => {
+  const count = context.options.graph.nodes.get(key)?.incoming.length ?? 0
+
+  if (count > 1) {
+    context.options.gravityState.nextIncomingIndexByCell.set(key, (index + 1) % count)
+  }
+}
+
+const findBranchSupply = <T>(
+  context: GravityContext<T>,
+  incoming: CellKey,
+  target: CellKey,
+  path: CellKey[]
+): Supply<T> | null => createCellSupply(context.state, incoming, path) ??
+  findSupply(context, incoming, target, [...path, incoming])
+
+const findSupply = <T>(
+  context: GravityContext<T>,
+  current: CellKey,
+  target: CellKey,
+  path: CellKey[]
+): Supply<T> | null => {
+  const incoming = context.options.graph.nodes.get(current)?.incoming ?? []
+
+  for (const index of getIncomingIndexes(context, current)) {
+    const supply = findBranchSupply(context, incoming[index], target, path)
+
     if (supply !== null) {
+      advanceCursor(context, current, index)
       return supply
     }
-
-    path.push(incoming)
-    current = incoming
   }
+  return getSpawnSupply(context, current, target, path)
 }
 
 const applySupply = <T>(context: GravityContext<T>, target: CellKey, supply: Supply<T>): void => {
@@ -138,7 +152,7 @@ const applySupply = <T>(context: GravityContext<T>, target: CellKey, supply: Sup
     tileId: context.options.getTileId(supply.tile),
     origin: supply.origin,
     path: supply.path,
-    phase: 0,
+    phase: context.options.phase ?? 0,
     resolutionOrder: (context.options.orderOffset ?? 0) + context.movements.length,
   })
 }
@@ -148,7 +162,7 @@ const resolveTarget = <T>(context: GravityContext<T>, target: CellKey): void => 
     return
   }
 
-  const supply = findSupply(context, target)
+  const supply = findSupply(context, target, target, [target])
   if (supply === null) {
     return
   }

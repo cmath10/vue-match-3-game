@@ -1,4 +1,5 @@
 import type { BoosterType } from '@/domain/enums'
+import type { CellKey } from '@/domain/levels/types'
 import type { Counter, GameResult } from '@/domain/types'
 import type { LevelDefinition } from '@/domain/levels/types'
 import type { Objective } from '@/domain/types'
@@ -34,7 +35,7 @@ export type LevelSource =
     }
 
 export type GravityStateSnapshot = {
-  nextIncomingIndexByCell: Readonly<Record<string, number>>
+  nextIncomingIndexByCell: Readonly<Partial<Record<CellKey, number>>>
 }
 
 export type GameSnapshot = {

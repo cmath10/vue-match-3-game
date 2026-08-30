@@ -1,6 +1,7 @@
 import type { SpawnTile as CreateSpawnTile } from '@/domain/board/gravity'
 import type { GravityGraph } from '@/domain/levels/types'
 import type { GravityResolution } from '@/domain/board/gravity'
+import type { GravityState } from '@/domain/levels/types'
 import type { Position } from '@/domain/types'
 import type { SpawnDefinition } from '@/domain/levels/types'
 import type { Tile } from '@/domain/types'
@@ -9,7 +10,10 @@ import type { TileMovement } from '@/domain/types'
 
 import { resolveGravity } from '@/domain/board/gravity'
 
-type SpawnTile = (row: number, column: number, spawnRow: number) => Tile
+type TransitionOrder = {
+  phase?: number
+  resolutionOrder?: number
+}
 
 const applyResolution = (grid: TileGrid, resolution: GravityResolution<Tile>): TileMovement[] => {
   const spawnedTileIds = new Set(resolution.movements.flatMap(movement => (
@@ -33,33 +37,35 @@ const getTilePosition = (tile: Tile): Position => ({ row: tile.row, column: tile
 export const collapseGrid = (
   grid: TileGrid,
   gravity: GravityGraph,
-  orderOffset = 0
+  gravityState: GravityState,
+  order: TransitionOrder = {}
 ): TileMovement[] => applyResolution(grid, resolveGravity({
   state: grid.getState(),
   graph: gravity,
+  gravityState,
   spawns: [],
   spawnTile: () => { throw new Error('Collapse cannot spawn tiles') },
   getTileId: tile => tile.id.toString(),
-  orderOffset,
+  orderOffset: order.resolutionOrder,
+  phase: order.phase,
 }))
 
 export const refillGrid = (
   grid: TileGrid,
   gravity: GravityGraph,
+  gravityState: GravityState,
   spawns: readonly SpawnDefinition[],
-  spawnTile: SpawnTile,
-  orderOffset = 0
+  spawnTile: CreateSpawnTile<Tile>,
+  order: TransitionOrder = {}
 ): TileMovement[] => {
-  const createTile: CreateSpawnTile<Tile> = (_, target, spawnIndex) => (
-    spawnTile(target.row, target.column, -1 - spawnIndex)
-  )
-
   return applyResolution(grid, resolveGravity({
     state: grid.getState(),
     graph: gravity,
+    gravityState,
     spawns,
-    spawnTile: createTile,
+    spawnTile,
     getTileId: tile => tile.id.toString(),
-    orderOffset,
+    orderOffset: order.resolutionOrder,
+    phase: order.phase,
   }))
 }
