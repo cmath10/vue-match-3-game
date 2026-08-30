@@ -4,6 +4,7 @@ import type { BoardTileType } from '@/domain/enums'
 
 import { expect, test } from '@playwright/test'
 
+import { createRectangularBoardState } from '@/domain/board/topology'
 import { getBoosterSwipe } from '@/domain/boosters/combinations'
 import { resolveBoosterWave } from '@/domain/boosters/chain'
 
@@ -22,7 +23,7 @@ test('booster wave activates each hit booster once and deduplicates positions', 
     [TileType.SweetsPillow, TileType.SweetsFish, TileType.SweetsBird, TileType.SweetsRooster],
   ]
   const wave = resolveBoosterWave(
-    board,
+    createRectangularBoardState(board),
     [{ source: { row: 1, column: 1 } }],
     () => null
   )
@@ -46,7 +47,7 @@ test('chain-activated button box selects only types currently present on board',
   ]
   const selections: TileType[][] = []
   const wave = resolveBoosterWave(
-    board,
+    createRectangularBoardState(board),
     [{ source: { row: 0, column: 0 } }],
     (types) => {
       selections.push(types)
@@ -74,7 +75,7 @@ test('chain-activated button box selects only types currently present on board',
 test('button box is still consumed when no ordinary tile type is present', () => {
   const board: Board<BoardTileType> = [[BoosterType.ButtonBox]]
   const wave = resolveBoosterWave(
-    board,
+    createRectangularBoardState(board),
     [{ source: { row: 0, column: 0 } }],
     types => types[0] ?? null
   )

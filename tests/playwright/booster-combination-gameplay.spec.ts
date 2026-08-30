@@ -5,6 +5,7 @@ import type { Tile } from '@/domain/types'
 
 import { expect, test } from '@playwright/test'
 
+import { AttemptRandom } from '@/domain/random'
 import { BoosterCombinationType, BoosterType } from '@/domain/enums'
 import { createPlayerState, createSessionStatistics } from '@/domain/progress'
 import { SpecialTileType } from '@/domain/enums'
@@ -177,7 +178,9 @@ const createSnapshot = (source: BoosterType, target?: BoosterType): GameSnapshot
   }
 
   return {
-    levelId: 1,
+    level: { kind: 'catalog', levelId: 1, levelRevision: 1 },
+    random: new AttemptRandom(now).snapshot(),
+    gravity: { nextIncomingIndexByCell: {} },
     board,
     objectives: [{ type: SpecialTileType.Mug, count: 99 }],
     counters: COUNTER_TYPES.map(type => ({ type, count: 0 })),

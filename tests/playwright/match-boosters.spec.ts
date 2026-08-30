@@ -1,4 +1,4 @@
-import type { Board, Position } from '@/domain/types'
+import type { BoardState, Position } from '@/domain/types'
 
 import { expect, test } from '@playwright/test'
 
@@ -9,11 +9,12 @@ import {
 } from '@/domain/boosters/creation'
 
 import { BoosterType } from '@/domain/enums'
+import { createRectangularBoardState } from '@/domain/board/topology'
 import { findMatchLines } from '@/domain/board/matches'
 
-const parseBoard = (rows: string[]): Board<string> => {
-  return rows.map(row => [...row].map(tile => tile === '.' ? null : tile))
-}
+const parseBoard = (rows: string[]): BoardState<string> => createRectangularBoardState(
+  rows.map(row => [...row].map(tile => tile === '.' ? null : tile))
+)
 
 const boosterAt = (rows: string[], position: Position) => {
   return getBoosterCreation(findMatchLines(parseBoard(rows)), position)
@@ -196,8 +197,20 @@ test('cascade creates a booster at the last causal movement destination', () => 
     '.....',
   ]))
   const boosters = getCascadeBoosterCreations(lines, [
-    { tileId: '10', from: { row: 0, column: 1 }, to: { row: 1, column: 1 }, order: 0 },
-    { tileId: '11', from: null, to: { row: 1, column: 3 }, order: 1 },
+    {
+      tileId: '10',
+      origin: { kind: 'cell', position: { row: 0, column: 1 } },
+      path: [{ row: 1, column: 1 }],
+      phase: 0,
+      resolutionOrder: 0,
+    },
+    {
+      tileId: '11',
+      origin: { kind: 'spawn', spawnId: 'test' },
+      path: [{ row: 1, column: 3 }],
+      phase: 0,
+      resolutionOrder: 1,
+    },
   ])
 
   expect(boosters).toEqual([{
@@ -213,7 +226,13 @@ test('cascade does not create a booster without a movement in its match', () => 
     '.....',
   ]))
   const boosters = getCascadeBoosterCreations(lines, [
-    { tileId: '10', from: null, to: { row: 0, column: 0 }, order: 0 },
+    {
+      tileId: '10',
+      origin: { kind: 'spawn', spawnId: 'test' },
+      path: [{ row: 0, column: 0 }],
+      phase: 0,
+      resolutionOrder: 0,
+    },
   ])
 
   expect(boosters).toEqual([])

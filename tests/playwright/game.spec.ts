@@ -82,8 +82,10 @@ test('expanded board keeps an 11 by 9 grid readable on mobile', async ({ page })
   await page.goto('/game/1')
 
   const cells = page.locator('.b-game-ground__cell')
+  const guides = page.locator('.b-game-board-shell__guide--collector')
 
   await expect(cells).toHaveCount(11 * 9)
+  await expect(guides).toHaveCount(11)
 
   const metrics = await page.locator('.b-game-ground').evaluate((ground) => {
     const grid = ground.querySelector<HTMLElement>('.b-game-ground__cells')!
@@ -110,6 +112,14 @@ test('expanded board keeps an 11 by 9 grid readable on mobile', async ({ page })
     fitsHeight: true,
   })
   expect(metrics.cellSize).toBeGreaterThanOrEqual(28)
+
+  const groundBox = await page.locator('.b-game-ground').boundingBox()
+  const guideBoxes = await guides.evaluateAll(elements => (
+    elements.map(element => element.getBoundingClientRect().toJSON())
+  ))
+
+  expect(groundBox).not.toBeNull()
+  guideBoxes.forEach(box => expect(box.y).toBeGreaterThan(groundBox!.y + groundBox!.height))
 })
 
 test('valid moves keep animated tiles inside the board', async ({ page }, testInfo) => {

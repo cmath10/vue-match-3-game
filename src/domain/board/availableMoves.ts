@@ -1,4 +1,4 @@
-import type { Board, BoardTile, Position } from '@/domain/types'
+import type { BoardState, BoardTile, Position } from '@/domain/types'
 
 import { getMoveMatch } from '@/domain/boosters/creation'
 import { swapBoardTiles } from '@/domain/board/transitions'
@@ -13,24 +13,24 @@ const canMove = (movable: boolean[][], position: Position): boolean => (
 )
 
 const createsMatch = <T extends BoardTile>(
-  board: Board<T>,
+  state: BoardState<T>,
   from: Position,
   to: Position
 ): boolean => {
-  const swapped = swapBoardTiles(board, from, to)
+  const swapped = swapBoardTiles(state, from, to)
 
   return getMoveMatch(swapped, to, from).positions.length > 0
 }
 
 export const hasAvailableMove = <T extends BoardTile>(
-  board: Board<T>,
+  state: BoardState<T>,
   movable: boolean[][]
 ): boolean => {
-  return board.some((row, rowIndex) => row.some((_, columnIndex) => {
+  return state.occupancy.some((row, rowIndex) => row.some((_, columnIndex) => {
     const from = { row: rowIndex, column: columnIndex }
 
     return canMove(movable, from) && getNeighbors(from).some(to => (
-      canMove(movable, to) && createsMatch(board, from, to)
+      canMove(movable, to) && createsMatch(state, from, to)
     ))
   }))
 }

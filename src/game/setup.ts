@@ -12,6 +12,7 @@ import { placeSpecialTiles } from '@/game/board/specialTiles'
 import { SPECIAL_OBJECTIVE_TYPES, SPECIAL_TARGETS } from '@/domain/config'
 
 type SelectRandom = <T>(items: T[]) => T
+type Shuffle = <T>(items: readonly T[]) => T[]
 type CreateTile = (type: BoardTileType, row: number, column: number) => Tile
 
 type PlayableLevelOptions = {
@@ -24,6 +25,7 @@ type PlayableLevelOptions = {
   fillGrid: () => void
   resetTileIds: () => void
   selectRandom: SelectRandom
+  shuffle: Shuffle
 }
 
 export const initializePlayableLevel = (options: PlayableLevelOptions): void => {
@@ -33,9 +35,9 @@ export const initializePlayableLevel = (options: PlayableLevelOptions): void => 
     options.counters.splice(0)
     options.resetTileIds()
     options.fillGrid()
-    placeSpecialTiles(options.grid, options.width, options.height, options.createTile)
+    placeSpecialTiles(options.grid, options.width, options.height, options.createTile, options.shuffle)
   } while (!hasAvailableMove(
-    getMatchableTileBoard(options.grid),
+    { topology: options.grid.getTopology(), occupancy: getMatchableTileBoard(options.grid) },
     getMovableTileBoard(options.grid)
   ))
 

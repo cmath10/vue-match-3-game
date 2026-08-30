@@ -1,79 +1,110 @@
-import type {
-  Board,
-  BoardTile,
-  MoveResult,
-  Position,
-} from '@/domain/types'
+import type { BoardState, BoardTile } from '@/domain/types'
+import type { GravityGraph } from '@/domain/levels/types'
+import type { MoveResult, Position } from '@/domain/types'
+import type { SpawnDefinition } from '@/domain/levels/types'
 
-import { cloneBoard, collapseBoard } from '@/domain/board/transitions'
+import { cloneBoardState } from '@/domain/board/topology'
+import { collapseAndRefillBoard } from '@/domain/board/transitions'
 import { findMatchedPositions, findMoveMatchedPositions } from '@/domain/board/matches'
-import {
-  getEmptyPositions,
-  isNeighborPosition,
-  refillBoard,
-  swapBoardTiles,
-} from '@/domain/board/transitions'
+import { isNeighborPosition, swapBoardTiles } from '@/domain/board/transitions'
 
-export const resolveBoard = <T extends BoardTile>(board: Board<T>, refillTiles: T[]): MoveResult<T> => {
-  let nextBoard = cloneBoard(board)
-  const cleared: T[] = []
-  let refillIndex = 0
-  let cascades = 0
+type BoardRules = {
+  gravity: GravityGraph
+  spawns: readonly SpawnDefinition[]
+}
 
-  while (true) {
-    const matched = findMatchedPositions(nextBoard)
+type ResolutionContext<T extends BoardTile> = {
+  state: BoardState<T>
+  rules: BoardRules
+  refillTiles: readonly T[]
+  cleared: T[]
+  refillIndex: number
+  cascades: number
+}
 
-    if (matched.length === 0) {
-      return { accepted: cascades > 0, board: nextBoard as Array<T[]>, cleared, cascades }
-    }
+const resolveNextCascade = <T extends BoardTile>(context: ResolutionContext<T>): boolean => {
+  const matched = findMatchedPositions(context.state)
 
-    clearMatchedTiles(nextBoard, matched, cleared)
-    ;({ board: nextBoard, refillIndex } = collapseAndRefill(nextBoard, refillTiles, refillIndex))
-    cascades++
+  if (matched.length === 0) {
+    return false
   }
+
+  clearMatchedTiles(context.state, matched, context.cleared)
+  const result = collapseAndRefillBoard(
+    context.state,
+    context.rules.gravity,
+    context.rules.spawns,
+    context.refillTiles.slice(context.refillIndex)
+  )
+
+  context.state = result.state
+  context.refillIndex += result.refillCount
+  context.cascades++
+  return true
+}
+
+const toMoveResult = <T extends BoardTile>(context: ResolutionContext<T>): MoveResult<T> => ({
+  accepted: context.cascades > 0,
+  board: context.state.occupancy,
+  cleared: context.cleared,
+  cascades: context.cascades,
+})
+
+export const resolveBoard = <T extends BoardTile>(
+  state: BoardState<T>,
+  rules: BoardRules,
+  refillTiles: readonly T[]
+): MoveResult<T> => {
+  const context: ResolutionContext<T> = {
+    state: cloneBoardState(state), rules, refillTiles, cleared: [], refillIndex: 0, cascades: 0,
+  }
+
+  let resolving = true
+
+  while (resolving) {
+    resolving = resolveNextCascade(context)
+  }
+
+  return toMoveResult(context)
 }
 
 export const applyMove = <T extends BoardTile>(
-  board: Board<T>,
+  state: BoardState<T>,
+  rules: BoardRules,
   from: Position,
   to: Position,
-  refillTiles: T[]
+  refillTiles: readonly T[]
 ): MoveResult<T> => {
-  if (!isNeighborPosition(from, to)) {
-    return { accepted: false, board: cloneBoard(board) as Array<T[]>, cleared: [], cascades: 0 }
+  if (!isNeighborPosition(state, from, to)) {
+    return rejectedMove(state)
   }
 
-  const swappedBoard = swapBoardTiles(board, from, to)
-
-  if (findMoveMatchedPositions(swappedBoard, from, to).length === 0) {
-    return { accepted: false, board: cloneBoard(board) as Array<T[]>, cleared: [], cascades: 0 }
+  const swappedState = swapBoardTiles(state, from, to)
+  if (findMoveMatchedPositions(swappedState, from, to).length === 0) {
+    return rejectedMove(state)
   }
 
-  return resolveBoard(swappedBoard, refillTiles)
+  return resolveBoard(swappedState, rules, refillTiles)
 }
 
-const clearMatchedTiles = <T extends BoardTile>(board: Board<T>, matched: Position[], cleared: T[]): void => {
+const rejectedMove = <T extends BoardTile>(state: BoardState<T>): MoveResult<T> => ({
+  accepted: false,
+  board: cloneBoardState(state).occupancy,
+  cleared: [],
+  cascades: 0,
+})
+
+const clearMatchedTiles = <T extends BoardTile>(
+  state: BoardState<T>,
+  matched: Position[],
+  cleared: T[]
+): void => {
   matched.forEach(({ row, column }) => {
-    const tile = board[row][column]
+    const tile = state.occupancy[row][column]
 
     if (tile !== null) {
       cleared.push(tile)
     }
-
-    board[row][column] = null
+    state.occupancy[row][column] = null
   })
-}
-
-const collapseAndRefill = <T extends BoardTile>(
-  board: Board<T>,
-  refillTiles: T[],
-  refillIndex: number
-): { board: Board<T>, refillIndex: number } => {
-  const collapsedBoard = collapseBoard(board)
-  const refillSize = getEmptyPositions(collapsedBoard).length
-
-  return {
-    board: refillBoard(collapsedBoard, refillTiles.slice(refillIndex, refillIndex + refillSize)),
-    refillIndex: refillIndex + refillSize,
-  }
 }

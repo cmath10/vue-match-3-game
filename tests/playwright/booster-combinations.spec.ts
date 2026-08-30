@@ -4,6 +4,7 @@ import type { BoardTileType } from '@/domain/enums'
 
 import { expect, test } from '@playwright/test'
 
+import { createRectangularBoardState } from '@/domain/board/topology'
 import { resolveBoosterWave } from '@/domain/boosters/chain'
 
 import { BoosterCombinationType, BoosterType, TileType } from '@/domain/enums'
@@ -19,7 +20,7 @@ test('two firecrackers combine into one row and one column at the swipe destinat
   board[2][2] = BoosterType.RowFirecracker
   board[2][3] = BoosterType.ColumnFirecracker
 
-  const wave = resolveBoosterWave(board, [], () => null, {
+  const wave = resolveBoosterWave(createRectangularBoardState(board), [], () => null, {
     type: BoosterCombinationType.CrossFirecrackers,
     source: { row: 2, column: 3 },
     participants: [{ row: 2, column: 2 }, { row: 2, column: 3 }],
@@ -39,7 +40,7 @@ test('a kettle and firecracker combine into three rows and three columns', () =>
   board[3][3] = BoosterType.AreaKettle
   board[3][4] = BoosterType.RowFirecracker
 
-  const wave = resolveBoosterWave(board, [], () => null, {
+  const wave = resolveBoosterWave(createRectangularBoardState(board), [], () => null, {
     type: BoosterCombinationType.KettleFirecracker,
     source: { row: 3, column: 3 },
     participants: [{ row: 3, column: 3 }, { row: 3, column: 4 }],

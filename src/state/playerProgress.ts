@@ -15,6 +15,7 @@ import {
   createSessionStatistics,
   getHighestUnlockedLevelAfterResult,
   getLatestInProgressGame,
+  getSnapshotLevelId,
 } from '@/domain/progress'
 import { loadPlayerState } from '@/storage/playerStateRepository'
 import { restorePlayerState } from '@/domain/playerStateMigration'
@@ -100,7 +101,7 @@ const createAttemptProgress = (
   snapshot: GameSnapshot,
   previous?: LevelProgress
 ): LevelProgress => ({
-  levelId: snapshot.levelId,
+  levelId: getSnapshotLevelId(snapshot),
   completed: previous ? previous.completed : false,
   lastResult: previous?.lastResult,
   updatedAt: snapshot.updatedAt,
@@ -108,20 +109,22 @@ const createAttemptProgress = (
 })
 
 export const beginLevelGame = (snapshot: GameSnapshot): Promise<void> => {
-  const previous = state.value.levels[snapshot.levelId]
+  const levelId = getSnapshotLevelId(snapshot)
+  const previous = state.value.levels[levelId]
 
   state.value.statistics.gamesStarted++
-  state.value.levels[snapshot.levelId] = createAttemptProgress(snapshot, previous)
+  state.value.levels[levelId] = createAttemptProgress(snapshot, previous)
 
   return persist()
 }
 
 export const saveLevelGame = (snapshot: GameSnapshot): Promise<void> => {
-  const progress = state.value.levels[snapshot.levelId]
+  const levelId = getSnapshotLevelId(snapshot)
+  const progress = state.value.levels[levelId]
   const previousStatistics = progress?.attempt?.statistics
 
   addSessionDelta(snapshot.statistics, previousStatistics)
-  state.value.levels[snapshot.levelId] = createAttemptProgress(snapshot, progress)
+  state.value.levels[levelId] = createAttemptProgress(snapshot, progress)
 
   return persist()
 }
@@ -136,13 +139,15 @@ const finishLevelProgress = (
   progress: LevelProgress,
   result: GameResult
 ): void => {
+  const levelId = getSnapshotLevelId(snapshot)
+
   state.value.highestUnlockedLevel = getHighestUnlockedLevelAfterResult(
     state.value.highestUnlockedLevel,
-    snapshot.levelId,
+    levelId,
     result
   )
-  state.value.levels[snapshot.levelId] = {
-    levelId: snapshot.levelId,
+  state.value.levels[levelId] = {
+    levelId,
     completed: progress.completed || result === 'win',
     lastResult: result,
     updatedAt: snapshot.updatedAt,
@@ -153,7 +158,7 @@ export const completeLevelGame = (
   snapshot: GameSnapshot,
   result: GameResult
 ): Promise<void> => {
-  const progress = state.value.levels[snapshot.levelId]
+  const progress = state.value.levels[getSnapshotLevelId(snapshot)]
 
   if (!progress?.attempt) {
     return persistence

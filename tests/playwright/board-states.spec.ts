@@ -1,6 +1,6 @@
 /// <reference types="node" />
 
-import type { Board, Position } from '@/domain/types'
+import type { Board, BoardState, Position } from '@/domain/types'
 
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -8,6 +8,8 @@ import { resolve } from 'node:path'
 import { expect, test } from '@playwright/test'
 
 import { applyMove } from '@/domain/board/move'
+import { compileDirectionalGravity } from '@/domain/levels/compileGravity'
+import { createRectangularTopology } from '@/domain/board/topology'
 
 type TileCounts = Record<string, number>
 type MoveFixture = {
@@ -37,10 +39,22 @@ const fixture = JSON.parse(readFileSync(
   resolve(process.cwd(), 'tests/fixtures/board-states/cases.json'),
   'utf8'
 )) as BoardStatesFixture
+const topology = createRectangularTopology(fixture.width, fixture.height)
+const spawns = Array.from({ length: fixture.width }, (_, column) => ({
+  id: `spawn-${column}`,
+  entry: { row: 0, column },
+  pool: 'fixture',
+}))
+const gravity = compileDirectionalGravity(topology, 'down', spawns).gravity
 
 const parseBoard = (rows: string[]): Board<string> => {
   return rows.map(row => row.split(''))
 }
+
+const parseBoardState = (rows: string[]): BoardState<string> => ({
+  topology,
+  occupancy: parseBoard(rows),
+})
 
 const serializeBoard = (board: Board<string>): string[] => {
   return board.map(row => row.join(''))
@@ -62,7 +76,8 @@ test.describe('board state transitions', () => {
   fixture.cases.forEach((state) => {
     test(state.name, () => {
       const result = applyMove(
-        parseBoard(state.board),
+        parseBoardState(state.board),
+        { gravity, spawns },
         parsePosition(state.move.from),
         parsePosition(state.move.to),
         state.refill.split('')
@@ -88,7 +103,13 @@ test('unrelated existing matches do not make a move accepted', () => {
     'AAADEABC',
   ])
 
-  const result = applyMove(board, { row: 0, column: 0 }, { row: 0, column: 1 }, 'ABCDE'.split(''))
+  const result = applyMove(
+    { topology, occupancy: board },
+    { gravity, spawns },
+    { row: 0, column: 0 },
+    { row: 0, column: 1 },
+    'ABCDE'.split('')
+  )
 
   expect(result.accepted).toBe(false)
   expect(serializeBoard(result.board)).toEqual(serializeBoard(board))

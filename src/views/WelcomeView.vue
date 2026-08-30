@@ -89,6 +89,7 @@ import { useRouter } from 'vue-router'
 import BLocaleSwitcher from '@/components/BLocaleSwitcher.vue'
 
 import { assetUrls } from '@/assets'
+import { getSnapshotLevelId } from '@/domain/progress'
 import { initializePlayerProgress, usePlayerProgress } from '@/state/playerProgress'
 
 defineOptions({ name: 'WelcomeView' })
@@ -107,7 +108,7 @@ const progress = computed(() => Math.round(completedOperations.value / operation
 const ready = computed(() => completedOperations.value === operationCount)
 const primaryAction = computed(() => {
   if (latestInProgressGame.value) {
-    return { label: t('welcome.continue'), levelId: latestInProgressGame.value.levelId }
+    return { label: t('welcome.continue'), levelId: getSnapshotLevelId(latestInProgressGame.value) }
   }
 
   return hasPlayed.value ? null : { label: t('welcome.start'), levelId: 1 }

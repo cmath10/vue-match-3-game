@@ -2,16 +2,20 @@ import type { GameSnapshot } from '@/domain/progress'
 
 import { expect, test } from '@playwright/test'
 
+import { AttemptRandom } from '@/domain/random'
 import {
   createPlayerState,
   createSessionStatistics,
   getHighestUnlockedLevelAfterResult,
   getLatestInProgressGame,
+  getSnapshotLevelId,
 } from '@/domain/progress'
 import { restorePlayerState } from '@/domain/playerStateMigration'
 
 const createAttempt = (levelId: number, updatedAt: number): GameSnapshot => ({
-  levelId,
+  level: { kind: 'catalog', levelId, levelRevision: 1 },
+  random: new AttemptRandom(updatedAt).snapshot(),
+  gravity: { nextIncomingIndexByCell: {} },
   board: [],
   objectives: [],
   counters: [],
@@ -59,5 +63,5 @@ test('migrates legacy progress without locking previously played levels', () => 
 
   expect(restored?.highestUnlockedLevel).toBe(5)
   expect(restored?.levels[1].completed).toBe(true)
-  expect(restored?.levels[5].attempt?.levelId).toBe(5)
+  expect(restored?.levels[5].attempt && getSnapshotLevelId(restored.levels[5].attempt)).toBe(5)
 })

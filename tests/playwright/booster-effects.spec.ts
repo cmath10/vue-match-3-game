@@ -4,6 +4,7 @@ import type { BoardTileType } from '@/domain/enums'
 
 import { expect, test } from '@playwright/test'
 
+import { createRectangularTopology } from '@/domain/board/topology'
 import {
   getBoosterEffect,
   getButtonBoxEffect,
@@ -16,8 +17,7 @@ test('row and column firecrackers cover their full lines', () => {
   expect(getBoosterEffect(
     BoosterType.RowFirecracker,
     { row: 2, column: 3 },
-    5,
-    4
+    createRectangularTopology(5, 4)
   ).positions).toEqual([
     { row: 2, column: 0 },
     { row: 2, column: 1 },
@@ -29,8 +29,7 @@ test('row and column firecrackers cover their full lines', () => {
   expect(getBoosterEffect(
     BoosterType.ColumnFirecracker,
     { row: 2, column: 3 },
-    5,
-    4
+    createRectangularTopology(5, 4)
   ).positions).toEqual([
     { row: 0, column: 3 },
     { row: 1, column: 3 },
@@ -43,8 +42,7 @@ test('kettle covers a 5 by 5 circle without the four zone corners', () => {
   expect(getBoosterEffect(
     BoosterType.AreaKettle,
     { row: 2, column: 2 },
-    5,
-    5
+    createRectangularTopology(5, 5)
   ).positions).toEqual([
     { row: 0, column: 1 },
     { row: 0, column: 2 },
@@ -74,8 +72,7 @@ test('kettle circle is clipped at board edges', () => {
   expect(getBoosterEffect(
     BoosterType.AreaKettle,
     { row: 0, column: 0 },
-    5,
-    4
+    createRectangularTopology(5, 4)
   ).positions).toEqual([
     { row: 0, column: 0 },
     { row: 0, column: 1 },

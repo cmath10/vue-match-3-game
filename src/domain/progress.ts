@@ -1,10 +1,13 @@
 import type { BoosterType } from '@/domain/enums'
-import type { Counter, GameResult, Objective } from '@/domain/types'
+import type { Counter, GameResult } from '@/domain/types'
+import type { LevelDefinition } from '@/domain/levels/types'
+import type { Objective } from '@/domain/types'
 import type { ObjectiveType } from '@/domain/enums'
+import type { RandomGeneratorSnapshot } from '@/domain/random'
 import type { Tile } from '@/domain/types'
 
 export const LEVEL_COUNT = 20
-export const PLAYER_STATE_VERSION = 2
+export const PLAYER_STATE_VERSION = 3
 
 export type CountBy<T extends string> = Partial<Record<T, number>>
 
@@ -21,8 +24,23 @@ export type GameStatistics = SessionStatistics & {
   gamesLost: number
 }
 
+export type LevelSource =
+  | { kind: 'catalog'; levelId: number; levelRevision: number }
+  | {
+      kind: 'generated'
+      definition: LevelDefinition
+      generatorVersion: number
+      generationSeed: number
+    }
+
+export type GravityStateSnapshot = {
+  nextIncomingIndexByCell: Readonly<Record<string, number>>
+}
+
 export type GameSnapshot = {
-  levelId: number
+  level: LevelSource
+  random: RandomGeneratorSnapshot
+  gravity: GravityStateSnapshot
   board: Array<Array<Tile | null>>
   objectives: Objective[]
   counters: Counter[]
@@ -32,6 +50,10 @@ export type GameSnapshot = {
   updatedAt: number
   statistics: SessionStatistics
 }
+
+export const getSnapshotLevelId = (snapshot: GameSnapshot): number => (
+  snapshot.level.kind === 'catalog' ? snapshot.level.levelId : snapshot.level.definition.id
+)
 
 export type LevelProgress = {
   levelId: number

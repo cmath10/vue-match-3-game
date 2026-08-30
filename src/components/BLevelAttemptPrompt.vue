@@ -2,7 +2,7 @@
     <main class="b-app-screen b-app-screen--immersive">
         <section class="b-attempt-prompt">
             <p class="b-app-screen__eyebrow">
-                {{ t('attempt.eyebrow', { level: snapshot.levelId }) }}
+                {{ t('attempt.eyebrow', { level: getSnapshotLevelId(snapshot) }) }}
             </p>
 
             <h1>{{ t('attempt.title') }}</h1>
@@ -57,6 +57,8 @@ import type { GameSnapshot } from '@/domain/progress'
 
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+import { getSnapshotLevelId } from '@/domain/progress'
 
 const props = defineProps<{ snapshot: GameSnapshot }>()
 const emit = defineEmits<{

@@ -1,27 +1,31 @@
-import type {
-  Board,
-  BoardEffect,
-  GeometricBoosterType,
-  Position,
-} from '@/domain/types'
+import type { Board, BoardEffect } from '@/domain/types'
+import type { BoardTopology } from '@/domain/levels/types'
+import type { GeometricBoosterType, Position } from '@/domain/types'
 
 import type { BoardTileType } from '@/domain/enums'
 
 import { BoosterType } from '@/domain/enums'
+import { getCellKey } from '@/domain/levels/coordinates'
 import { isTileType } from '@/domain/tiles'
 import { TileType } from '@/domain/enums'
 
 export const KETTLE_AREA_RADIUS = 2
 export const KETTLE_AREA_SIZE = KETTLE_AREA_RADIUS + KETTLE_AREA_RADIUS + 1
 
+const DIRECTIONS = [
+  { row: -1, column: 0 },
+  { row: 1, column: 0 },
+  { row: 0, column: -1 },
+  { row: 0, column: 1 },
+] as const
+
 export const getBoosterEffect = (
   booster: GeometricBoosterType,
   source: Position,
-  width: number,
-  height: number
+  topology: BoardTopology
 ): BoardEffect => ({
   source,
-  positions: getEffectPositions(booster, source, width, height),
+  positions: getEffectPositions(booster, source, topology),
   booster,
 })
 
@@ -55,50 +59,91 @@ export const getPresentTileTypes = (board: Board<BoardTileType>): TileType[] => 
 const getEffectPositions = (
   booster: GeometricBoosterType,
   source: Position,
-  width: number,
-  height: number
+  topology: BoardTopology
 ): Position[] => {
   if (booster === BoosterType.RowFirecracker) {
-    return getRowPositions(source.row, width)
+    return getLinePositions(source, topology, { row: 0, column: 1 })
   }
-
   if (booster === BoosterType.ColumnFirecracker) {
-    return getColumnPositions(source.column, height)
+    return getLinePositions(source, topology, { row: 1, column: 0 })
   }
 
-  return getAreaPositions(source, width, height)
+  return getAreaPositions(source, topology)
 }
 
-const getRowPositions = (row: number, width: number): Position[] => {
-  return Array.from({ length: width }, (_, column) => ({ row, column }))
+const getRay = (source: Position, topology: BoardTopology, delta: Position): Position[] => {
+  const positions: Position[] = []
+  let current = { row: source.row + delta.row, column: source.column + delta.column }
+
+  while (topology.playableCells.has(getCellKey(current))) {
+    positions.push(current)
+    current = { row: current.row + delta.row, column: current.column + delta.column }
+  }
+
+  return positions
 }
 
-const getColumnPositions = (column: number, height: number): Position[] => {
-  return Array.from({ length: height }, (_, row) => ({ row, column }))
+const getLinePositions = (
+  source: Position,
+  topology: BoardTopology,
+  forward: Position
+): Position[] => {
+  if (!topology.playableCells.has(getCellKey(source))) {
+    return []
+  }
+
+  const backward = { row: -forward.row, column: -forward.column }
+
+  return [...getRay(source, topology, backward).reverse(), source, ...getRay(source, topology, forward)]
 }
 
-const getAreaPositions = (source: Position, width: number, height: number): Position[] => {
-  const rows = getAreaIndexes(source.row)
-  const columns = getAreaIndexes(source.column)
+const isInsideKettleFootprint = (position: Position, source: Position): boolean => {
+  const rowDistance = Math.abs(position.row - source.row)
+  const columnDistance = Math.abs(position.column - source.column)
 
-  return rows
-    .flatMap(row => columns.map(column => ({ row, column })))
-    .filter(position => !isAreaCorner(position, source))
-    .filter(position => isInsideBoard(position, width, height))
+  return rowDistance <= KETTLE_AREA_RADIUS && columnDistance <= KETTLE_AREA_RADIUS &&
+    !(rowDistance === KETTLE_AREA_RADIUS && columnDistance === KETTLE_AREA_RADIUS)
 }
 
-const getAreaIndexes = (center: number): number[] => {
-  return Array.from(
-    { length: KETTLE_AREA_SIZE },
-    (_, index) => center - KETTLE_AREA_RADIUS + index
-  )
+const getAreaNeighbors = (position: Position, source: Position, topology: BoardTopology): Position[] => (
+  DIRECTIONS.map(delta => ({
+    row: position.row + delta.row,
+    column: position.column + delta.column,
+  })).filter(candidate => isInsideKettleFootprint(candidate, source))
+    .filter(candidate => topology.playableCells.has(getCellKey(candidate)))
+)
+
+const enqueueAreaNeighbors = (
+  position: Position,
+  source: Position,
+  topology: BoardTopology,
+  positions: Map<string, Position>,
+  queue: Position[]
+): void => {
+  getAreaNeighbors(position, source, topology).forEach((candidate) => {
+    const key = getCellKey(candidate)
+    if (!positions.has(key)) {
+      positions.set(key, candidate)
+      queue.push(candidate)
+    }
+  })
 }
-const isAreaCorner = (position: Position, source: Position): boolean => {
-  return Math.abs(position.row - source.row) === KETTLE_AREA_RADIUS &&
-    Math.abs(position.column - source.column) === KETTLE_AREA_RADIUS
-}
-const isInsideBoard = ({ row, column }: Position, width: number, height: number): boolean => {
-  return row >= 0 && row < height && column >= 0 && column < width
+
+const getAreaPositions = (source: Position, topology: BoardTopology): Position[] => {
+  if (!topology.playableCells.has(getCellKey(source))) {
+    return []
+  }
+
+  const positions = new Map<string, Position>([[getCellKey(source), source]])
+  const queue = [source]
+
+  while (queue.length > 0) {
+    const position = queue.shift() as Position
+
+    enqueueAreaNeighbors(position, source, topology, positions, queue)
+  }
+
+  return [...positions.values()].sort((a, b) => a.row - b.row || a.column - b.column)
 }
 
 const getTileTypePositions = (board: Board<BoardTileType>, targetType: TileType): Position[] => {

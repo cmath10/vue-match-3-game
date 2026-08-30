@@ -1,0 +1,74 @@
+.b-game-board-shell {
+  --cell-gap: clamp(0.1rem, 0.35vmin, 0.18rem);
+  --tile-transition-duration: 0.48s;
+  --panel-padding: 0.3rem;
+  --cell-size-by-width: calc((var(--game-board-available-width) - var(--panel-padding) - var(--panel-padding) + var(--cell-gap)) / var(--board-column-count) - var(--cell-gap));
+  --cell-size-by-height: calc((var(--game-board-available-height) - var(--panel-padding) - var(--panel-padding) + var(--cell-gap)) / var(--board-row-count) - var(--cell-gap));
+  --cell-size: clamp(1rem, min(var(--cell-size-by-width), var(--cell-size-by-height), 5rem), 5rem);
+  --tile-size: calc(var(--cell-size) * 0.9);
+  --tile-offset: calc((var(--cell-size) - var(--tile-size)) / 2);
+  --guide-offset: 0.35rem;
+  --guide-size: clamp(0.3rem, calc(var(--cell-size) * 0.16), 0.55rem);
+
+  position: relative;
+  display: inline-block;
+  line-height: normal;
+
+  &__guides {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  &__guide {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border: var(--guide-size) solid transparent;
+
+    &--bottom,
+    &--top {
+      left: calc(
+        var(--panel-padding) + var(--guide-column) * (var(--cell-size) + var(--cell-gap)) +
+        var(--cell-size) / 2 - var(--guide-size)
+      );
+    }
+
+    &--left,
+    &--right {
+      top: calc(
+        var(--panel-padding) + var(--guide-row) * (var(--cell-size) + var(--cell-gap)) +
+        var(--cell-size) / 2 - var(--guide-size)
+      );
+    }
+
+    &--bottom {
+      top: calc(100% + var(--guide-offset));
+      border-top-color: rgba(255, 255, 255, 0.72);
+      border-bottom: 0;
+    }
+
+    &--top {
+      bottom: calc(100% + var(--guide-offset));
+      border-bottom-color: rgba(255, 255, 255, 0.72);
+      border-top: 0;
+    }
+
+    &--left {
+      right: calc(100% + var(--guide-offset));
+      border-right-color: rgba(255, 255, 255, 0.72);
+      border-left: 0;
+    }
+
+    &--right {
+      left: calc(100% + var(--guide-offset));
+      border-left-color: rgba(255, 255, 255, 0.72);
+      border-right: 0;
+    }
+
+    &--collector {
+      filter: drop-shadow(0 0 0.18rem rgba(255, 210, 84, 0.75));
+    }
+  }
+}

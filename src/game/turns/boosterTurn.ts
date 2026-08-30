@@ -12,10 +12,10 @@ import type {
 
 import type TileGrid from '@/game/board/TileGrid'
 
-import { getBoardTileTypeBoard } from '@/game/board/boardProjection'
+import { getBoardTileTypeState } from '@/game/board/boardProjection'
 import { getBoosterSwipe } from '@/domain/boosters/combinations'
 import { getGridTilePosition } from '@/game/board/boardProjection'
-import { getMatchableTileBoard } from '@/game/board/boardProjection'
+import { getMatchableTileState } from '@/game/board/boardProjection'
 import { getMoveMatch } from '@/domain/boosters/creation'
 import { resolveBoosterWave } from '@/domain/boosters/chain'
 
@@ -114,7 +114,7 @@ const getBoosterMoveMatch = (
   sourceDestination: Position,
   targetDestination: Position
 ): MoveMatch => getMoveMatch(
-  getMatchableTileBoard(options.grid),
+  getMatchableTileState(options.grid),
   sourceDestination,
   targetDestination
 )
@@ -141,7 +141,7 @@ const resolveTurnWave = (
   combination: BoosterCombination | null
 ) => {
   return resolveBoosterWave(
-    getBoardTileTypeBoard(options.grid),
+    getBoardTileTypeState(options.grid),
     activations,
     options.selectButtonBoxTarget,
     combination

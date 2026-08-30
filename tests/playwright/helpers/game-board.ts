@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test'
 import type { Board } from '@/domain/types'
 
 import { BOARD_HEIGHT, BOARD_WIDTH } from '@/domain/config'
+import { createRectangularBoardState } from '@/domain/board/topology'
 import { getMoveMatch } from '@/domain/boosters/creation'
 
 import { BoosterType, TileType } from '@/domain/enums'
@@ -126,7 +127,7 @@ const getMoveResult = (board: Board<string>, move: Move) => {
   const from = { row: move.from.row, column: move.from.column }
   const to = { row: move.to.row, column: move.to.column }
 
-  return getMoveMatch(swappedBoard, to, from)
+  return getMoveMatch(createRectangularBoardState(swappedBoard), to, from)
 }
 
 const getSwappedBoard = (board: Board<string>, move: Move): Board<string> => {

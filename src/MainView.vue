@@ -26,6 +26,7 @@
                     :combining-booster-tile-ids="combiningBoosterTileIds"
                     :cookie-break-effects="cookieBreakEffects"
                     :detonating-kettle-tile-ids="detonatingKettleTileIds"
+                    :edge-guides="level.edgeGuides"
                     :landing-tile-ids="landingTileIds"
                     :result="gameResult"
                     :tile-break-effects="tileBreakEffects"
@@ -74,6 +75,7 @@ import type {
 } from '@/domain/types'
 
 import type { BoardTileType } from '@/domain/enums'
+import type { FixedTileDefinition } from '@/domain/levels/types'
 import type { GameSnapshot } from '@/domain/progress'
 import type { ObjectiveType } from '@/domain/enums'
 
@@ -108,31 +110,31 @@ import { clearMatchedPositions } from '@/game/board/boardHits'
 import { cloneBoard } from '@/domain/progress'
 import { collapseGrid } from '@/game/board/boardTransitions'
 import { collectDroppedMugs } from '@/game/board/specialTiles'
+import { createAttemptRandom } from '@/domain/random'
 import { createMatch3BoosterTurn } from '@/game/turns/boosterTurn'
 import { createMatch3TileInput } from '@/input/tileInput'
 import { findMatchedPositions, findMatchLines } from '@/domain/board/matches'
 import { getBoardStyle } from '@/presentation/tiles'
 import { getCascadeBoosterCreations } from '@/domain/boosters/creation'
+import { getCatalogLevel } from '@/domain/levels/catalog'
 import { getGameResult } from '@/domain/objectives'
 import { getGridCells } from '@/presentation/tiles'
-import { getGridTilePosition, getMatchableTileBoard } from '@/game/board/boardProjection'
+import { getGridTilePosition, getMatchableTileState } from '@/game/board/boardProjection'
 import { getMatchPositions } from '@/domain/board/matches'
 import { getMoveMatch } from '@/domain/boosters/creation'
 import { getPointerTargetTile } from '@/input/tilePointerTarget'
 import { initializePlayableLevel } from '@/game/setup'
+import { isBoardCompatibleWithLevel } from '@/domain/levels/restore'
+import { materializeInitialBoard } from '@/domain/levels/materializeInitialBoard'
 import { placeCreatedBoosters } from '@/game/board/boardBoosters'
 import { refillGrid } from '@/game/board/boardTransitions'
+import { restoreAttemptRandom } from '@/domain/random'
 import { usePlayerProgress } from '@/state/playerProgress'
 
 import { TileType } from '@/domain/enums'
 
-import { AVAILABLE_TILE_TYPES } from '@/domain/config'
-import { BOARD_HEIGHT, BOARD_WIDTH } from '@/domain/config'
-
 const COUNT_TURNS = 25
 const ANIMATION_DELAY = 480
-
-const random = <T>(array: T[]): T => array[Math.floor(Math.random() * array.length)]
 
 const props = defineProps<{
   levelId: number;
@@ -142,8 +144,19 @@ const props = defineProps<{
 const { t } = useI18n()
 const router = useRouter()
 const { state: playerState } = usePlayerProgress()
+const level = getCatalogLevel(props.levelId)
+const { width: boardWidth, height: boardHeight } = level.topology.bounds
+let attemptRandom = createAttemptRandom()
 
-const grid = reactive(new TileGrid(BOARD_WIDTH, BOARD_HEIGHT)) as TileGrid
+const random = <T>(array: T[]): T => {
+  if (array.length === 0) {
+    throw new Error('Cannot select a random item from an empty array')
+  }
+
+  return attemptRandom.select(array as [T, ...T[]])
+}
+
+const grid = reactive(new TileGrid(level.topology)) as TileGrid
 const objectives = reactive<Objective[]>([])
 const counters = reactive<Counter[]>([])
 const turns = ref(COUNT_TURNS)
@@ -151,7 +164,7 @@ const evaluating = ref(false)
 const gameResult = ref<GameResult | null>(null)
 const gameVersion = ref(0)
 const nextTileId = ref(0)
-const boardStyle = getBoardStyle(BOARD_WIDTH, BOARD_HEIGHT)
+const boardStyle = getBoardStyle(boardWidth, boardHeight)
 const {
   begin: beginProgress,
   persist: persistProgress,
@@ -160,7 +173,9 @@ const {
   recordTurn,
   restore: restoreProgress,
 } = useGameProgress({
-  getLevelId: () => props.levelId,
+  getLevel: () => ({ kind: 'catalog', levelId: level.id, levelRevision: level.revision }),
+  getRandom: () => attemptRandom.snapshot(),
+  getGravity: () => ({ nextIncomingIndexByCell: {} }),
   getBoard: () => grid.getTileList(),
   objectives,
   counters,
@@ -176,7 +191,20 @@ const createTile = (type: BoardTileType, row: number, column: number): Tile => (
   { id: nextTileId.value++, type, selected: false, row, column }
 )
 
-const generateType = (i: number, j: number): TileType => random(AVAILABLE_TILE_TYPES.filter(type => !createsMatch(type, i, j)))
+const getSpawnTileTypes = (column: number): TileType[] => {
+  const spawn = level.spawns.find(item => item.entry.column === column)
+  const pool = spawn === undefined ? undefined : level.tilePools.get(spawn.pool)
+
+  if (pool === undefined) {
+    throw new Error(`Missing spawn pool for column ${column}`)
+  }
+
+  return [...pool.types]
+}
+
+const generateType = (i: number, j: number): TileType => (
+  random(getSpawnTileTypes(j).filter(type => !createsMatch(type, i, j)))
+)
 
 const swapTiles = (a: Tile, b: Tile) => {
   const indexOfA = grid.indexOf(a)
@@ -203,12 +231,12 @@ const {
   animateWave: animateBoosterWave, cancel: cancelBoosterAnimation,
 } = useBoosterAnimation({ grid, waitAnimation, nextAnimationFrame })
 
-const getTileTypeBoard = () => getMatchableTileBoard(grid)
+const getTileTypeBoard = () => getMatchableTileState(grid)
 
 const createsMatch = (type: TileType, i: number, j: number): boolean => {
   const board = getTileTypeBoard()
 
-  board[i][j] = type
+  board.occupancy[i][j] = type
 
   return findMatchedPositions(board).some(position => position.row === i && position.column === j)
 }
@@ -240,7 +268,7 @@ const {
 } = useObjectiveCollection({
   objectives,
   counters,
-  boardWidth: BOARD_WIDTH,
+  boardWidth,
   incrementCounter,
   waitAnimation,
   nextAnimationFrame,
@@ -350,21 +378,27 @@ const getCascadePositions = (movements: TileMovement[]): Position[] => {
 }
 
 const resolveMatchedPositions = (positions: Position[]): TileMovement[] => {
-  clearMatchedPositions(grid, positions, BOARD_WIDTH, BOARD_HEIGHT, collectTile)
+  clearMatchedPositions(grid, positions, boardWidth, boardHeight, collectTile)
   return transitionGrid()
 }
 
 const resolveBoosterPositions = (positions: Position[], match: MoveMatch): TileMovement[] => {
-  applyBoosterMovePositions(grid, positions, match, BOARD_WIDTH, BOARD_HEIGHT, collectTile)
+  applyBoosterMovePositions(grid, positions, match, boardWidth, boardHeight, collectTile)
   return transitionGrid()
 }
 
 const transitionGrid = (): TileMovement[] => {
-  const movements = collapseGrid(grid)
+  const movements = collapseGrid(grid, level.gravity)
 
-  collectDroppedMugs(grid, BOARD_WIDTH, BOARD_HEIGHT, collectTile)
-  movements.push(...collapseGrid(grid, movements.length))
-  movements.push(...refillGrid(grid, BOARD_WIDTH, BOARD_HEIGHT, spawnTile, movements.length))
+  collectDroppedMugs(grid, level.gravity, level.collectors, collectTile)
+  movements.push(...collapseGrid(grid, level.gravity, movements.length))
+  movements.push(...refillGrid(
+    grid,
+    level.gravity,
+    level.spawns,
+    spawnTile,
+    movements.length
+  ))
   animateTileLandings(movements)
 
   return movements
@@ -459,13 +493,25 @@ const {
   swipeBooster,
 })
 
-const fillGrid = () => {
-  grid.forEachCell((tile: Tile | null, i: number, j: number) => {
-    if (tile === null) {
-      grid.setTile(createTile(generateType(i, j), i, j), i, j)
+const createMaterializedTile = (definition: FixedTileDefinition, row: number, column: number): Tile => {
+  const tile = createTile(definition.type, row, column)
+
+  if (definition.kind === 'ordinary') {
+    tile.blocker = definition.blocker === undefined ? undefined : { ...definition.blocker }
+  } else if (definition.kind === 'special' && 'health' in definition) {
+    tile.health = definition.health
+  }
+
+  return tile
+}
+
+const fillGrid = () => materializeInitialBoard(level, attemptRandom).forEach((row, rowIndex) => (
+  row.forEach((definition, columnIndex) => {
+    if (definition !== null) {
+      grid.setTile(createMaterializedTile(definition, rowIndex, columnIndex), rowIndex, columnIndex)
     }
   })
-}
+))
 
 const resetRuntime = (): void => {
   gameVersion.value++
@@ -483,16 +529,26 @@ const resetRuntime = (): void => {
 
 const startNewGame = () => {
   resetRuntime()
+  attemptRandom = createAttemptRandom()
   turns.value = COUNT_TURNS
   initializePlayableLevel({
-    grid, width: BOARD_WIDTH, height: BOARD_HEIGHT, objectives, counters, createTile, fillGrid,
+    grid, width: boardWidth, height: boardHeight, objectives, counters, createTile, fillGrid,
     resetTileIds: () => nextTileId.value = 0, selectRandom: random,
+    shuffle: items => attemptRandom.shuffle(items),
   })
   beginProgress()
 }
 
 const restoreGame = (snapshot: GameSnapshot): void => {
+  if (snapshot.level.kind !== 'catalog' ||
+    snapshot.level.levelId !== level.id ||
+    snapshot.level.levelRevision !== level.revision ||
+    !isBoardCompatibleWithLevel(level, snapshot.board)) {
+    throw new Error('Saved attempt uses an incompatible level definition')
+  }
+
   resetRuntime()
+  attemptRandom = restoreAttemptRandom(snapshot.random)
   turns.value = snapshot.turns
   nextTileId.value = snapshot.nextTileId
   restoreProgress(snapshot)

@@ -1,5 +1,6 @@
+import type { BoardTileType } from '@/domain/enums'
+import type { BoardTopology } from '@/domain/levels/types'
 import type {
-  BoardTileType,
   BoosterCombinationType,
   BoosterType,
   ObjectiveType,
@@ -49,9 +50,14 @@ export type BoardTile = string
 export type BoardCell<T extends BoardTile = BoardTile> = T | null
 export type Board<T extends BoardTile = BoardTile> = Array<Array<BoardCell<T>>>
 
+export type BoardState<T> = {
+  topology: BoardTopology
+  occupancy: Array<Array<T | null>>
+}
+
 export type MoveResult<T extends BoardTile = BoardTile> = {
   accepted: boolean
-  board: Array<T[]>
+  board: Board<T>
   cleared: T[]
   cascades: number
 }
@@ -64,11 +70,16 @@ export type MatchLine<T extends BoardTile = BoardTile> = {
   positions: Position[]
 }
 
+export type MovementOrigin =
+  | { kind: 'cell'; position: Position }
+  | { kind: 'spawn'; spawnId: string }
+
 export type TileMovement = {
   tileId: string
-  from: Position | null
-  to: Position
-  order: number
+  origin: MovementOrigin
+  path: readonly [Position, ...Position[]]
+  phase: number
+  resolutionOrder: number
 }
 
 export type BoosterCreation = {

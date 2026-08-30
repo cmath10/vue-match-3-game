@@ -7,6 +7,7 @@ import { expect, test } from '@playwright/test'
 import { BoosterType } from '@/domain/enums'
 import { clearMatchedPositions } from '@/game/board/boardHits'
 import { collectDroppedMugs } from '@/game/board/specialTiles'
+import { compileDirectionalGravity } from '@/domain/levels/compileGravity'
 import { isMovableTile } from '@/domain/tiles'
 import { placeCreatedBoosters } from '@/game/board/boardBoosters'
 import { SpecialTileType } from '@/domain/enums'
@@ -133,7 +134,7 @@ test('mug is collected when it reaches the bottom row', () => {
   const collectObjective = createCollector(counters)
 
   grid.setTile(mug, 2, 1)
-  collectDroppedMugs(grid, 3, 3, collectObjective)
+  collectDroppedMugs(grid, createGravity(grid), createCollectors(3), collectObjective)
 
   expect(grid.getTileByIndex(2, 1)).toBeNull()
   expect(counters[0].count).toBe(1)
@@ -146,9 +147,25 @@ test('consecutive mugs at the bottom are collected in the same transition', () =
 
   grid.setTile(createTile(1, SpecialTileType.Mug), 1, 1)
   grid.setTile(createTile(2, SpecialTileType.Mug), 2, 1)
-  collectDroppedMugs(grid, 3, 3, collectObjective)
+  collectDroppedMugs(grid, createGravity(grid), createCollectors(3), collectObjective)
 
   expect(grid.getTileByIndex(1, 1)).toBeNull()
   expect(grid.getTileByIndex(2, 1)).toBeNull()
   expect(counters[0].count).toBe(2)
 })
+
+const createCollectors = (width: number) => Array.from({ length: width }, (_, column) => ({
+  id: `collector-${column}`,
+  cell: { row: 2, column },
+  accepts: [SpecialTileType.Mug] as [SpecialTileType.Mug],
+}))
+
+const createGravity = (grid: TileGrid) => compileDirectionalGravity(
+  grid.getTopology(),
+  'down',
+  Array.from({ length: 3 }, (_, column) => ({
+    id: `spawn-${column}`,
+    entry: { row: 0, column },
+    pool: 'fixture',
+  }))
+).gravity

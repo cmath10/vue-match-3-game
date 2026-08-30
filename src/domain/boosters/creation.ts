@@ -1,5 +1,5 @@
 import type {
-  Board,
+  BoardState,
   BoardTile,
   BoosterCreation,
   MatchLine,
@@ -20,11 +20,11 @@ const FIRECRACKER_MATCH_LENGTH = 4
 const BUTTON_BOX_MATCH_LENGTH = 5
 
 export const getMoveMatch = <T extends BoardTile>(
-  board: Board<T>,
+  state: BoardState<T>,
   sourceDestination: Position,
   targetDestination: Position
 ): MoveMatch => {
-  const lines = findMoveMatchLines(board, sourceDestination, targetDestination)
+  const lines = findMoveMatchLines(state, sourceDestination, targetDestination)
 
   return {
     positions: getMatchPositions(lines),
@@ -39,7 +39,7 @@ export const getCascadeBoosterCreations = <T extends BoardTile>(
   return findMatchGroups(lines).flatMap((group) => {
     const movement = findCausalMovement(group, movements)
 
-    return movement === null ? [] : toArray(getBoosterCreation(group, movement.to))
+    return movement === null ? [] : toArray(getBoosterCreation(group, getMovementDestination(movement)))
   })
 }
 
@@ -102,12 +102,18 @@ const findCausalMovement = <T extends BoardTile>(
   movements: TileMovement[]
 ): TileMovement | null => {
   const positions = new Set(getMatchPositions(group).map(getPositionKey))
-  const causalMovements = movements.filter(movement => positions.has(getPositionKey(movement.to)))
+  const causalMovements = movements.filter(movement => (
+    positions.has(getPositionKey(getMovementDestination(movement)))
+  ))
 
   return causalMovements.reduce<TileMovement | null>((latest, movement) => (
-    latest === null || movement.order > latest.order ? movement : latest
+    latest === null || movement.resolutionOrder > latest.resolutionOrder ? movement : latest
   ), null)
 }
+
+const getMovementDestination = (movement: TileMovement): Position => (
+  movement.path[movement.path.length - 1]
+)
 
 const toArray = <T>(value: T | null): T[] => value === null ? [] : [value]
 const getPositionKey = ({ row, column }: Position): string => `${row}-${column}`

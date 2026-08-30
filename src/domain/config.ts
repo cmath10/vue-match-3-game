@@ -18,7 +18,7 @@ export const AVAILABLE_TILE_TYPES = [
   TileType.SweetsRooster,
   TileType.SweetsPillow,
   TileType.SweetsBird,
-]
+] satisfies [TileType, ...TileType[]]
 
 export const SPECIAL_OBJECTIVE_TYPES = [
   SpecialTileType.Mug,

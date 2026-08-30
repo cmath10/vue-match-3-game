@@ -1,19 +1,30 @@
+import type { BoardState } from '@/domain/types'
+import type { BoardTopology } from '@/domain/levels/types'
 import type { Position, Tile } from '@/domain/types'
+
+import { createRectangularTopology } from '@/domain/board/topology'
+import { getCellKey } from '@/domain/levels/coordinates'
 
 type TilePredicate = (tile: Tile, row: number, column: number) => boolean
 
 export default class TileGrid {
+  private readonly topology: BoardTopology
   private readonly width: number
   private readonly height: number
   private tiles: Array<Array<Tile | null>> = []
 
-  constructor (width: number, height: number) {
-    this.width = width
-    this.height = height
-    for (let i = 0; i < height; i++) {
+  constructor (topology: BoardTopology)
+  constructor (width: number, height: number)
+  constructor (topologyOrWidth: BoardTopology | number, height?: number) {
+    this.topology = typeof topologyOrWidth === 'number'
+      ? createRectangularTopology(topologyOrWidth, height ?? 0)
+      : topologyOrWidth
+    this.width = this.topology.bounds.width
+    this.height = this.topology.bounds.height
+    for (let i = 0; i < this.height; i++) {
       const row: Array<Tile | null> = []
 
-      for (let j = 0; j < width; j++) {
+      for (let j = 0; j < this.width; j++) {
         row.push(null)
       }
 
@@ -23,6 +34,14 @@ export default class TileGrid {
 
   public getTileList (): Array<Array<Tile | null>> {
     return this.tiles
+  }
+
+  public getState (): BoardState<Tile> {
+    return { topology: this.topology, occupancy: this.tiles }
+  }
+
+  public getTopology (): BoardTopology {
+    return this.topology
   }
 
   public getTiles (): Tile[] {
@@ -36,15 +55,25 @@ export default class TileGrid {
   }
 
   public getTileByIndex (i: number, j: number): Tile | null {
+    if (!this.isPlayable(i, j)) {
+      return null
+    }
+
     return this.tiles[i] ? this.tiles[i][j] || null : null
   }
 
   public setTile (tile: Tile | null, i: number, j: number, position?: Position): void {
+    if (tile !== null && !this.isPlayable(i, j)) {
+      throw new Error(`Cannot place a tile in void cell ${i}:${j}`)
+    }
+
     this.tiles[i][j] = tile
 
-    if (tile) {
-      tile.row = position ? position.row : i
-      tile.column = position ? position.column : j
+    if (tile !== null) {
+      const tilePosition = position ?? { row: i, column: j }
+
+      tile.row = tilePosition.row
+      tile.column = tilePosition.column
     }
   }
 
@@ -83,7 +112,9 @@ export default class TileGrid {
 
   public forEachCell (fn: (tile: Tile | null, i: number, j: number) => void) {
     this.tiles.forEach((row, i) => row.forEach((tile, j) => {
-      fn(tile, i, j)
+      if (this.isPlayable(i, j)) {
+        fn(tile, i, j)
+      }
     }))
   }
 
@@ -131,5 +162,9 @@ export default class TileGrid {
     const [bi, bj] = indexOfB
 
     return aj === bj && Math.abs(ai - bi) === 1
+  }
+
+  private isPlayable (row: number, column: number): boolean {
+    return this.topology.playableCells.has(getCellKey({ row, column }))
   }
 }

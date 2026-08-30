@@ -5,15 +5,6 @@
 .b-game-ground {
   @include m-game-glass-panel();
 
-  --cell-gap: clamp(0.1rem, 0.35vmin, 0.18rem);
-  --tile-transition-duration: 0.48s;
-  --panel-padding: 0.3rem;
-  --cell-size-by-width: calc((var(--game-board-available-width) - var(--panel-padding) - var(--panel-padding) + var(--cell-gap)) / var(--board-column-count) - var(--cell-gap));
-  --cell-size-by-height: calc((var(--game-board-available-height) - var(--panel-padding) - var(--panel-padding) + var(--cell-gap)) / var(--board-row-count) - var(--cell-gap));
-  --cell-size: clamp(1rem, min(var(--cell-size-by-width), var(--cell-size-by-height), 5rem), 5rem);
-  --tile-size: calc(var(--cell-size) * 0.9);
-  --tile-offset: calc((var(--cell-size) - var(--tile-size)) / 2);
-
   position: relative;
   display: inline-block;
   padding: var(--panel-padding);

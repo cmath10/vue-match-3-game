@@ -2,9 +2,10 @@ import type { Ref } from 'vue'
 
 import type { BoosterType } from '@/domain/enums'
 import type { Counter, GameResult } from '@/domain/types'
-import type { GameSnapshot } from '@/domain/progress'
+import type { GameSnapshot, GravityStateSnapshot, LevelSource } from '@/domain/progress'
 import type { Objective } from '@/domain/types'
 import type { ObjectiveType } from '@/domain/enums'
+import type { RandomGeneratorSnapshot } from '@/domain/random'
 import type { SessionStatistics } from '@/domain/progress'
 import type { Tile } from '@/domain/types'
 
@@ -17,7 +18,9 @@ import { createSessionStatistics, incrementCount } from '@/domain/progress'
 import { saveLevelGame } from '@/state/playerProgress'
 
 type GameProgressOptions = {
-  getLevelId: () => number
+  getLevel: () => LevelSource
+  getRandom: () => RandomGeneratorSnapshot
+  getGravity: () => GravityStateSnapshot
   getBoard: () => Array<Array<Tile | null>>
   objectives: Objective[]
   counters: Counter[]
@@ -32,7 +35,9 @@ type GameProgressContext = {
 }
 
 const createSnapshot = (context: GameProgressContext): GameSnapshot => ({
-  levelId: context.options.getLevelId(),
+  level: context.options.getLevel(),
+  random: context.options.getRandom(),
+  gravity: context.options.getGravity(),
   board: cloneBoard(context.options.getBoard()),
   objectives: context.options.objectives.map(objective => ({ ...objective })),
   counters: context.options.counters.map(counter => ({ ...counter })),

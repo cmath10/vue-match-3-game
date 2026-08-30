@@ -1,85 +1,72 @@
-import type { Board, BoardTile, Position } from '@/domain/types'
+import type { BoardState, BoardTile } from '@/domain/types'
+import type { GravityGraph } from '@/domain/levels/types'
+import type { Position } from '@/domain/types'
+import type { SpawnDefinition } from '@/domain/levels/types'
 
-export const cloneBoard = <T extends BoardTile>(board: Board<T>): Board<T> => {
-  return board.map(row => [...row])
-}
+import { cloneBoardState } from '@/domain/board/topology'
+import { getCellKey } from '@/domain/levels/coordinates'
+import { resolveGravity } from '@/domain/board/gravity'
+
+const isAdjacent = (a: Position, b: Position): boolean => (
+  (a.row === b.row && Math.abs(a.column - b.column) === 1) ||
+  (a.column === b.column && Math.abs(a.row - b.row) === 1)
+)
 
 export const swapBoardTiles = <T extends BoardTile>(
-  board: Board<T>,
+  state: BoardState<T>,
   a: Position,
   b: Position
-): Board<T> => {
-  const nextBoard = cloneBoard(board)
-  const tile = nextBoard[a.row][a.column]
+): BoardState<T> => {
+  const nextState = cloneBoardState(state)
+  const tile = nextState.occupancy[a.row][a.column]
 
-  nextBoard[a.row][a.column] = nextBoard[b.row][b.column]
-  nextBoard[b.row][b.column] = tile
+  nextState.occupancy[a.row][a.column] = nextState.occupancy[b.row][b.column]
+  nextState.occupancy[b.row][b.column] = tile
 
-  return nextBoard
+  return nextState
 }
 
-export const isNeighborPosition = (a: Position, b: Position): boolean => {
-  return (a.row === b.row && Math.abs(a.column - b.column) === 1) ||
-    (a.column === b.column && Math.abs(a.row - b.row) === 1)
+export const isNeighborPosition = <T>(state: BoardState<T>, a: Position, b: Position): boolean => {
+  const playable = state.topology.playableCells
+  return isAdjacent(a, b) && playable.has(getCellKey(a)) && playable.has(getCellKey(b))
 }
 
-export const collapseBoard = <T extends BoardTile>(board: Board<T>): Board<T> => {
-  const nextBoard = cloneBoard(board)
-  const width = nextBoard[0].length
+const createRefillTile = <T extends BoardTile>(refillTiles: readonly T[], getIndex: () => number): T => {
+  const tile = refillTiles[getIndex()]
 
-  for (let column = 0; column < width; column++) {
-    fillColumn(nextBoard, column, getColumnTiles(nextBoard, column))
+  if (tile === undefined) {
+    throw new Error('Not enough refill tiles')
   }
 
-  return nextBoard
+  return tile
 }
 
-export const refillBoard = <T extends BoardTile>(board: Board<T>, refillTiles: T[]): Board<T> => {
-  const nextBoard = cloneBoard(board)
+export const collapseBoard = <T extends BoardTile>(
+  state: BoardState<T>,
+  gravity: GravityGraph
+): BoardState<T> => resolveGravity({
+  state,
+  graph: gravity,
+  spawns: [],
+  spawnTile: () => { throw new Error('Collapse cannot spawn tiles') },
+  getTileId: tile => tile,
+}).state
 
-  getEmptyPositions(nextBoard).forEach((position, index) => {
-    const tile = refillTiles[index]
-
-    if (tile === undefined) {
-      throw new Error('Not enough refill tiles')
-    }
-
-    nextBoard[position.row][position.column] = tile
+export const collapseAndRefillBoard = <T extends BoardTile>(
+  state: BoardState<T>,
+  gravity: GravityGraph,
+  spawns: readonly SpawnDefinition[],
+  refillTiles: readonly T[]
+): { state: BoardState<T>; refillCount: number } => {
+  let refillCount = 0
+  const getRefillIndex = () => refillCount++
+  const resolution = resolveGravity({
+    state,
+    graph: gravity,
+    spawns,
+    spawnTile: () => createRefillTile(refillTiles, getRefillIndex),
+    getTileId: tile => tile,
   })
 
-  return nextBoard
-}
-
-export const getEmptyPositions = <T extends BoardTile>(board: Board<T>): Position[] => {
-  const positions: Position[] = []
-
-  board[0].forEach((_, column) => {
-    for (let row = board.length - 1; row >= 0; row--) {
-      if (board[row][column] === null) {
-        positions.push({ row, column })
-      }
-    }
-  })
-
-  return positions
-}
-
-const getColumnTiles = <T extends BoardTile>(board: Board<T>, column: number): T[] => {
-  const tiles: T[] = []
-
-  for (let row = board.length - 1; row >= 0; row--) {
-    const tile = board[row][column]
-
-    if (tile !== null) {
-      tiles.push(tile)
-    }
-  }
-
-  return tiles
-}
-
-const fillColumn = <T extends BoardTile>(board: Board<T>, column: number, tiles: T[]): void => {
-  for (let row = board.length - 1; row >= 0; row--) {
-    board[row][column] = tiles.shift() ?? null
-  }
+  return { state: resolution.state, refillCount }
 }

@@ -1,6 +1,7 @@
 import type {
   Board,
   BoardEffect,
+  BoardState,
   BoosterActivation,
   BoosterCombination,
   BoosterWave,
@@ -28,17 +29,17 @@ type WaveResolution = {
 }
 
 export const resolveBoosterWave = (
-  board: Board<BoardTileType>,
+  state: BoardState<BoardTileType>,
   activations: BoosterActivation[],
   selectButtonBoxTarget: SelectButtonBoxTarget,
   combination: BoosterCombination | null = null
 ): BoosterWave => {
-  const resolution = createWaveResolution(board, activations, combination)
+  const resolution = createWaveResolution(state, activations, combination)
 
   resolution.effects.forEach(effect => enqueueEffect(
-    effect, board, resolution.queue, resolution.positions
+    effect, state.occupancy, resolution.queue, resolution.positions
   ))
-  resolveActivationQueue(board, resolution, selectButtonBoxTarget)
+  resolveActivationQueue(state, resolution, selectButtonBoxTarget)
 
   return {
     effects: resolution.effects,
@@ -49,43 +50,43 @@ export const resolveBoosterWave = (
 }
 
 const createWaveResolution = (
-  board: Board<BoardTileType>,
+  state: BoardState<BoardTileType>,
   activations: BoosterActivation[],
   combination: BoosterCombination | null
 ): WaveResolution => ({
   queue: [...activations],
   activated: new Set(combination?.participants.map(getPositionKey) ?? []),
   positions: new Map(),
-  effects: getBoosterCombinationEffects(combination, board[0].length, board.length),
+  effects: getBoosterCombinationEffects(combination, state.topology),
   activatedBoosters: [...(combination?.boosters ?? [])],
 })
 
 const resolveActivationQueue = (
-  board: Board<BoardTileType>,
+  state: BoardState<BoardTileType>,
   resolution: WaveResolution,
   selectButtonBoxTarget: SelectButtonBoxTarget
 ): void => {
   while (resolution.queue.length > 0) {
-    resolveNextActivation(board, resolution, selectButtonBoxTarget)
+    resolveNextActivation(state, resolution, selectButtonBoxTarget)
   }
 }
 
 const resolveNextActivation = (
-  board: Board<BoardTileType>,
+  state: BoardState<BoardTileType>,
   resolution: WaveResolution,
   selectButtonBoxTarget: SelectButtonBoxTarget
 ): void => {
-  const pending = getPendingBooster(board, resolution.queue, resolution.activated)
+  const pending = getPendingBooster(state.occupancy, resolution.queue, resolution.activated)
 
   if (pending === null) {
     return
   }
 
-  const effect = createEffect(board, pending.booster, pending.activation, selectButtonBoxTarget)
+  const effect = createEffect(state, pending.booster, pending.activation, selectButtonBoxTarget)
 
   resolution.effects.push(effect)
   resolution.activatedBoosters.push(pending.booster)
-  enqueueEffect(effect, board, resolution.queue, resolution.positions)
+  enqueueEffect(effect, state.occupancy, resolution.queue, resolution.positions)
 }
 
 const getPendingBooster = (
@@ -120,24 +121,19 @@ const getUnactivatedBooster = (
 }
 
 const createEffect = (
-  board: Board<BoardTileType>,
+  state: BoardState<BoardTileType>,
   booster: BoosterType,
   activation: BoosterActivation,
   selectButtonBoxTarget: SelectButtonBoxTarget
 ): BoardEffect => {
   if (booster === BoosterType.ButtonBox) {
     const targetType = activation.targetType ??
-      selectButtonBoxTarget(getPresentTileTypes(board))
+      selectButtonBoxTarget(getPresentTileTypes(state.occupancy))
 
-    return getButtonBoxEffect(board, activation.source, targetType)
+    return getButtonBoxEffect(state.occupancy, activation.source, targetType)
   }
 
-  return getBoosterEffect(
-    booster,
-    activation.source,
-    board[0].length,
-    board.length
-  )
+  return getBoosterEffect(booster, activation.source, state.topology)
 }
 
 const enqueueEffect = (

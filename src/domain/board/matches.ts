@@ -1,6 +1,7 @@
 import type {
   Board,
   BoardCell,
+  BoardState,
   BoardTile,
   MatchLine,
   MatchOrientation,
@@ -9,16 +10,16 @@ import type {
 
 const MIN_MATCH_LENGTH = 3
 
-export const findMatchLines = <T extends BoardTile>(board: Board<T>): Array<MatchLine<T>> => {
-  const rows = board.flatMap((row, index) => getBoardLineMatches(row, 'row', index))
-  const columns = getColumns(board)
+export const findMatchLines = <T extends BoardTile>(state: BoardState<T>): Array<MatchLine<T>> => {
+  const rows = state.occupancy.flatMap((row, index) => getBoardLineMatches(row, 'row', index))
+  const columns = getColumns(state.occupancy)
     .flatMap((column, index) => getBoardLineMatches(column, 'column', index))
 
   return [...rows, ...columns]
 }
 
-export const findMatchedPositions = <T extends BoardTile>(board: Board<T>): Position[] => {
-  return getMatchPositions(findMatchLines(board))
+export const findMatchedPositions = <T extends BoardTile>(state: BoardState<T>): Position[] => {
+  return getMatchPositions(findMatchLines(state))
 }
 
 export const getMatchPositions = <T extends BoardTile>(lines: Array<MatchLine<T>>): Position[] => {
@@ -32,19 +33,19 @@ export const getMatchPositions = <T extends BoardTile>(lines: Array<MatchLine<T>
 }
 
 export const findMoveMatchedPositions = <T extends BoardTile>(
-  board: Board<T>,
+  state: BoardState<T>,
   from: Position,
   to: Position
 ): Position[] => {
-  return getMatchPositions(findMoveMatchLines(board, from, to))
+  return getMatchPositions(findMoveMatchLines(state, from, to))
 }
 
 export const findMoveMatchLines = <T extends BoardTile>(
-  board: Board<T>,
+  state: BoardState<T>,
   from: Position,
   to: Position
 ): Array<MatchLine<T>> => {
-  const lines = findMatchLines(board)
+  const lines = findMatchLines(state)
   const moveLines = lines.filter(line => (
     line.positions.some(position => isSamePosition(position, from) || isSamePosition(position, to))
   ))

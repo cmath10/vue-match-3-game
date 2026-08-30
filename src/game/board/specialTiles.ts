@@ -1,65 +1,85 @@
 import type { BoardTileType } from '@/domain/enums'
-import type { CollectObjective, Position, Tile } from '@/domain/types'
+import type { CollectObjective } from '@/domain/types'
+import type { CollectorDefinition, GravityGraph } from '@/domain/levels/types'
+import type { Position, Tile } from '@/domain/types'
 import type TileGrid from '@/game/board/TileGrid'
 
 import { COOKIE_HEALTH } from '@/domain/config'
+import { getCellKey } from '@/domain/levels/coordinates'
 import { isMatchableTile } from '@/domain/tiles'
-import { PACKAGE_HEALTH, SPECIAL_TARGETS } from '@/domain/config'
+import { PACKAGE_HEALTH } from '@/domain/config'
+import { parseCellKey } from '@/domain/levels/coordinates'
+import { SPECIAL_TARGETS } from '@/domain/config'
 import { SpecialTileType } from '@/domain/enums'
 
 type CreateTile = (type: BoardTileType, row: number, column: number) => Tile
+type Shuffle = <T>(items: readonly T[]) => T[]
 
 export const placeSpecialTiles = (
   grid: TileGrid,
   width: number,
   height: number,
-  createTile: CreateTile
+  createTile: CreateTile,
+  shuffle: Shuffle
 ) => {
-  placeMugs(grid, height, createTile)
-  placePackages(grid)
-  placeCookies(grid, height, createTile)
+  placeMugs(grid, height, createTile, shuffle)
+  placePackages(grid, shuffle)
+  placeCookies(grid, height, createTile, shuffle)
 }
 
 export const collectDroppedMugs = (
   grid: TileGrid,
-  width: number,
-  height: number,
+  gravity: GravityGraph,
+  collectors: readonly CollectorDefinition[],
   collectObjective: CollectObjective
 ) => {
-  for (let column = 0; column < width; column++) {
-    collectMugsInColumn(grid, height, column, collectObjective)
-  }
+  collectors.forEach(collector => collectMugsAtCollector(grid, gravity, collector, collectObjective))
 }
 
-const collectMugsInColumn = (
+const collectMugsAtCollector = (
   grid: TileGrid,
-  height: number,
-  column: number,
+  gravity: GravityGraph,
+  collector: CollectorDefinition,
   collectObjective: CollectObjective
 ): void => {
-  for (let row = height - 1; row >= 0; row--) {
-    const tile = grid.getTileByIndex(row, column)
+  let key: `${number}:${number}` | undefined = getCellKey(collector.cell)
 
-    if (tile?.type !== SpecialTileType.Mug) {
-      break
+  while (key !== undefined) {
+    if (!collectMug(grid, key, collectObjective)) {
+      return
     }
-
-    collectObjective({ tileId: tile.id, type: SpecialTileType.Mug, position: { row, column } })
-    grid.setTile(null, row, column)
+    key = gravity.nodes.get(key)?.incoming[0]
   }
 }
 
-const placeMugs = (grid: TileGrid, height: number, createTile: CreateTile) => {
-  getRandomPositions(grid, SPECIAL_TARGETS[SpecialTileType.Mug], (_, row) => row < height - 1)
+const collectMug = (
+  grid: TileGrid,
+  key: `${number}:${number}`,
+  collectObjective: CollectObjective
+): boolean => {
+  const { row, column } = parseCellKey(key)
+  const tile = grid.getTileByIndex(row, column)
+
+  if (tile?.type !== SpecialTileType.Mug) {
+    return false
+  }
+
+  collectObjective({ tileId: tile.id, type: SpecialTileType.Mug, position: { row, column } })
+  grid.setTile(null, row, column)
+  return true
+}
+
+const placeMugs = (grid: TileGrid, height: number, createTile: CreateTile, shuffle: Shuffle) => {
+  getRandomPositions(grid, SPECIAL_TARGETS[SpecialTileType.Mug], (_, row) => row < height - 1, shuffle)
     .forEach(({ row, column }) => {
       grid.setTile(createTile(SpecialTileType.Mug, row, column), row, column)
     })
 }
 
-const placePackages = (grid: TileGrid) => {
+const placePackages = (grid: TileGrid, shuffle: Shuffle) => {
   getRandomPositions(grid, SPECIAL_TARGETS[SpecialTileType.Package], (tile) => (
     tile !== null && isMatchableTile(tile)
-  )).forEach(({ row, column }) => {
+  ), shuffle).forEach(({ row, column }) => {
     const tile = grid.getTileByIndex(row, column)
 
     if (tile && isMatchableTile(tile)) {
@@ -68,10 +88,10 @@ const placePackages = (grid: TileGrid) => {
   })
 }
 
-const placeCookies = (grid: TileGrid, height: number, createTile: CreateTile) => {
+const placeCookies = (grid: TileGrid, height: number, createTile: CreateTile, shuffle: Shuffle) => {
   getRandomPositions(grid, SPECIAL_TARGETS[SpecialTileType.Cookie], (tile, row) => (
     row > 0 && row < height - 1 && tile !== null && isMatchableTile(tile) && !tile.blocker
-  )).forEach(({ row, column }) => {
+  ), shuffle).forEach(({ row, column }) => {
     const cookie = createTile(SpecialTileType.Cookie, row, column)
 
     cookie.health = COOKIE_HEALTH
@@ -82,7 +102,8 @@ const placeCookies = (grid: TileGrid, height: number, createTile: CreateTile) =>
 const getRandomPositions = (
   grid: TileGrid,
   count: number,
-  predicate: (tile: Tile | null, row: number, column: number) => boolean
+  predicate: (tile: Tile | null, row: number, column: number) => boolean,
+  shuffle: Shuffle
 ): Position[] => {
   const positions: Position[] = []
 
@@ -93,18 +114,4 @@ const getRandomPositions = (
   })
 
   return shuffle(positions).slice(0, count)
-}
-
-const shuffle = <T>(items: T[]): T[] => {
-  const result = [...items]
-
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    const item = result[i]
-
-    result[i] = result[j]
-    result[j] = item
-  }
-
-  return result
 }

@@ -1,5 +1,6 @@
+import type { BoardEffect } from '@/domain/types'
+import type { BoardTopology } from '@/domain/levels/types'
 import type {
-  BoardEffect,
   BoosterActivation,
   BoosterCombination,
   BoosterSwipe,
@@ -58,16 +59,15 @@ export const getBoosterCombination = (
 
 export const getBoosterCombinationEffects = (
   combination: BoosterCombination | null,
-  width: number,
-  height: number
+  topology: BoardTopology
 ): BoardEffect[] => {
   if (combination === null) {
     return []
   }
 
   return combination.type === BoosterCombinationType.KettleFirecracker
-    ? getWideCrossEffects(combination.source, width, height)
-    : getCrossEffects(combination.source, width, height)
+    ? getWideCrossEffects(combination.source, topology)
+    : getCrossEffects(combination.source, topology)
 }
 
 const getCombinationType = (
@@ -97,9 +97,9 @@ const getFirecrackerCombinationType = (
     : BoosterCombinationType.ColumnFirecrackers
 }
 
-const getCrossEffects = (source: Position, width: number, height: number): BoardEffect[] => [
-  getBoosterEffect(BoosterType.RowFirecracker, source, width, height),
-  getBoosterEffect(BoosterType.ColumnFirecracker, source, width, height),
+const getCrossEffects = (source: Position, topology: BoardTopology): BoardEffect[] => [
+  getBoosterEffect(BoosterType.RowFirecracker, source, topology),
+  getBoosterEffect(BoosterType.ColumnFirecracker, source, topology),
 ]
 
 const getBaseBoosterSwipe = (
@@ -128,20 +128,18 @@ const getSourceActivation = (
     : { source }
 )
 
-const getWideCrossEffects = (source: Position, width: number, height: number): BoardEffect[] => [
-  ...getAreaIndexes(source.row, height).map(row => getBoosterEffect(
+const getWideCrossEffects = (source: Position, topology: BoardTopology): BoardEffect[] => [
+  ...getAreaIndexes(source.row, topology.bounds.height).map(row => getBoosterEffect(
     BoosterType.RowFirecracker,
     { row, column: source.column },
-    width,
-    height
+    topology
   )),
-  ...getAreaIndexes(source.column, width).map(column => getBoosterEffect(
+  ...getAreaIndexes(source.column, topology.bounds.width).map(column => getBoosterEffect(
     BoosterType.ColumnFirecracker,
     { row: source.row, column },
-    width,
-    height
+    topology
   )),
-]
+].filter(effect => effect.positions.length > 0)
 
 const getAreaIndexes = (center: number, limit: number): number[] => Array.from(
   { length: COMBINATION_DIAMETER },
