@@ -234,4 +234,10 @@ export default [
       'max-nested-callbacks': 'off',
     },
   },
+  {
+    files: ['src/domain/levels/catalogLevels*.ts'],
+    rules: {
+      '@typescript-eslint/no-magic-numbers': 'off',
+    },
+  },
 ]

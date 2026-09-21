@@ -7,8 +7,9 @@ import { expect, test } from '@playwright/test'
 
 import { AttemptRandom } from '@/domain/random'
 import { BoosterCombinationType, BoosterType } from '@/domain/enums'
+import { CATALOG_LEVEL_REVISION } from '@/domain/levels/catalog'
 import { createPlayerState, createSessionStatistics } from '@/domain/progress'
-import { SpecialTileType } from '@/domain/enums'
+import { getCatalogLevel } from '@/domain/levels/catalog'
 
 import {
   AVAILABLE_TILE_TYPES,
@@ -178,11 +179,11 @@ const createSnapshot = (source: BoosterType, target?: BoosterType): GameSnapshot
   }
 
   return {
-    level: { kind: 'catalog', levelId: 1, levelRevision: 1 },
+    level: { kind: 'catalog', levelId: 1, levelRevision: CATALOG_LEVEL_REVISION },
     random: new AttemptRandom(now).snapshot(),
     gravity: { nextIncomingIndexByCell: {} },
     board,
-    objectives: [{ type: SpecialTileType.Mug, count: 99 }],
+    objectives: getCatalogLevel(1).objectives.map(objective => ({ ...objective })),
     counters: COUNTER_TYPES.map(type => ({ type, count: 0 })),
     turns: 25,
     nextTileId: TILE_COUNT,

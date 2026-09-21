@@ -11,6 +11,7 @@ defineOptions({ name: 'App' })
 @import "bootstrap/scss/bootstrap";
 @import "assets/scss/normalize";
 @import "assets/scss/blocks/b-app-screen";
+@import "assets/scss/blocks/b-board-surface";
 @import "assets/scss/blocks/b-game-layout";
 @import "assets/scss/blocks/b-game-ground";
 @import "assets/scss/transitions/t-game-fade";

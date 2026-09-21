@@ -57,9 +57,16 @@ export type GravityEdgeTargetDefinition = {
   terminals: readonly [CellKey, ...CellKey[]]
 }
 
+export type PointGravityZoneDefinition = {
+  id: string
+  cells: readonly CellKey[]
+  target: BoardEdgeAnchor
+  tieBreak: readonly Direction[]
+}
+
 export type GravityDefinition =
   | { kind: 'direction'; direction: Direction }
-  | { kind: 'point'; target: BoardEdgeAnchor; tieBreak: readonly Direction[] }
+  | { kind: 'point'; zones: readonly PointGravityZoneDefinition[] }
   | {
       kind: 'flow'
       nextByCell: Readonly<Record<CellKey, CellKey | null>>

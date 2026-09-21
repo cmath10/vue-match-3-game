@@ -75,5 +75,10 @@ export const en = {
     language: 'Language',
   },
   footer: { code: 'Code:', artwork: 'Artwork:' },
-  result: { win: 'You win!', lose: 'Game over', playAgain: 'Play again' },
+  result: {
+    win: 'You win!',
+    lose: 'Game over',
+    playAgain: 'Play again',
+    nextLevel: 'Next level',
+  },
 }

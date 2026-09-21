@@ -46,14 +46,15 @@ export const seedMathRandom = async (page: Page, initialSeed = 42) => {
 }
 
 export const getTiles = async (page: Page): Promise<TileSnapshot[]> => {
-  return page.evaluate((boardWidth) => {
+  return page.evaluate(() => {
     const cells = [...document.querySelectorAll<HTMLElement>('.b-game-ground__cell')]
-      .map((element, index) => {
+      .map((element) => {
         const rect = element.getBoundingClientRect()
+        const style = getComputedStyle(element)
 
         return {
-          row: Math.floor(index / boardWidth),
-          column: index % boardWidth,
+          row: Number.parseInt(style.gridRowStart) - 1,
+          column: Number.parseInt(style.gridColumnStart) - 1,
           centerX: rect.x + rect.width / 2,
           centerY: rect.y + rect.height / 2,
         }
@@ -92,13 +93,15 @@ export const getTiles = async (page: Page): Promise<TileSnapshot[]> => {
         height: rect.height,
       }
     })
-  }, BOARD_WIDTH)
+  })
 }
 
 export const getBoard = (tiles: TileSnapshot[]): Board<string> => {
+  const height = Math.max(...tiles.map(tile => tile.row)) + 1
+  const width = Math.max(...tiles.map(tile => tile.column)) + 1
   const board: Board<string> = Array.from(
-    { length: BOARD_HEIGHT },
-    () => Array.from({ length: BOARD_WIDTH }, (): null => null)
+    { length: height },
+    () => Array.from({ length: width }, (): null => null)
   )
 
   tiles.forEach(tile => {

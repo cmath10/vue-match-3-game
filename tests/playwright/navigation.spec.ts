@@ -88,6 +88,44 @@ test('keeps previous levels playable while later levels stay locked', async ({ p
   await expect(page).toHaveURL(/\/levels$/)
 })
 
+test('completed levels show stable board previews while unfinished levels do not', async ({ page }, testInfo) => {
+  const state = createPlayerState()
+
+  state.highestUnlockedLevel = 12
+  state.levels[1] = { levelId: 1, completed: true, lastResult: 'win', updatedAt: 1 }
+  state.levels[2] = { levelId: 2, completed: true, lastResult: 'win', updatedAt: 2 }
+  state.levels[11] = { levelId: 11, completed: true, lastResult: 'win', updatedAt: 11 }
+  await seedPlayerState(page, state)
+  await page.goto('/levels')
+
+  const previews = page.locator('.b-level-preview')
+
+  await expect(previews).toHaveCount(3)
+  await expect(page.getByRole('link', { name: 'Open level 12' }).locator('.b-level-preview')).toHaveCount(0)
+  await expect(page.getByRole('link', { name: 'Open level 11' }).locator('.b-level-preview')).toHaveCount(1)
+  const firstPreview = await previews.first().locator('.b-level-preview__tile').evaluateAll(elements => (
+    elements.map(element => element.className)
+  ))
+
+  await page.reload()
+
+  await expect(page.locator('.b-level-preview')).toHaveCount(3)
+  expect(await page.locator('.b-level-preview').first().locator('.b-level-preview__tile')
+    .evaluateAll(elements => elements.map(element => element.className))).toEqual(firstPreview)
+  await page.goto('/game/1')
+  await expect(page.locator('.b-game-ground')).toBeVisible()
+  await expect.poll(() => getStoredTurns(page, 1)).toBe(25)
+  await page.goto('/levels')
+  await expect(page.getByRole('link', { name: 'Open level 1' }).first().locator('.b-level-preview'))
+    .toHaveCount(1)
+  await expect(page.getByRole('link', { name: 'Open level 11' }).first().locator('.b-level-preview'))
+    .toHaveCount(1)
+  await testInfo.attach('completed-level-previews', {
+    body: await page.screenshot(),
+    contentType: 'image/png',
+  })
+})
+
 test('keeps welcome actions in one row until the mobile layout', async ({ page }) => {
   await openStartedHome(page)
 

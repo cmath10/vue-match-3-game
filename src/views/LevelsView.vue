@@ -45,6 +45,10 @@
                         :to="{ name: 'game', params: { levelId } }"
                     >
                         <span class="b-levels__number">{{ levelId }}</span>
+                        <BLevelPreview
+                            v-if="hasCompleted(levelId)"
+                            :level-id="levelId"
+                        />
                         <span class="b-levels__status">{{ getStatusLabel(levelId) }}</span>
                     </RouterLink>
 
@@ -107,6 +111,7 @@ import { Swiper as VSwiper, SwiperSlide as VSwiperSlide } from 'swiper/vue'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import BLevelPreview from '@/components/BLevelPreview.vue'
 import BLocaleSwitcher from '@/components/BLocaleSwitcher.vue'
 
 import { getLevelDisplayStatus, getLevelIds } from '@/domain/progress'
@@ -186,6 +191,7 @@ const breakpoints: Record<number, ResponsiveSwiperOptions> = {
 const initialSlide = computed(() => Math.max(0, state.value.highestUnlockedLevel - 1))
 
 const isUnlocked = (levelId: number): boolean => isLevelUnlocked(state.value, levelId)
+const hasCompleted = (levelId: number): boolean => state.value.levels[levelId]?.completed === true
 const getStatusLabel = (levelId: number): string => (
   statusLabels.value[getLevelDisplayStatus(state.value, levelId)]
 )

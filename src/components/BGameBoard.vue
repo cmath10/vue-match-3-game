@@ -1,10 +1,15 @@
 <template>
     <div class="b-game-board-shell">
         <div class="b-game-ground">
+            <BBoardSurface
+                :surface="surface"
+                class="b-game-ground__surface"
+            />
             <div class="b-game-ground__cells">
                 <div
                     v-for="cell in cells"
                     :key="cell.key"
+                    :data-cell-key="cell.key"
                     :style="cell.style"
                     class="b-game-ground__cell"
                 />
@@ -44,11 +49,6 @@
                 <BGameTileBreakEffects :effects="tileBreakEffects" />
             </div>
 
-            <BGameResultOverlay
-                v-if="result"
-                :result="result"
-                @play-again="emit('play-again')"
-            />
         </div>
 
         <div class="b-game-board-shell__guides">
@@ -64,6 +64,7 @@
 
 <script lang="ts" setup>
 import type { BoardEdgeGuide } from '@/domain/levels/types'
+import type { BoardSurface } from '@/presentation/boardSurface'
 import type { BoosterCombination } from '@/domain/types'
 import type { BoosterVisualEffect } from '@/composables/useBoosterAnimation'
 import type { ButtonFlight } from '@/composables/useButtonCollection'
@@ -71,13 +72,13 @@ import type { CookieBreakEffect } from '@/composables/useCookieBreakAnimation'
 import type { GameCell } from '@/presentation/tiles'
 import type { TileBreakEffect } from '@/composables/useTileBreakAnimation'
 
-import type { GameResult, Tile } from '@/domain/types'
+import type { Tile } from '@/domain/types'
 
+import BBoardSurface from '@/components/BBoardSurface.vue'
 import BGameBoosterCombination from '@/components/BGameBoosterCombination.vue'
 import BGameBoosterEffects from '@/components/BGameBoosterEffects.vue'
 import BGameButtonFlights from '@/components/BGameButtonFlights.vue'
 import BGameCookieBreakEffects from '@/components/BGameCookieBreakEffects.vue'
-import BGameResultOverlay from '@/components/BGameResultOverlay.vue'
 import BGameTile from '@/components/BGameTile.vue'
 import BGameTileBreakEffects from '@/components/BGameTileBreakEffects.vue'
 
@@ -102,11 +103,10 @@ defineProps<{
   cookieBreakEffects: CookieBreakEffect[]
   tileBreakEffects: TileBreakEffect[]
   tileMovementDurations: ReadonlyMap<number, number>
-  result: GameResult | null
+  surface: BoardSurface
 }>()
 
 const emit = defineEmits<{
-  'play-again': []
   'tile-click': [tile: Tile]
   'tile-double-click': [tile: Tile]
   'tile-pointer-cancel': []

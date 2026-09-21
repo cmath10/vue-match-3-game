@@ -1,8 +1,10 @@
+import type { CellKey } from '@/domain/levels/types'
 import type { PointerPosition } from '@/input/tileGesture'
 import type { Position, Tile } from '@/domain/types'
 import type TileGrid from '@/game/board/TileGrid'
 
 import { getDirectionalNeighbor, getSwipeDirection } from '@/input/tileGesture'
+import { parseCellKey } from '@/domain/levels/coordinates'
 
 const CENTER_DIVISOR = 2
 const SWIPE_THRESHOLD_RATIO = 0.18
@@ -29,28 +31,25 @@ const getPointerTargetPosition = (
 
   return sourcePosition !== null && direction !== null
     ? getDirectionalNeighbor(sourcePosition, direction)
-    : getNearestCellPosition(grid, end)
+    : getNearestCellPosition(end)
 }
 
 const getNearestCellPosition = (
-  grid: TileGrid,
   pointer: PointerPosition
 ): Position | null => {
   const cells = [...document.querySelectorAll<HTMLElement>('.b-game-ground__cell')]
-  const width = grid.getTileList()[0]?.length ?? 0
 
-  if (cells.length === 0 || width === 0) {
+  if (cells.length === 0) {
     return null
   }
 
   const nearest = cells
-    .map((cell, index) => ({ index, distance: getDistanceToCenter(cell, pointer) }))
+    .map(cell => ({ cell, distance: getDistanceToCenter(cell, pointer) }))
     .reduce((closest, candidate) => candidate.distance < closest.distance ? candidate : closest)
 
-  return {
-    row: Math.floor(nearest.index / width),
-    column: nearest.index % width,
-  }
+  const key = nearest.cell.dataset.cellKey
+
+  return key === undefined ? null : parseCellKey(key as CellKey)
 }
 
 const getSwipeThreshold = (): number => {

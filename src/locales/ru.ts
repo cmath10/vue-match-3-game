@@ -75,5 +75,10 @@ export const ru = {
     language: 'Язык',
   },
   footer: { code: 'Код:', artwork: 'Графика:' },
-  result: { win: 'Победа!', lose: 'Игра окончена', playAgain: 'Играть снова' },
+  result: {
+    win: 'Победа!',
+    lose: 'Игра окончена',
+    playAgain: 'Играть снова',
+    nextLevel: 'Следующий уровень',
+  },
 }

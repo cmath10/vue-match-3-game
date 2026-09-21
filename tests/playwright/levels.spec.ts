@@ -97,6 +97,36 @@ test('reports definition paths for unknown tokens and unreachable cells', () => 
   }
 })
 
+test('rejects impossible objectives and unassigned special tiles', () => {
+  const unassignedMug = compileLevel(createDefinition({
+    initialBoard: {
+      layout: ['M'],
+      legend: { M: { kind: 'fixed', tile: { kind: 'special', type: SpecialTileType.Mug } } },
+    },
+    spawns: [{ id: 'only', entry: { row: 0, column: 0 }, pool: 'main' }],
+    collectors: [],
+  }))
+  const missingMug = compileLevel(createDefinition({
+    objectives: [{ type: SpecialTileType.Mug, count: 1 }],
+  }))
+  const tooMany = compileLevel(createDefinition({
+    objectives: [
+      { type: TileType.SweetsBarbaris, count: 1 },
+      { type: TileType.SweetsFish, count: 1 },
+      { type: TileType.SweetsBird, count: 1 },
+      { type: TileType.SweetsPillow, count: 1 },
+      { type: TileType.SweetsRooster, count: 1 },
+    ],
+  }))
+
+  for (const result of [unassignedMug, missingMug, tooMany]) {
+    expect(result.ok).toBe(false)
+    if (result.ok === false) {
+      expect(result.errors).toContainEqual(expect.objectContaining({ code: 'invalid-objective' }))
+    }
+  }
+})
+
 test('materializes random zones deterministically without initial matches', () => {
   const definition = createDefinition({
     initialBoard: {
@@ -159,18 +189,25 @@ test('point gravity routes deterministically around void using tieBreak', () => 
   const level = compileLevelOrThrow(createDefinition({
     gravity: {
       kind: 'point',
-      target: { side: 'bottom', column: 1 },
-      tieBreak: ['right', 'down', 'left', 'up'],
+      zones: [{
+        id: 'main',
+        cells: ['0:0', '0:1', '0:2', '1:0', '1:2', '2:0', '2:1', '2:2'],
+        target: { side: 'bottom', column: 1 },
+        tieBreak: ['right', 'down', 'left', 'up'],
+      }],
     },
     spawns: [
       { id: 'upper-left', entry: { row: 0, column: 0 }, pool: 'main' },
       { id: 'upper-middle', entry: { row: 0, column: 1 }, pool: 'main' },
+      { id: 'upper-right', entry: { row: 0, column: 2 }, pool: 'main' },
+      { id: 'lower-left', entry: { row: 2, column: 0 }, pool: 'main' },
+      { id: 'lower-right', entry: { row: 2, column: 2 }, pool: 'main' },
     ],
   }))
 
-  expect(level.gravity.nodes.get('0:1')?.next).toBe('0:2')
+  expect(level.gravity.nodes.get('0:1')?.next).toBe('1:2')
   expect(level.gravity.nodes.get('0:2')?.next).toBe('1:2')
-  expect(level.gravity.nodes.get('1:2')?.next).toBe('2:2')
+  expect(level.gravity.nodes.get('1:2')?.next).toBe('2:1')
   expect(level.gravity.nodes.get('2:2')?.next).toBe('2:1')
   expect(level.edgeGuides).toContainEqual({
     kind: 'collector',
@@ -282,8 +319,12 @@ test('point gravity requires a complete tieBreak and restore validates merge cur
   const invalidPoint = compileLevel(createDefinition({
     gravity: {
       kind: 'point',
-      target: { side: 'bottom', column: 1 },
-      tieBreak: ['left', 'right'],
+      zones: [{
+        id: 'main',
+        cells: ['0:0', '0:1', '0:2', '1:0', '1:2', '2:0', '2:1', '2:2'],
+        target: { side: 'bottom', column: 1 },
+        tieBreak: ['left', 'right'],
+      }],
     },
     spawns: [
       { id: 'upper-left', entry: { row: 0, column: 0 }, pool: 'main' },
@@ -296,6 +337,56 @@ test('point gravity requires a complete tieBreak and restore validates merge cur
   expect(() => restoreGravityState({
     nextIncomingIndexByCell: { '1:1': 2 },
   }, flow.gravity)).toThrow('Invalid gravity cursor at 1:1')
+})
+
+test('point gravity rejects disconnected and uncovered zones', () => {
+  const result = compileLevel(createDefinition({
+    gravity: {
+      kind: 'point',
+      zones: [{
+        id: 'disconnected',
+        cells: ['0:0', '2:0'],
+        target: { side: 'bottom', column: 0 },
+        tieBreak: ['down', 'left', 'right', 'up'],
+      }],
+    },
+  }))
+
+  expect(result.ok).toBe(false)
+  if (result.ok === false) {
+    expect(result.errors).toContainEqual(expect.objectContaining({ code: 'invalid-gravity-zone' }))
+  }
+})
+
+test('point gravity rejects disconnected zones with equally close terminals', () => {
+  const result = compileLevel(createDefinition({
+    initialBoard: {
+      layout: ['A.A'],
+      legend: { A: { kind: 'random', pool: 'main' } },
+    },
+    gravity: {
+      kind: 'point',
+      zones: [{
+        id: 'split',
+        cells: ['0:0', '0:2'],
+        target: { side: 'bottom', column: 1 },
+        tieBreak: ['down', 'left', 'right', 'up'],
+      }],
+    },
+    spawns: [
+      { id: 'left', entry: { row: 0, column: 0 }, pool: 'main' },
+      { id: 'right', entry: { row: 0, column: 2 }, pool: 'main' },
+    ],
+    collectors: [],
+  }))
+
+  expect(result.ok).toBe(false)
+  if (result.ok === false) {
+    expect(result.errors).toContainEqual(expect.objectContaining({
+      code: 'invalid-gravity-zone',
+      path: ['gravity', 'zones', 0, 'cells'],
+    }))
+  }
 })
 
 test('spatial effects stop at void while topology area can route around it', () => {
@@ -327,10 +418,10 @@ test('TileGrid rejects writes to void and preserves authored cell coordinates', 
     row: 1,
     column: 1,
   }, 1, 1)).toThrow('Cannot place a tile in void cell 1:1')
-  expect(getGridCells(grid)).toContainEqual({
+  expect(getGridCells(grid)).toContainEqual(expect.objectContaining({
     key: '2:1',
     style: { gridColumn: 2, gridRow: 3 },
-  })
+  }))
   expect(getGridCells(grid)).toHaveLength(8)
 })
 

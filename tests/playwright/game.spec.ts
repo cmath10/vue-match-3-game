@@ -82,7 +82,7 @@ test('expanded board keeps an 11 by 9 grid readable on mobile', async ({ page })
   await page.goto('/game/1')
 
   const cells = page.locator('.b-game-ground__cell')
-  const guides = page.locator('.b-game-board-shell__guide--collector')
+  const guides = page.locator('.b-game-board-shell__guide--gravity')
 
   await expect(cells).toHaveCount(11 * 9)
   await expect(guides).toHaveCount(11)

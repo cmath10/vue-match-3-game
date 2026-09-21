@@ -28,11 +28,10 @@
                     :detonating-kettle-tile-ids="detonatingKettleTileIds"
                     :edge-guides="level.edgeGuides"
                     :landing-tile-ids="landingTileIds"
-                    :result="gameResult"
+                    :surface="boardSurface"
                     :tile-break-effects="tileBreakEffects"
                     :tile-movement-durations="tileMovementDurations"
                     :tiles="activeTiles"
-                    @play-again="startNewGame"
                     @tile-click="onTileClick"
                     @tile-double-click="onTileDoubleClick"
                     @tile-pointer-cancel="onTilePointerCancel"
@@ -42,6 +41,14 @@
             </div>
 
             <BGameFooter />
+
+            <BGameResultOverlay
+                v-if="gameResult"
+                :next-level-available="nextLevelId !== null"
+                :result="gameResult"
+                @next-level="openNextLevel"
+                @play-again="startNewGame"
+            />
         </main>
 
         <BGameObjectiveFlights :flights="objectiveFlights" />
@@ -90,6 +97,7 @@ import BGameBoard from '@/components/BGameBoard.vue'
 import BGameFooter from '@/components/BGameFooter.vue'
 import BGameMenu from '@/components/BGameMenu.vue'
 import BGameObjectiveFlights from '@/components/BGameObjectiveFlights.vue'
+import BGameResultOverlay from '@/components/BGameResultOverlay.vue'
 import BLevelAttemptPrompt from '@/components/BLevelAttemptPrompt.vue'
 
 import TileGrid from '@/game/board/TileGrid'
@@ -115,6 +123,7 @@ import { createMatch3BoosterTurn } from '@/game/turns/boosterTurn'
 import { createMatch3TileInput } from '@/input/tileInput'
 import { findMatchedPositions, findMatchLines } from '@/domain/board/matches'
 import { getBoardStyle } from '@/presentation/tiles'
+import { getBoardSurface } from '@/presentation/boardSurface'
 import { getCascadeBoosterCreations } from '@/domain/boosters/creation'
 import { getCatalogLevel } from '@/domain/levels/catalog'
 import { getGameResult } from '@/domain/objectives'
@@ -125,6 +134,7 @@ import { getMoveMatch } from '@/domain/boosters/creation'
 import { getPointerTargetTile } from '@/input/tilePointerTarget'
 import { initializePlayableLevel } from '@/game/setup'
 import { isBoardCompatibleWithLevel } from '@/domain/levels/restore'
+import { isLevelId } from '@/domain/progress'
 import { materializeInitialBoard } from '@/domain/levels/materializeInitialBoard'
 import { placeCreatedBoosters } from '@/game/board/boardBoosters'
 import { refillGrid } from '@/game/board/boardTransitions'
@@ -168,6 +178,7 @@ const gameResult = ref<GameResult | null>(null)
 const gameVersion = ref(0)
 const nextTileId = ref(0)
 const boardStyle = getBoardStyle(boardWidth, boardHeight)
+const boardSurface = getBoardSurface(level.topology)
 const {
   begin: beginProgress,
   persist: persistProgress,
@@ -187,6 +198,11 @@ const {
 })
 
 const locked = computed(() => evaluating.value || gameResult.value !== null)
+const nextLevelId = computed(() => {
+  const levelId = props.levelId + 1
+
+  return gameResult.value === 'win' && isLevelId(levelId) ? levelId : null
+})
 const activeTiles = computed(() => grid.getTiles().sort((a, b) => a.id - b.id))
 const cells = computed(() => getGridCells(grid))
 
@@ -565,9 +581,12 @@ const startNewGame = () => {
   gravityState = createGravityState()
   turns.value = COUNT_TURNS
   initializePlayableLevel({
-    grid, width: boardWidth, height: boardHeight, objectives, counters, createTile, fillGrid,
-    resetTileIds: () => nextTileId.value = 0, selectRandom: random,
-    shuffle: items => attemptRandom.shuffle(items),
+    grid,
+    objectives,
+    counters,
+    initialObjectives: level.objectives,
+    fillGrid,
+    resetTileIds: () => nextTileId.value = 0,
   })
   beginProgress()
 }
@@ -594,6 +613,11 @@ const restoreGame = (snapshot: GameSnapshot): void => {
 }
 
 const openRoute = (name: 'home' | 'levels'): void => void router.push({ name })
+const openNextLevel = (): void => {
+  if (nextLevelId.value !== null) {
+    void router.push({ name: 'game', params: { levelId: nextLevelId.value } })
+  }
+}
 
 const entry = reactive(useLevelEntry({
   getLevelId: () => props.levelId,

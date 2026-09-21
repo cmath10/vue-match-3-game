@@ -7,7 +7,9 @@ import type { ObjectiveType } from '@/domain/enums'
 import type { RandomGeneratorSnapshot } from '@/domain/random'
 import type { Tile } from '@/domain/types'
 
-export const LEVEL_COUNT = 20
+import { CATALOG_LEVEL_COUNT } from '@/domain/levels/catalog'
+
+export const LEVEL_COUNT = CATALOG_LEVEL_COUNT
 export const PLAYER_STATE_VERSION = 3
 
 export type CountBy<T extends string> = Partial<Record<T, number>>

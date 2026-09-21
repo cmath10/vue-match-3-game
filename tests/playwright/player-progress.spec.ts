@@ -8,7 +8,6 @@ import {
   createSessionStatistics,
   getHighestUnlockedLevelAfterResult,
   getLatestInProgressGame,
-  getSnapshotLevelId,
 } from '@/domain/progress'
 import { restorePlayerState } from '@/domain/playerStateMigration'
 
@@ -45,7 +44,7 @@ test('continue selects the most recently played unfinished attempt', () => {
   expect(getLatestInProgressGame(state)).toEqual(latestAttempt)
 })
 
-test('migrates legacy progress without locking previously played levels', () => {
+test('migrates legacy progress and drops attempts from the replaced catalog revision', () => {
   const statistics = createPlayerState().statistics
   const restored = restorePlayerState({
     version: 1,
@@ -63,5 +62,21 @@ test('migrates legacy progress without locking previously played levels', () => 
 
   expect(restored?.highestUnlockedLevel).toBe(5)
   expect(restored?.levels[1].completed).toBe(true)
-  expect(restored?.levels[5].attempt && getSnapshotLevelId(restored.levels[5].attempt)).toBe(5)
+  expect(restored?.levels[5].levelId).toBe(5)
+  expect(restored?.levels[5].attempt).toBeUndefined()
+})
+
+test('drops an incompatible current-state attempt without losing level progress', () => {
+  const state = createPlayerState()
+
+  state.levels[1] = {
+    levelId: 1,
+    completed: true,
+    updatedAt: 10,
+    attempt: createAttempt(1, 10),
+  }
+  const restored = restorePlayerState(state)
+
+  expect(restored?.levels[1].completed).toBe(true)
+  expect(restored?.levels[1].attempt).toBeUndefined()
 })

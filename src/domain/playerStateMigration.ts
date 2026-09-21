@@ -8,6 +8,7 @@ import { LEVEL_COUNT, PLAYER_STATE_VERSION } from '@/domain/progress'
 
 const LEGACY_PLAYER_STATE_VERSION = 1
 const PREVIOUS_PLAYER_STATE_VERSION = 2
+const LEGACY_CATALOG_LEVEL_REVISION = 1
 
 type LegacyGameSnapshot = Omit<GameSnapshot, 'gravity' | 'level' | 'random'> & {
   levelId: number
@@ -60,7 +61,7 @@ const migrateSnapshot = (snapshot: LegacyGameSnapshot, levelId: number): GameSna
 
   return {
     ...state,
-    level: { kind: 'catalog', levelId, levelRevision: CATALOG_LEVEL_REVISION },
+    level: { kind: 'catalog', levelId, levelRevision: LEGACY_CATALOG_LEVEL_REVISION },
     random: new AttemptRandom(seed).snapshot(),
     gravity: { nextIncomingIndexByCell: {} },
   }
@@ -98,20 +99,42 @@ const isCurrentPlayerState = (stored: Record<string, unknown>): boolean => (
   stored.version === PLAYER_STATE_VERSION && Number.isInteger(stored.highestUnlockedLevel)
 )
 
+const isAttemptCompatible = (attempt: GameSnapshot): boolean => (
+  attempt.level.kind === 'generated' || attempt.level.levelRevision === CATALOG_LEVEL_REVISION
+)
+
+const discardIncompatibleAttempt = (progress: LevelProgress): LevelProgress => {
+  if (progress.attempt !== undefined && !isAttemptCompatible(progress.attempt)) {
+    return { ...progress, attempt: undefined }
+  }
+  return progress
+}
+
+const discardIncompatibleAttempts = (state: PlayerState): PlayerState => ({
+  ...state,
+  levels: Object.fromEntries(Object.entries(state.levels).map(([id, progress]) => (
+    [id, discardIncompatibleAttempt(progress)]
+  ))),
+})
+
+const migrateStoredState = (stored: Record<string, unknown>): PlayerState | null => {
+  if (isCurrentPlayerState(stored)) {
+    return stored as PlayerState
+  }
+  if (stored.version === PREVIOUS_PLAYER_STATE_VERSION) {
+    return migrateVersionTwoState(stored as VersionTwoPlayerState)
+  }
+  if (stored.version === LEGACY_PLAYER_STATE_VERSION) {
+    return migrateLegacyState(stored as LegacyPlayerState)
+  }
+  return null
+}
+
 export const restorePlayerState = (stored: unknown): PlayerState | null => {
   if (!isStoredState(stored)) {
     return null
   }
+  const migrated = migrateStoredState(stored)
 
-  if (isCurrentPlayerState(stored)) {
-    return stored as PlayerState
-  }
-
-  if (stored.version === PREVIOUS_PLAYER_STATE_VERSION) {
-    return migrateVersionTwoState(stored as VersionTwoPlayerState)
-  }
-
-  return stored.version === LEGACY_PLAYER_STATE_VERSION
-    ? migrateLegacyState(stored as LegacyPlayerState)
-    : null
+  return migrated === null ? null : discardIncompatibleAttempts(migrated)
 }

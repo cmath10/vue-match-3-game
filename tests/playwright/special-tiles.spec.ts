@@ -1,27 +1,38 @@
 import { expect, test } from '@playwright/test'
 
 import { BoosterType } from '@/domain/enums'
+import { createPlayerState } from '@/domain/progress'
 
 import { seedMathRandom } from './helpers/game-board'
+import { seedPlayerState } from './helpers/player-state'
 
-test('new game renders special tile mechanics', async ({ page }) => {
+const openLevel = async (page: import('@playwright/test').Page, levelId: number): Promise<void> => {
   await seedMathRandom(page)
-  await page.goto('/game/1')
+  const state = createPlayerState()
+
+  state.highestUnlockedLevel = levelId
+  await seedPlayerState(page, state)
+  await page.goto(`/game/${levelId}`)
+}
+
+test('stable levels render only their authored special tile mechanics', async ({ page }) => {
+  await openLevel(page, 1)
+
+  await expect(page.locator('.b-game-ground__tile.b-game-tile--special-mug')).toHaveCount(0)
+  await expect(page.locator('.b-game-ground__tile.b-game-tile--special-cookie')).toHaveCount(0)
+  await expect(page.locator('.b-game-ground__tile.b-game-tile--blocker-special-package')).toHaveCount(0)
+
+  await openLevel(page, 15)
 
   await expect(page.locator('.b-game-ground__tile.b-game-tile--special-mug')).toHaveCount(3)
   await expect(page.locator('.b-game-ground__tile.b-game-tile--special-cookie')).toHaveCount(4)
-  await expect(page.locator('.b-game-ground__tile.b-game-tile--blocker-special-package')).toHaveCount(6)
+  await expect(page.locator('.b-game-ground__tile.b-game-tile--blocker-special-package')).toHaveCount(4)
   await expect(page.locator('.b-game-ground__tile.b-game-tile--cookie-jam-2')).toHaveCount(4)
-  await expect(page.locator(
-    '.b-game-menu__objective .b-game-tile--special-mug,' +
-    '.b-game-menu__objective .b-game-tile--special-package,' +
-    '.b-game-menu__objective .b-game-tile--special-cookie'
-  )).toHaveCount(1)
+  await expect(page.locator('.b-game-menu__objective')).toHaveCount(4)
 })
 
-test('package blockers cover the whole cell and cannot be selected', async ({ page }) => {
-  await seedMathRandom(page)
-  await page.goto('/game/1')
+test('standalone package blockers cover the whole cell and cannot be selected', async ({ page }) => {
+  await openLevel(page, 2)
 
   const packagedTile = page.locator('.b-game-ground__tile.b-game-tile--blocker-special-package').first()
   const cell = page.locator('.b-game-ground__cell').first()
@@ -48,8 +59,7 @@ test('package blockers cover the whole cell and cannot be selected', async ({ pa
 })
 
 test('mugs use highlighted assets when selected for a swap', async ({ page }) => {
-  await seedMathRandom(page)
-  await page.goto('/game/1')
+  await openLevel(page, 6)
 
   const mugTile = page.locator('.b-game-ground__tile.b-game-tile--special-mug').first()
 
@@ -60,8 +70,7 @@ test('mugs use highlighted assets when selected for a swap', async ({ page }) =>
 })
 
 test('cookies use highlighted assets when selected for a swap', async ({ page }) => {
-  await seedMathRandom(page)
-  await page.goto('/game/1')
+  await openLevel(page, 7)
 
   const cookieTile = page.locator(
     '.b-game-ground__tile.b-game-tile--special-cookie.b-game-tile--cookie-jam-2'

@@ -71,3 +71,44 @@ export const getStoredTurns = async (page: Page, levelId: number): Promise<numbe
     })
   }, { coordinates: databaseCoordinates, id: levelId })
 }
+
+export const completeStoredObjectives = async (page: Page, levelId: number): Promise<void> => {
+  await page.evaluate(async ({ coordinates, id }) => {
+    await new Promise<void>((resolve, reject) => {
+      const request = indexedDB.open(coordinates.databaseName, 1)
+
+      request.onerror = () => reject(request.error)
+      request.onsuccess = () => {
+        const database = request.result
+        const transaction = database.transaction(coordinates.storeName, 'readwrite')
+        const store = transaction.objectStore(coordinates.storeName)
+        const getRequest = store.get(coordinates.key)
+
+        getRequest.onerror = () => reject(getRequest.error)
+        getRequest.onsuccess = () => {
+          const state = getRequest.result as PlayerState | undefined
+          const attempt = state?.levels[id]?.attempt
+
+          if (state === undefined || attempt === undefined) {
+            reject(new Error(`Missing stored attempt for level ${id}`))
+            return
+          }
+
+          attempt.counters.forEach((counter) => {
+            const objective = attempt.objectives.find(item => item.type === counter.type)
+
+            if (objective !== undefined) {
+              counter.count = objective.count
+            }
+          })
+          store.put(state, coordinates.key)
+        }
+        transaction.onerror = () => reject(transaction.error)
+        transaction.oncomplete = () => {
+          database.close()
+          resolve()
+        }
+      }
+    })
+  }, { coordinates: databaseCoordinates, id: levelId })
+}

@@ -1,16 +1,24 @@
 @import "../variables";
-@import "../mixins/m-game-glass-panel";
 @import "b-game-button";
 
 .b-game-ground {
-  @include m-game-glass-panel();
-
   position: relative;
   display: inline-block;
   padding: var(--panel-padding);
   overflow: hidden;
+  background: transparent;
+  border: 0;
+  border-radius: 0.5rem;
+
+  &__surface {
+    inset: var(--panel-padding);
+    width: auto;
+    height: auto;
+    --board-surface-border-width: 1.5px;
+  }
 
   &__cells {
+    position: relative;
     display: grid;
     grid-template-rows: repeat(var(--board-row-count), var(--cell-size));
     grid-template-columns: repeat(var(--board-column-count), var(--cell-size));
@@ -23,9 +31,9 @@
     height: var(--cell-size);
     align-items: center;
     justify-content: center;
+    background: rgba($white, 0.025);
     border: 1px solid rgba($white, 0.08);
     border-radius: 0.35rem;
-    background: rgba($white, 0.025);
     cursor: pointer;
     user-select: none;
     background-size: cover;
@@ -70,29 +78,4 @@
     }
   }
 
-  &__result {
-    position: absolute;
-    z-index: 1;
-    inset: 0;
-    display: grid;
-    padding: 1rem;
-    background: rgba($black, 0.48);
-    backdrop-filter: blur(3px);
-    place-items: center;
-  }
-
-  &__result-content {
-    display: grid;
-    gap: 1rem;
-    justify-items: center;
-    text-align: center;
-  }
-
-  &__result-title {
-    color: $white;
-    font-size: 2rem;
-    font-weight: 700;
-    line-height: 1.1;
-    text-shadow: 0 0.2rem 0.8rem rgba($black, 0.42);
-  }
 }

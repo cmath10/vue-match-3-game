@@ -11,11 +11,9 @@ import { getCellKey } from '@/domain/levels/coordinates'
 import { levelError } from '@/domain/levels/errors'
 import { parseCellKey } from '@/domain/levels/coordinates'
 import { TileType } from '@/domain/enums'
-import {
-  validateCollectors,
-  validateRandomPools,
-  validateSpawns,
-} from '@/domain/levels/validateLevel'
+import { validateCollectors } from '@/domain/levels/validateLevel'
+import { validateObjectives } from '@/domain/levels/validateObjectives'
+import { validateRandomPools, validateSpawns } from '@/domain/levels/validateLevel'
 
 const validatePool = (id: string, pool: TilePoolDefinition): LevelCompilationError[] => {
   const types: readonly TileType[] = Array.isArray(pool.types) ? pool.types : []
@@ -99,23 +97,39 @@ const createCompiledLevel = (
   objectives: definition.objectives,
 })
 
+const getCollectorCompilationErrors = (
+  definition: LevelDefinition,
+  initial: ReturnType<typeof compileInitialBoard>,
+  gravity: ReturnType<typeof compileGravityDefinition>
+): LevelCompilationError[] => {
+  const externalTerminals = new Set(gravity.edgeTargets.flatMap(target => target.terminals))
+
+  return validateCollectors(
+    definition, initial.topology, gravity.gravity, externalTerminals
+  )
+}
+
+const getDefinitionErrors = (
+  definition: LevelDefinition,
+  pools: ReadonlyMap<string, TilePoolDefinition>
+): LevelCompilationError[] => [
+  ...validateRandomPools(definition, pools),
+  ...validateObjectives(definition),
+]
+
 const getCompilationErrors = (
   definition: LevelDefinition,
   initial: ReturnType<typeof compileInitialBoard>,
   pools: ReadonlyMap<string, TilePoolDefinition>,
   poolErrors: LevelCompilationError[],
   gravity: ReturnType<typeof compileGravityDefinition>
-): LevelCompilationError[] => {
-  const spawnErrors = validateSpawns(definition.spawns, initial.topology, pools)
-  const externalTerminals = new Set(gravity.edgeTargets.flatMap(target => target.terminals))
-  const collectorErrors = validateCollectors(
-    definition, initial.topology, gravity.gravity, externalTerminals
+): LevelCompilationError[] => initial.errors.concat(
+    poolErrors,
+    getDefinitionErrors(definition, pools),
+    validateSpawns(definition.spawns, initial.topology, pools),
+    gravity.errors,
+    getCollectorCompilationErrors(definition, initial, gravity)
   )
-
-  return initial.errors.concat(
-    poolErrors, validateRandomPools(definition, pools), spawnErrors, gravity.errors, collectorErrors
-  )
-}
 
 export const compileLevel = (definition: LevelDefinition): LevelCompilationResult<CompiledLevel> => {
   const initial = compileInitialBoard(definition.initialBoard)
