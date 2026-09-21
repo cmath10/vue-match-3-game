@@ -1,5 +1,11 @@
 # Repository instructions
 
+## Booster coverage
+
+- Board holes do not block booster effects. Firecrackers affect every playable cell in their row or column; area effects affect every playable cell within their geometric footprint, including disconnected cells.
+- Apply the same rule to combinations and chain reactions. A projected combination line must still work when its origin lies in a hole.
+- Void cells remain untargetable; preserve each booster's established range and tile hit rules.
+
 ## Stable level authoring
 
 - Treat gravity exits, edge guides, and mug collectors as one domain contract: every visible guide must correspond to a real terminal in the compiled gravity graph.

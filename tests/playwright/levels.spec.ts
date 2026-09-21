@@ -389,7 +389,7 @@ test('point gravity rejects disconnected zones with equally close terminals', ()
   }
 })
 
-test('spatial effects stop at void while topology area can route around it', () => {
+test('spatial effects cross void while targeting only playable cells', () => {
   const level = compileLevelOrThrow(createDefinition())
   const row = getBoosterEffect(
     BoosterType.RowFirecracker,
@@ -402,7 +402,7 @@ test('spatial effects stop at void while topology area can route around it', () 
     level.topology
   )
 
-  expect(row.positions).toEqual([{ row: 1, column: 0 }])
+  expect(row.positions).toEqual([{ row: 1, column: 0 }, { row: 1, column: 2 }])
   expect(area.positions).not.toContainEqual({ row: 1, column: 1 })
   expect(area.positions).toContainEqual({ row: 1, column: 2 })
 })
