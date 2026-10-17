@@ -1,0 +1,54 @@
+.b-game-mascot {
+  position: relative;
+  display: block;
+  width: 8rem;
+  aspect-ratio: 1612 / 1803;
+  flex-shrink: 0;
+  pointer-events: none;
+
+  &__portrait {
+    position: absolute;
+    inset: 0;
+    background: center / contain no-repeat;
+
+    &--open {
+      background-image: url("../../images/mascot-cat-open.png");
+      transition: opacity 180ms ease-out;
+    }
+
+    &--blink {
+      background-image: url("../../images/mascot-cat-blink.png");
+      opacity: 0;
+      animation: b-game-mascot-blink 6.4s steps(1, end) infinite;
+    }
+
+    &--sad {
+      background-image: url("../../images/mascot-cat-sad.png");
+      opacity: 0;
+      transition: opacity 180ms ease-out;
+    }
+  }
+
+  &--sad &__portrait--blink {
+    animation: none;
+    opacity: 0;
+  }
+
+  &--sad &__portrait--open { opacity: 0; }
+
+  &--sad &__portrait--sad {
+    opacity: 1;
+  }
+}
+
+@keyframes b-game-mascot-blink {
+  0%, 41%, 44%, 89%, 92%, 95%, 100% { opacity: 0; }
+  42%, 90%, 94% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .b-game-mascot__portrait {
+    animation: none;
+    transition: none;
+  }
+}

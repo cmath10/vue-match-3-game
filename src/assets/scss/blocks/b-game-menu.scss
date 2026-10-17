@@ -7,17 +7,24 @@
   align-items: center;
   gap: 0.625rem 1rem;
   grid-template-areas:
-    "title language turns"
-    "objectives objectives button";
+    "title title turns"
+    "objectives objectives language"
+    "button button button";
   grid-template-columns: minmax(0, 1fr) auto auto;
 
   &__title {
+    display: grid;
+    grid-template-areas: "name mascot" "level mascot";
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 0.75rem;
     margin: 0;
     font-size: clamp(1.45rem, 5vw, 2rem);
     line-height: 1;
     grid-area: title;
 
     small {
+      grid-area: level;
       display: block;
       margin-top: 0.35rem;
       color: rgba($white, 0.58);
@@ -26,6 +33,13 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
+  }
+
+  &__name { grid-area: name; }
+
+  &__mascot {
+    grid-area: mascot;
+    width: 3rem;
   }
 
   &__language {
@@ -110,7 +124,7 @@
     flex-wrap: wrap;
     gap: 0.5rem;
     grid-area: button;
-    justify-self: end;
+    justify-self: start;
   }
 
   &__button {
@@ -166,6 +180,15 @@
 
     &__title {
       font-size: 2rem;
+      grid-template-areas: "name" "mascot" "level";
+      grid-template-columns: minmax(0, 1fr);
+      justify-items: center;
+      row-gap: 0.75rem;
+      text-align: center;
+    }
+
+    &__mascot {
+      width: clamp(5rem, 15dvh, 8rem);
     }
 
     &__objectives {
@@ -204,6 +227,18 @@
       justify-self: start;
     }
   }
+}
+
+@media (min-width: 992px) and (max-height: 699.98px) {
+  .b-game-menu__title {
+    grid-template-areas: "name mascot" "level mascot";
+    grid-template-columns: minmax(0, 1fr) auto;
+    justify-items: start;
+    row-gap: 0;
+    text-align: left;
+  }
+
+  .b-game-menu__mascot { width: 3rem; }
 }
 
 @media (max-width: 575.98px) and (orientation: portrait) {

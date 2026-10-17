@@ -1,7 +1,8 @@
 <template>
     <div class="b-game-menu">
         <h1 class="b-game-menu__title">
-            {{ t('app.title') }}
+            <span class="b-game-menu__name">{{ t('app.title') }}</span>
+            <BGameMascot :sad="result === 'lose'" class="b-game-menu__mascot" />
             <small>{{ t('menu.level', { level: levelId }) }}</small>
         </h1>
 
@@ -56,11 +57,12 @@
 </template>
 
 <script lang="ts" setup>
-import type { Counter, Objective } from '@/domain/types'
+import type { Counter, GameResult, Objective } from '@/domain/types'
 
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import BGameMascot from '@/components/BGameMascot.vue'
 import BGameTile from '@/components/BGameTile.vue'
 import BLocaleSwitcher from '@/components/BLocaleSwitcher.vue'
 
@@ -69,6 +71,7 @@ const props = defineProps<{
   counters: Counter[]
   turns: number
   levelId: number
+  result: GameResult | null
 }>()
 const emit = defineEmits<{
   'new-game': []

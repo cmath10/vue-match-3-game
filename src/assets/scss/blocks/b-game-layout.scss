@@ -3,7 +3,7 @@
 
 .b-game-layout {
   --game-menu-inline-size: 18rem;
-  --game-menu-block-size: clamp(6.75rem, 18dvh, 9rem);
+  --game-menu-block-size: 14rem;
   --game-field-padding-x: clamp(0.75rem, 3vw, 1rem);
   --game-field-padding-y: 0.75rem;
   --game-footer-block-size: clamp(3.5rem, 9dvh, 4.75rem);
@@ -19,6 +19,7 @@
   &__menu {
     flex: 0 0 var(--game-menu-block-size);
     min-height: 0;
+    overflow-y: auto;
     padding: clamp(0.75rem, 2.5dvh, 1rem);
     background:
       linear-gradient(180deg, rgba($game-menu-bg, 0.98), rgba($game-menu-bg-dark, 1)),
@@ -160,8 +161,7 @@
 
 @media (max-width: 575.98px) and (orientation: portrait) {
   .b-game-layout {
-    --game-menu-block-size: clamp(6.25rem, 17dvh, 7.75rem);
-    --game-footer-block-size: 4.25rem;
+    --game-footer-block-size: 7rem;
     --game-footer-gap: 0.625rem;
 
     &__menu {

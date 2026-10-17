@@ -9,6 +9,7 @@
                 :counters="gameResult === 'win' ? counters : displayedCounters"
                 :level-id="props.levelId"
                 :objectives="objectives"
+                :result="gameResult"
                 :turns="turns"
                 @main-menu="openRoute('home')"
                 @new-game="startNewGame"
