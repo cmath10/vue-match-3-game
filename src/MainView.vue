@@ -6,7 +6,7 @@
     >
         <aside class="b-game-layout__menu">
             <BGameMenu
-                :counters="counters"
+                :counters="gameResult === 'win' ? counters : displayedCounters"
                 :level-id="props.levelId"
                 :objectives="objectives"
                 :turns="turns"
@@ -89,7 +89,12 @@ import type { GravityState } from '@/domain/levels/types'
 import type { ObjectiveType } from '@/domain/enums'
 import type { SpawnDefinition } from '@/domain/levels/types'
 
-import { computed, reactive, ref } from 'vue'
+import {
+  computed,
+  onBeforeUnmount,
+  reactive,
+  ref,
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
@@ -172,6 +177,7 @@ const random = <T>(array: T[]): T => {
 const grid = reactive(new TileGrid(level.topology)) as TileGrid
 const objectives = reactive<Objective[]>([])
 const counters = reactive<Counter[]>([])
+const displayedCounters = reactive<Counter[]>([])
 const turns = ref(COUNT_TURNS)
 const evaluating = ref(false)
 const gameResult = ref<GameResult | null>(null)
@@ -271,8 +277,8 @@ const getTileMoveMatch = (movedTile: Tile, swappedTile: Tile): MoveMatch => {
   return getMoveMatch(getTileTypeBoard(), positionA, positionB)
 }
 
-const incrementCounter = (type: ObjectiveType) => {
-  const counter = counters.find((c: Counter) => c.type === type)
+const incrementCounter = (collectionCounters: Counter[], type: ObjectiveType) => {
+  const counter = collectionCounters.find((c: Counter) => c.type === type)
 
   if (counter) {
     counter.count++
@@ -286,9 +292,9 @@ const {
   collect: collectObjective,
 } = useObjectiveCollection({
   objectives,
-  counters,
+  counters: displayedCounters,
   boardWidth,
-  incrementCounter,
+  incrementCounter: type => incrementCounter(displayedCounters, type),
   waitAnimation,
   nextAnimationFrame,
 })
@@ -334,6 +340,7 @@ const {
 })
 
 const collectTile = (collection: ObjectiveCollection): void => {
+  incrementCounter(counters, collection.type)
   recordCollection(collection.type)
   collectCookieBreak(collection)
   collectObjective(collection)
@@ -379,10 +386,17 @@ const waitForResolutionAnimations = (movements: TileMovement[]) => Promise.all([
   animateTileBreaks(),
 ])
 
+const finishWinningTurn = (): void => {
+  if (gameResult.value === null && getGameResult(objectives, counters, turns.value) === 'win') {
+    finishTurn()
+  }
+}
+
 const settleGrid = async (version: number, initialMovements: TileMovement[]) => {
   let movements = initialMovements
 
   while (true) {
+    finishWinningTurn()
     await waitForResolutionAnimations(movements)
 
     if (version !== gameVersion.value) {
@@ -487,9 +501,11 @@ const updateGameResult = () => {
 }
 
 const finishTurn = () => {
-  turns.value--
-  recordTurn()
-  updateGameResult()
+  if (gameResult.value === null) {
+    turns.value--
+    recordTurn()
+    updateGameResult()
+  }
   evaluating.value = false
   persistProgress(gameResult.value)
 }
@@ -561,6 +577,9 @@ const fillGrid = () => materializeInitialBoard(level, attemptRandom).forEach((ro
 ))
 
 const resetRuntime = (): void => {
+  if (gameResult.value !== null) {
+    persistProgress(gameResult.value)
+  }
   gameVersion.value++
   evaluating.value = false
   gameResult.value = null
@@ -572,6 +591,7 @@ const resetRuntime = (): void => {
   cancelBoosterAnimation()
   objectives.splice(0)
   counters.splice(0)
+  displayedCounters.splice(0)
   grid.clear()
 }
 
@@ -588,6 +608,7 @@ const startNewGame = () => {
     fillGrid,
     resetTileIds: () => nextTileId.value = 0,
   })
+  displayedCounters.push(...counters.map(counter => ({ ...counter })))
   beginProgress()
 }
 
@@ -606,10 +627,15 @@ const restoreGame = (snapshot: GameSnapshot): void => {
   nextTileId.value = snapshot.nextTileId
   restoreProgress(snapshot)
   objectives.push(...snapshot.objectives.map(objective => ({ ...objective })))
-  counters.push(...snapshot.counters.map(counter => ({ ...counter })))
+  restoreCounters(snapshot.counters)
   cloneBoard(snapshot.board).forEach((row, rowIndex) => row.forEach((tile, columnIndex) => {
     grid.setTile(tile, rowIndex, columnIndex)
   }))
+}
+
+const restoreCounters = (savedCounters: Counter[]): void => {
+  counters.push(...savedCounters.map(counter => ({ ...counter })))
+  displayedCounters.push(...savedCounters.map(counter => ({ ...counter })))
 }
 
 const openRoute = (name: 'home' | 'levels'): void => void router.push({ name })
@@ -627,4 +653,10 @@ const entry = reactive(useLevelEntry({
   startGame: startNewGame,
   onLocked: () => void router.replace({ name: 'levels' }),
 }))
+
+onBeforeUnmount(() => {
+  if (gameResult.value !== null) {
+    resetRuntime()
+  }
+})
 </script>

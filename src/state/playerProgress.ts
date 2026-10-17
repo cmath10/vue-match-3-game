@@ -171,6 +171,15 @@ export const completeLevelGame = (
   return persist()
 }
 
+export const saveCompletedGameStatistics = (
+  current: SessionStatistics,
+  previous: SessionStatistics
+): Promise<void> => {
+  addSessionDelta(current, previous)
+
+  return persist()
+}
+
 export const usePlayerProgress = () => ({
   state,
   initialized,

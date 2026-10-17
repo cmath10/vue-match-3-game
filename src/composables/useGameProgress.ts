@@ -15,6 +15,7 @@ import { beginLevelGame } from '@/state/playerProgress'
 import { cloneBoard } from '@/domain/progress'
 import { completeLevelGame } from '@/state/playerProgress'
 import { createSessionStatistics, incrementCount } from '@/domain/progress'
+import { saveCompletedGameStatistics } from '@/state/playerProgress'
 import { saveLevelGame } from '@/state/playerProgress'
 
 type GameProgressOptions = {
@@ -32,6 +33,7 @@ type GameProgressContext = {
   options: GameProgressOptions
   startedAt: Ref<number>
   statistics: SessionStatistics
+  completedStatistics: SessionStatistics | null
 }
 
 const createSnapshot = (context: GameProgressContext): GameSnapshot => ({
@@ -50,6 +52,7 @@ const createSnapshot = (context: GameProgressContext): GameSnapshot => ({
 
 const begin = (context: GameProgressContext): void => {
   context.startedAt.value = Date.now()
+  context.completedStatistics = null
   Object.assign(context.statistics, createSessionStatistics())
   void beginLevelGame(createSnapshot(context))
 }
@@ -57,23 +60,29 @@ const begin = (context: GameProgressContext): void => {
 const persist = (context: GameProgressContext, result: GameResult | null): void => {
   const snapshot = createSnapshot(context)
 
-  if (result) {
+  if (context.completedStatistics !== null) {
+    void saveCompletedGameStatistics(snapshot.statistics, context.completedStatistics)
+    context.completedStatistics = snapshot.statistics
+  } else if (result) {
     void completeLevelGame(snapshot, result)
+    context.completedStatistics = snapshot.statistics
   } else {
     void saveLevelGame(snapshot)
   }
 }
 
 const restore = (context: GameProgressContext, snapshot: GameSnapshot): void => {
+  context.completedStatistics = null
   context.startedAt.value = snapshot.startedAt
   Object.assign(context.statistics, snapshot.statistics)
 }
 
 export const useGameProgress = (options: GameProgressOptions) => {
-  const context = {
+  const context: GameProgressContext = {
     options,
     startedAt: ref(Date.now()),
     statistics: reactive<SessionStatistics>(createSessionStatistics()),
+    completedStatistics: null,
   }
 
   return {
