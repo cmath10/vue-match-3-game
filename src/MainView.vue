@@ -254,7 +254,7 @@ const {
   flights: buttonFlights, collectingTileIds, combiningTileIds: combiningBoosterTileIds,
   detonatingKettleTileIds,
   animateWave: animateBoosterWave, cancel: cancelBoosterAnimation,
-} = useBoosterAnimation({ grid, waitAnimation, nextAnimationFrame })
+} = useBoosterAnimation({ grid, waitAnimation, waitDuration, nextAnimationFrame })
 
 const getTileTypeBoard = () => getMatchableTileState(grid)
 

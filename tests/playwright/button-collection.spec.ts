@@ -54,7 +54,7 @@ test('button flights include only ordinary tiles actually collected by the box',
     type: TileType.SweetsFish,
     from: { row: 0, column: 1 },
     to: { row: 0, column: 0 },
-    active: false,
+    phase: 'targeting',
   }])
 })
 

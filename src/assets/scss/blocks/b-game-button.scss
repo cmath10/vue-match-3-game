@@ -1,6 +1,6 @@
 .b-game-button {
   position: absolute;
-  z-index: 1;
+  z-index: 3;
   top: 0;
   left: 0;
   width: var(--tile-size);
@@ -12,23 +12,124 @@
   pointer-events: none;
   transition: transform var(--tile-transition-duration) cubic-bezier(0.22, 1, 0.36, 1);
 
+  &--targeting {
+    background-image: var(--button-tile-background);
+  }
+
+  &--highlighted {
+    background-image: var(--button-tile-highlighted-background);
+  }
+
+  &--transformed,
+  &--fading {
+    background-image: var(--button-highlighted-background);
+  }
+
+  &--transformed {
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--button-tile-highlighted-background) center / contain no-repeat;
+      animation: button-transform var(--button-phase-duration) ease-out both;
+    }
+  }
+
+  &__lightning {
+    position: absolute;
+    z-index: 2;
+    overflow: visible;
+    fill: none;
+    pointer-events: none;
+    filter: drop-shadow(0 0 6px #ffce68);
+    animation: button-lightning-appear var(--button-lightning-appear-duration) ease-in-out both;
+
+    &--fading {
+      animation: button-lightning-fade var(--button-lightning-fade-duration) ease-in-out both;
+    }
+  }
+
+  &__lightning-halo,
+  &__lightning-glow,
+  &__lightning-core {
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    stroke-dasharray: 1;
+    animation: button-lightning-draw var(--button-lightning-appear-duration) ease-in-out both;
+  }
+
+  // SVG path filters use viewBox units: one unit is one board cell.
+  &__lightning-halo {
+    stroke: #ffbd46;
+    stroke-width: 0.18;
+    opacity: 0.65;
+    filter: blur(0.045px);
+  }
+
+  &__lightning-glow {
+    stroke: #ffe0a0;
+    stroke-width: 0.065;
+    filter: blur(0.015px);
+  }
+
+  &__lightning-core {
+    stroke: #fffbe3;
+    stroke-width: 0.025;
+    filter: blur(0.005px);
+  }
+
   &--sweets-barbaris {
     --button-background: url("../../images/tile-button-barbaris.png");
+    --button-highlighted-background: url("../../images/tile-button-barbaris-highlighted.png");
+    --button-tile-background: url("../../images/tile-sweets-barbaris.png");
+    --button-tile-highlighted-background: url("../../images/tile-sweets-barbaris-highlighted.png");
   }
 
   &--sweets-fish {
     --button-background: url("../../images/tile-button-fish.png");
+    --button-highlighted-background: url("../../images/tile-button-fish-highlighted.png");
+    --button-tile-background: url("../../images/tile-sweets-fish.png");
+    --button-tile-highlighted-background: url("../../images/tile-sweets-fish-highlighted.png");
   }
 
   &--sweets-rooster {
     --button-background: url("../../images/tile-button-rooster.png");
+    --button-highlighted-background: url("../../images/tile-button-rooster-highlighted.png");
+    --button-tile-background: url("../../images/tile-sweets-rooster.png");
+    --button-tile-highlighted-background: url("../../images/tile-sweets-rooster-highlighted.png");
   }
 
   &--sweets-pillow {
     --button-background: url("../../images/tile-button-pillow.png");
+    --button-highlighted-background: url("../../images/tile-button-pillow-highlighted.png");
+    --button-tile-background: url("../../images/tile-sweets-pillow.png");
+    --button-tile-highlighted-background: url("../../images/tile-sweets-pillow-highlighted.png");
   }
 
   &--sweets-bird {
     --button-background: url("../../images/tile-button-bird.png");
+    --button-highlighted-background: url("../../images/tile-button-bird-highlighted.png");
+    --button-tile-background: url("../../images/tile-sweets-bird.png");
+    --button-tile-highlighted-background: url("../../images/tile-sweets-bird-highlighted.png");
   }
+}
+
+@keyframes button-lightning-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes button-lightning-appear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes button-lightning-fade {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes button-transform {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.6); }
 }

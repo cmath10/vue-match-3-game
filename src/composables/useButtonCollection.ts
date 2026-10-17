@@ -17,27 +17,40 @@ export type ButtonFlight = {
   type: TileType
   from: Position
   to: Position
-  active: boolean
+  phase: 'targeting' | 'highlighted' | 'transformed' | 'fading' | 'flying'
 }
+
+export const BUTTON_PREPARATION_PHASES = ['targeting', 'highlighted', 'transformed', 'fading'] as const
+export const BUTTON_PHASE_DURATIONS = {
+  targeting: 240,
+  highlighted: 180,
+  transformed: 180,
+  fading: 240,
+} as const
 
 type ButtonCollectionOptions = {
   grid: TileGrid
   waitAnimation: () => Promise<void>
+  waitDuration: (duration: number) => Promise<void>
   nextAnimationFrame: () => Promise<void>
 }
 
+type ButtonCollectionState = { flights: Ref<ButtonFlight[]>; version: number }
+
 export const useButtonCollection = (options: ButtonCollectionOptions) => {
   const flights = ref<ButtonFlight[]>([])
+  const state: ButtonCollectionState = { flights, version: 0 }
   const collectingTileIds = computed(() => new Set(flights.value.map(flight => flight.tileId)))
 
   const cancel = (): void => {
+    state.version++
     flights.value = []
   }
 
   return {
     flights,
     collectingTileIds,
-    animateWave: (wave: BoosterWave) => animateWave(options, flights, wave),
+    animateWave: (wave: BoosterWave) => animateWave(options, state, wave),
     cancel,
   }
 }
@@ -51,34 +64,47 @@ export const getButtonFlights = (grid: TileGrid, wave: BoosterWave): ButtonFligh
 }
 
 export const getButtonFlightStyle = (flight: ButtonFlight) => {
-  const position = flight.active ? flight.to : flight.from
+  const position = flight.phase === 'flying' ? flight.to : flight.from
 
   return {
+    '--button-phase-duration': `${BUTTON_PHASE_DURATIONS.transformed}ms`,
     transform: `translate(calc(${position.column} * (var(--cell-size) + var(--cell-gap)) + var(--tile-offset)), calc(${position.row} * (var(--cell-size) + var(--cell-gap)) + var(--tile-offset)))`,
   }
 }
 
-const startFlights = async (
-  flights: ButtonFlight[],
-  nextAnimationFrame: () => Promise<void>
-): Promise<void> => {
+const prepareFlights = async (
+  options: ButtonCollectionOptions,
+  state: ButtonCollectionState,
+  version: number
+): Promise<boolean> => {
   await nextTick()
-  await nextAnimationFrame()
-  await nextAnimationFrame()
-  flights.forEach(flight => flight.active = true)
+  await options.nextAnimationFrame()
+  await options.nextAnimationFrame()
+  for (const phase of BUTTON_PREPARATION_PHASES) {
+    if (version !== state.version) {
+      return false
+    }
+    state.flights.value.forEach(flight => flight.phase = phase)
+    await options.waitDuration(BUTTON_PHASE_DURATIONS[phase])
+  }
+  return version === state.version
 }
 
 const animateWave = async (
   options: ButtonCollectionOptions,
-  flights: Ref<ButtonFlight[]>,
+  state: ButtonCollectionState,
   wave: BoosterWave
 ): Promise<void> => {
-  flights.value = getButtonFlights(options.grid, wave)
+  const version = ++state.version
 
-  if (flights.value.length > 0) {
-    await startFlights(flights.value, options.nextAnimationFrame)
-    await options.waitAnimation()
-    flights.value = []
+  state.flights.value = getButtonFlights(options.grid, wave)
+  if (state.flights.value.length === 0 || !await prepareFlights(options, state, version)) {
+    return
+  }
+  state.flights.value.forEach(flight => flight.phase = 'flying')
+  await options.waitAnimation()
+  if (version === state.version) {
+    state.flights.value = []
   }
 }
 
@@ -111,7 +137,7 @@ const createButtonFlight = (
   type: tile.type,
   from,
   to,
-  active: false,
+  phase: 'targeting',
 })
 
 const isCollectableTile = (

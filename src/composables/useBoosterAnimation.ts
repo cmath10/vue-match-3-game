@@ -24,6 +24,7 @@ export type BoosterVisualEffect = {
 type BoosterAnimationOptions = {
   grid: TileGrid
   waitAnimation: () => Promise<void>
+  waitDuration: (duration: number) => Promise<void>
   nextAnimationFrame: () => Promise<void>
 }
 
