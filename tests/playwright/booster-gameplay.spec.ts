@@ -228,7 +228,7 @@ for (const scenario of boosterScenarios.filter(({ type }) => (
   })
 }
 
-test('area kettle has a continuous circular animation across its 5 by 5 zone', async ({ page }, testInfo) => {
+test('area kettle releases steam across its 5 by 5 zone', async ({ page }, testInfo) => {
   const kettleScenario = boosterScenarios[3]
   const booster = await startBoosterScenario(page, kettleScenario)
 
@@ -249,9 +249,8 @@ test('area kettle has a continuous circular animation across its 5 by 5 zone', a
       height: effectRect.height,
       cellSize: firstCell.width,
       cellStep: secondCell.x - firstCell.x,
-      backgroundImage: getComputedStyle(element, '::before').backgroundImage,
-      borderRadius: getComputedStyle(element, '::before').borderRadius,
-      clipPath: getComputedStyle(element, '::before').clipPath,
+      puffs: element.querySelectorAll('.b-game-kettle-steam__puff').length,
+      jet: element.querySelectorAll('.b-game-kettle-steam__jet').length,
     }
   })
 
@@ -265,9 +264,8 @@ test('area kettle has a continuous circular animation across its 5 by 5 zone', a
 
   expect(geometry.width).toBeCloseTo(expectedSize, 0)
   expect(geometry.height).toBeCloseTo(expectedSize, 0)
-  expect(geometry.backgroundImage).toContain('radial-gradient(')
-  expect(geometry.borderRadius).toBe('50%')
-  expect(geometry.clipPath).toBe('none')
+  expect(geometry.puffs).toBe(8)
+  expect(geometry.jet).toBe(1)
 })
 
 for (const scenario of geometricBoosterScenarios) {
@@ -403,7 +401,7 @@ test('starting a new game cancels a geometric booster effect', async ({ page }) 
   await expect(page.locator('.b-game-booster-effect')).toHaveCount(0)
   await expect(page.locator('.b-game-menu__turns-value')).toHaveText('25')
 
-  await page.waitForTimeout(600)
+  await page.waitForTimeout(1200)
   await expect(page.locator('.b-game-menu__turns-value')).toHaveText('25')
   await expect(page.locator('.b-game-ground__tile')).toHaveCount(BOARD_WIDTH * BOARD_HEIGHT)
 })

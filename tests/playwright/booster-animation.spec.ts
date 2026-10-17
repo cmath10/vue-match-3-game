@@ -6,6 +6,7 @@ import {
   FIRECRACKER_ANIMATION_DURATION,
   getBoosterVisualEffects,
   getBoosterVisualEffectStyle,
+  KETTLE_ANIMATION_DURATION,
 } from '@/composables/useBoosterAnimation'
 
 import { BoosterType, TileType } from '@/domain/enums'
@@ -71,5 +72,6 @@ test('kettle visual effect carries its domain area dimensions', () => {
     '--effect-column': 7,
     '--effect-area-radius': 2,
     '--effect-area-size': 5,
+    '--effect-duration': `${KETTLE_ANIMATION_DURATION}ms`,
   })
 })

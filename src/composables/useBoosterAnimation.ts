@@ -16,6 +16,7 @@ import { KETTLE_AREA_RADIUS, KETTLE_AREA_SIZE } from '@/domain/boosters/effects'
 import { useButtonCollection } from '@/composables/useButtonCollection'
 
 export const FIRECRACKER_ANIMATION_DURATION = 920
+export const KETTLE_ANIMATION_DURATION = 900
 
 export type BoosterVisualEffect = {
   id: string
@@ -103,9 +104,9 @@ const animateEffects = async (
 }
 
 const waitForVisualEffects = (options: BoosterAnimationOptions, effects: BoosterVisualEffect[]) => {
-  return effects.some(effect => effect.type !== BoosterType.AreaKettle)
-    ? options.waitDuration(FIRECRACKER_ANIMATION_DURATION)
-    : options.waitAnimation()
+  return options.waitDuration(Math.max(...effects.map(effect => (
+    effect.type === BoosterType.AreaKettle ? KETTLE_ANIMATION_DURATION : FIRECRACKER_ANIMATION_DURATION
+  ))))
 }
 
 const cancelAnimation = (
@@ -179,6 +180,7 @@ export const getBoosterVisualEffectStyle = (effect: BoosterVisualEffect) => {
         ...position,
         '--effect-area-radius': KETTLE_AREA_RADIUS,
         '--effect-area-size': KETTLE_AREA_SIZE,
+        '--effect-duration': `${KETTLE_ANIMATION_DURATION}ms`,
       }
     : { ...position, '--effect-duration': `${FIRECRACKER_ANIMATION_DURATION}ms` }
 }

@@ -28,6 +28,7 @@
                 <BGameFirecrackerFlame />
             </span>
         </template>
+        <BGameKettleSteam v-else-if="effect.type === BoosterType.AreaKettle" />
     </div>
 </template>
 
@@ -35,6 +36,7 @@
 import type { BoosterVisualEffect } from '@/composables/useBoosterAnimation'
 
 import BGameFirecrackerFlame from '@/components/BGameFirecrackerFlame.vue'
+import BGameKettleSteam from '@/components/BGameKettleSteam.vue'
 
 import { BoosterType } from '@/domain/enums'
 

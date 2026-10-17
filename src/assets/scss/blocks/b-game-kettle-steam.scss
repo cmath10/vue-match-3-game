@@ -1,0 +1,77 @@
+.b-game-kettle-steam {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  &__puff {
+    position: absolute;
+    left: calc(50% - var(--tile-size) * 0.36);
+    top: calc(50% - var(--tile-size) * 0.08);
+    width: calc(var(--cell-size) * 1.5);
+    height: calc(var(--cell-size) * 1.25);
+    border-radius: 44% 56% 62% 38% / 55% 42% 58% 45%;
+    background:
+      radial-gradient(ellipse at 35% 35%, rgba(255, 255, 242, 0.85), transparent 60%),
+      radial-gradient(ellipse at 65% 55%, rgba(216, 234, 246, 0.7), transparent 65%);
+    filter: blur(calc(var(--cell-size) * 0.035));
+    animation: b-game-kettle-steam-puff calc(var(--effect-duration) * 0.8) ease-out both;
+    animation-delay: calc(var(--effect-duration) * var(--steam-delay));
+
+    &:nth-child(1) { --steam-x: -1.5; --steam-y: -1.4; --steam-turn: -28deg; --steam-delay: 0; }
+    &:nth-child(2) { --steam-x: -0.4; --steam-y: -1.9; --steam-turn: 32deg; --steam-delay: 0.05; }
+    &:nth-child(3) { --steam-x: 1.2; --steam-y: -1.5; --steam-turn: -35deg; --steam-delay: 0.1; }
+    &:nth-child(4) { --steam-x: -1.8; --steam-y: -0.2; --steam-turn: 38deg; --steam-delay: 0.08; }
+    &:nth-child(5) { --steam-x: 1.8; --steam-y: -0.3; --steam-turn: -26deg; --steam-delay: 0.15; }
+    &:nth-child(6) { --steam-x: -1.3; --steam-y: 1.1; --steam-turn: 30deg; --steam-delay: 0.12; }
+    &:nth-child(7) { --steam-x: 0.2; --steam-y: 1.5; --steam-turn: -40deg; --steam-delay: 0.18; }
+    &:nth-child(8) { --steam-x: 1.4; --steam-y: 1.1; --steam-turn: 24deg; --steam-delay: 0.2; }
+  }
+
+  &__jet {
+    position: absolute;
+    left: calc(50% - var(--tile-size) * 0.36);
+    top: calc(50% - var(--tile-size) * 0.08);
+    width: calc(var(--cell-size) * 1.65);
+    height: calc(var(--cell-size) * 1.65);
+    overflow: visible;
+    fill: #f1f5e7;
+    filter: blur(calc(var(--cell-size) * 0.012));
+    transform-origin: 88% 89%;
+    animation: b-game-kettle-steam-jet var(--effect-duration) ease-in-out both;
+  }
+}
+
+@keyframes b-game-kettle-steam-puff {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.08) rotate(0deg);
+  }
+
+  18% { opacity: 0.75; }
+
+  45% {
+    opacity: 0.6;
+    border-radius: 60% 40% 45% 55% / 40% 60% 35% 65%;
+    transform: translate(
+      calc(-50% + var(--steam-x) * var(--cell-step) * 0.5),
+      calc(-50% + var(--steam-y) * var(--cell-step) * 0.5)
+    ) scale(0.8) rotate(calc(var(--steam-turn) * -0.4));
+  }
+
+  100% {
+    opacity: 0;
+    border-radius: 38% 62% 55% 45% / 60% 35% 65% 40%;
+    transform: translate(
+      calc(-50% + var(--steam-x) * var(--cell-step)),
+      calc(-50% + var(--steam-y) * var(--cell-step) - var(--cell-size) * 0.2)
+    ) scale(1.35) rotate(var(--steam-turn));
+  }
+}
+
+@keyframes b-game-kettle-steam-jet {
+  0%, 8% { opacity: 0; transform: translate(-88%, -89%) scale(0.12); }
+  24% { opacity: 0.7; transform: translate(-88%, -89%) scale(0.65) rotate(-6deg); }
+  48% { opacity: 0.55; transform: translate(-88%, -89%) scale(1) rotate(7deg); }
+  72% { opacity: 0.25; transform: translate(-91%, -97%) scale(1.08) rotate(-3deg); }
+  100% { opacity: 0; transform: translate(-96%, -110%) scale(1.2) rotate(9deg); }
+}
