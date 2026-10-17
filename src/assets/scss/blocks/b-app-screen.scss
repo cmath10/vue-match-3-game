@@ -301,22 +301,60 @@
   }
 
   &__metric {
+    --metric-tint: 172, 120, 78;
+
+    position: relative;
     display: flex;
-    min-height: 7rem;
+    overflow: hidden;
+    min-height: 8.5rem;
     flex-direction: column;
+    gap: 0.75rem;
     justify-content: space-between;
     padding: 1rem;
-    background: rgba($white, 0.07);
+    background:
+      radial-gradient(ellipse at bottom right, rgba(var(--metric-tint), 0.35), transparent 85%),
+      rgba($black, 0.25);
     border: 1px solid rgba($white, 0.14);
     border-radius: 0.75rem;
 
+    span,
+    strong {
+      position: relative;
+    }
+
     span {
-      color: rgba($white, 0.68);
+      color: rgba($white, 0.85);
     }
 
     strong {
       font-size: 2rem;
+      overflow-wrap: anywhere;
     }
+
+    &--started { --metric-tint: 99, 175, 202; }
+    &--completed { --metric-tint: 139, 151, 206; }
+    &--won { --metric-tint: 237, 180, 73; }
+    &--lost { --metric-tint: 190, 100, 121; }
+    &--turns { --metric-tint: 92, 181, 160; }
+    &--tiles { --metric-tint: 216, 108, 87; }
+    &--boosters { --metric-tint: 200, 147, 70; }
+  }
+
+  &__metric > &__metric-art {
+    position: absolute;
+    right: -0.15rem;
+    bottom: -0.35rem;
+    width: 4.75rem;
+    height: 4.75rem;
+    color: rgb(var(--metric-tint));
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.4;
+    transform: rotate(-16deg);
+    pointer-events: none;
   }
 
   &__details {

@@ -6,6 +6,30 @@ for (const viewport of [{ width: 1366, height: 900 }, { width: 320, height: 740 
     await page.goto('/statistics')
     await page.getByRole('button', { name: 'Русский' }).click()
 
+    const metrics = page.locator('.b-statistics__metric')
+
+    await expect(metrics).toHaveCount(7)
+    for (const metric of await metrics.all()) {
+      const art = metric.locator('.b-statistics__metric-art')
+
+      await expect(art).toHaveAttribute('aria-hidden', 'true')
+      await expect(art).toHaveCSS('position', 'absolute')
+      await expect(art).toHaveCSS('width', '76px')
+      await expect(art).not.toHaveCSS('transform', 'none')
+      const cardBox = (await metric.boundingBox())!
+      const artBox = (await art.boundingBox())!
+
+      expect(artBox.x + artBox.width / 2).toBeGreaterThan(cardBox.x + cardBox.width / 2)
+      expect(artBox.y + artBox.height / 2).toBeGreaterThan(cardBox.y + cardBox.height / 2)
+      for (const text of await metric.locator('span, strong').all()) {
+        const box = (await text.boundingBox())!
+
+        expect(box.x).toBeGreaterThanOrEqual(cardBox.x)
+        expect(box.x + box.width).toBeLessThanOrEqual(cardBox.x + cardBox.width)
+        expect(box.y + box.height).toBeLessThanOrEqual(cardBox.y + cardBox.height)
+      }
+    }
+
     const groups = page.locator('.b-statistics__group')
 
     await expect(groups).toHaveCount(2)

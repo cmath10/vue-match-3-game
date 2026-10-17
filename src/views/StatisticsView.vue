@@ -20,9 +20,26 @@
             <div class="b-statistics__summary">
                 <article
                     v-for="item in summary"
-                    :key="item.label"
-                    class="b-statistics__metric"
+                    :key="item.id"
+                    :class="{
+                        'b-statistics__metric': true,
+                        [`b-statistics__metric--${item.id}`]: true,
+                    }"
                 >
+                    <svg
+                        v-if="item.icon"
+                        aria-hidden="true"
+                        class="b-statistics__metric-art"
+                        viewBox="0 0 48 48"
+                    >
+                        <path :d="item.icon" />
+                    </svg>
+                    <BGameTile
+                        v-else-if="item.tile"
+                        :type="item.tile"
+                        aria-hidden="true"
+                        class="b-statistics__metric-art"
+                    />
                     <span>{{ item.label }}</span>
                     <strong>{{ item.value }}</strong>
                 </article>
@@ -68,6 +85,8 @@
 </template>
 
 <script lang="ts" setup>
+import type { TileVisualType } from '@/domain/enums'
+
 import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -101,14 +120,27 @@ const tileLabels = computed(() => ({
   [BoosterType.AreaKettle]: t('tiles.booster-area-kettle'),
   [BoosterType.ButtonBox]: t('tiles.booster-button-box'),
 }))
-const summary = computed(() => [
-  { label: t('statistics.gamesStarted'), value: statistics.value.gamesStarted },
-  { label: t('statistics.gamesCompleted'), value: statistics.value.gamesCompleted },
-  { label: t('statistics.gamesWon'), value: statistics.value.gamesWon },
-  { label: t('statistics.gamesLost'), value: statistics.value.gamesLost },
-  { label: t('statistics.turnsPlayed'), value: statistics.value.turnsPlayed },
-  { label: t('statistics.collectedTotal'), value: getCountTotal(statistics.value.tilesCollected) },
-  { label: t('statistics.boostersTotal'), value: getCountTotal(statistics.value.boostersUsed) },
+const metricIcons = {
+  started: 'M18 12 36 24 18 36Z M24 4a20 20 0 1 0 0 40 20 20 0 0 0 0-40',
+  completed: 'M10 43V6h28l-6 10 6 10H10 M18 6v20 M26 6v20 M10 16h22',
+  won: 'M14 6h20v12a10 10 0 0 1-20 0Z M14 10H6v5a10 10 0 0 0 10 10 M34 10h8v5a10 10 0 0 1-10 10 M24 28v10 M15 43v-5h18v5Z',
+  lost: 'M24 12C14-2-2 12 8 24L24 42 40 24C50 12 34-2 24 12Z M24 12l-5 9 10 5-7 9',
+  turns: 'M6 15h34 M31 6l9 9-9 9 M42 33H8 M17 24l-9 9 9 9',
+}
+const summary = computed<{
+  id: string
+  label: string
+  value: number
+  icon?: string
+  tile?: TileVisualType
+}[]>(() => [
+  { id: 'started', label: t('statistics.gamesStarted'), value: statistics.value.gamesStarted, icon: metricIcons.started },
+  { id: 'completed', label: t('statistics.gamesCompleted'), value: statistics.value.gamesCompleted, icon: metricIcons.completed },
+  { id: 'won', label: t('statistics.gamesWon'), value: statistics.value.gamesWon, icon: metricIcons.won },
+  { id: 'lost', label: t('statistics.gamesLost'), value: statistics.value.gamesLost, icon: metricIcons.lost },
+  { id: 'turns', label: t('statistics.turnsPlayed'), value: statistics.value.turnsPlayed, icon: metricIcons.turns },
+  { id: 'tiles', label: t('statistics.collectedTotal'), value: getCountTotal(statistics.value.tilesCollected), tile: TileType.SweetsBarbaris },
+  { id: 'boosters', label: t('statistics.boostersTotal'), value: getCountTotal(statistics.value.boostersUsed), tile: BoosterType.RowFirecracker },
 ])
 
 onMounted(() => {
