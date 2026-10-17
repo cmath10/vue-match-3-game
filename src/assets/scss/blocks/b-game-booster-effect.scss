@@ -10,96 +10,26 @@
   left: 0;
   pointer-events: none;
 
-  &::before,
-  &::after {
-    position: absolute;
-    content: "";
-    pointer-events: none;
-  }
-
   &__firecracker {
     position: absolute;
-    z-index: 1;
-    width: calc(var(--cell-size) * 0.92);
-    aspect-ratio: 191 / 80;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: contain;
-    filter: drop-shadow(0 0 calc(var(--cell-size) * 0.12) rgba(255, 112, 28, 0.8));
-    opacity: 0;
-    pointer-events: none;
-    transform-origin: center;
-    will-change: top, left, opacity, transform;
+    width: var(--tile-size);
+    height: var(--tile-size);
+    background: var(--firecracker-image) center / contain no-repeat;
+    transform: translate(-50%, -50%);
+    animation-duration: var(--effect-duration);
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    will-change: top, left, transform;
+  }
 
-    &::before,
-    &::after {
-      position: absolute;
-      z-index: 1;
-      content: "";
-      pointer-events: none;
-    }
-
-    &::before {
-      top: 50%;
-      width: calc(var(--cell-size) * 0.28);
-      height: calc(var(--cell-size) * 0.16);
-      background: radial-gradient(
-        ellipse at var(--fire-origin),
-        #fff 0 8%,
-        #fff7ad 14%,
-        #ffc229 30%,
-        #ff6a18 48%,
-        rgba(234, 36, 8, 0.48) 62%,
-        transparent 74%
-      );
-      filter:
-        drop-shadow(0 0 calc(var(--cell-size) * 0.08) #ffed8a)
-        drop-shadow(0 0 calc(var(--cell-size) * 0.14) rgba(255, 76, 20, 0.9));
-      transform: translateY(-50%);
-      transform-origin: var(--fire-origin);
-      animation: b-game-firecracker-flame 90ms steps(2, jump-none) infinite alternate;
-    }
-
-    &::after {
-      top: 50%;
-      width: calc(var(--cell-size) * 0.07);
-      height: calc(var(--cell-size) * 0.07);
-      background: #fff8b2;
-      border-radius: 50%;
-      box-shadow:
-        var(--spark-near-offset) calc(var(--cell-size) * -0.08) 0 -1px #ffb51c,
-        var(--spark-far-offset) calc(var(--cell-size) * 0.06) 0 -1px #ff6722;
-      transform: translateY(-50%);
-      animation: b-game-firecracker-sparks 140ms ease-out infinite;
-    }
-
-    &--negative {
-      --fire-origin: left center;
-      --spark-near-offset: calc(var(--cell-size) * 0.1);
-      --spark-far-offset: calc(var(--cell-size) * 0.15);
-      --spark-travel: calc(var(--cell-size) * 0.12);
-
-      background-image: url("../../images/tile-booster-firecracker-left.png");
-
-      &::before,
-      &::after {
-        left: 91%;
-      }
-    }
-
-    &--positive {
-      --fire-origin: right center;
-      --spark-near-offset: calc(var(--cell-size) * -0.1);
-      --spark-far-offset: calc(var(--cell-size) * -0.15);
-      --spark-travel: calc(var(--cell-size) * -0.12);
-
-      background-image: url("../../images/tile-booster-firecracker-right.png");
-
-      &::before,
-      &::after {
-        right: 91%;
-      }
-    }
+  &__exhaust {
+    position: absolute;
+    left: var(--exhaust-x);
+    top: calc(var(--exhaust-y) - 12%);
+    width: 62%;
+    height: 24%;
+    transform-origin: left center;
+    animation: b-game-firecracker-ignition var(--effect-duration) linear both;
   }
 
   &--booster-row-firecracker {
@@ -107,37 +37,28 @@
     height: var(--cell-size);
     transform: translateY(calc(var(--effect-row) * var(--cell-step)));
 
-    &::before,
-    &::after {
-      top: 50%;
-      right: 0;
-      left: 0;
-      height: calc(var(--cell-size) * 0.24);
-      border-radius: 999px;
-      background: linear-gradient(90deg, transparent, #ff8b31 12%, #fff6ae 50%, #ff8b31 88%, transparent);
-      box-shadow:
-        0 0 calc(var(--cell-size) * 0.14) rgba(255, 245, 174, 0.95),
-        0 0 calc(var(--cell-size) * 0.32) rgba(255, 91, 34, 0.8);
-      transform-origin: var(--effect-source-x) center;
-      animation: b-game-booster-row var(--effect-duration) ease-out both;
-    }
-
-    &::after {
-      height: calc(var(--cell-size) * 0.06);
-      background: #fff;
-      animation-delay: 60ms;
-    }
-
     .b-game-booster-effect__firecracker {
       top: 50%;
       left: var(--effect-source-x);
+      --launch-squeeze-x: 0.55;
+      --launch-squeeze-y: 1.12;
 
       &--negative {
-        animation: b-game-firecracker-row-negative var(--effect-duration) cubic-bezier(0.18, 0.72, 0.26, 1) both;
+        --firecracker-image: url("../../images/tile-booster-firecracker-left.png");
+        --exhaust-x: 75%;
+        --exhaust-y: 34%;
+        --exhaust-angle: 0deg;
+        --launch-edge: 0%;
+        animation-name: b-game-firecracker-row;
       }
 
       &--positive {
-        animation: b-game-firecracker-row-positive var(--effect-duration) cubic-bezier(0.18, 0.72, 0.26, 1) both;
+        --firecracker-image: url("../../images/tile-booster-firecracker-right.png");
+        --exhaust-x: 26%;
+        --exhaust-y: 66%;
+        --exhaust-angle: 180deg;
+        --launch-edge: 100%;
+        animation-name: b-game-firecracker-row;
       }
     }
   }
@@ -147,42 +68,40 @@
     height: 100%;
     transform: translateX(calc(var(--effect-column) * var(--cell-step)));
 
-    &::before,
-    &::after {
-      top: 0;
-      bottom: 0;
-      left: 50%;
-      width: calc(var(--cell-size) * 0.24);
-      border-radius: 999px;
-      background: linear-gradient(180deg, transparent, #ff8b31 12%, #fff6ae 50%, #ff8b31 88%, transparent);
-      box-shadow:
-        0 0 calc(var(--cell-size) * 0.14) rgba(255, 245, 174, 0.95),
-        0 0 calc(var(--cell-size) * 0.32) rgba(255, 91, 34, 0.8);
-      transform-origin: center var(--effect-source-y);
-      animation: b-game-booster-column var(--effect-duration) ease-out both;
-    }
-
-    &::after {
-      width: calc(var(--cell-size) * 0.06);
-      background: #fff;
-      animation-delay: 60ms;
-    }
-
     .b-game-booster-effect__firecracker {
       top: var(--effect-source-y);
       left: 50%;
+      --launch-squeeze-x: 1.12;
+      --launch-squeeze-y: 0.55;
 
       &--negative {
-        animation: b-game-firecracker-column-negative var(--effect-duration) cubic-bezier(0.18, 0.72, 0.26, 1) both;
+        --firecracker-image: url("../../images/tile-booster-firecracker-up.png");
+        --exhaust-x: 66%;
+        --exhaust-y: 75%;
+        --exhaust-angle: 90deg;
+        --launch-edge: 0%;
+        animation-name: b-game-firecracker-column;
       }
 
       &--positive {
-        animation: b-game-firecracker-column-positive var(--effect-duration) cubic-bezier(0.18, 0.72, 0.26, 1) both;
+        --firecracker-image: url("../../images/tile-booster-firecracker-down.png");
+        --exhaust-x: 33%;
+        --exhaust-y: 26%;
+        --exhaust-angle: -90deg;
+        --launch-edge: 100%;
+        animation-name: b-game-firecracker-column;
       }
     }
   }
 
   &--booster-area-kettle {
+    &::before,
+    &::after {
+      position: absolute;
+      content: "";
+      pointer-events: none;
+    }
+
     width: calc(var(--cell-size) * var(--effect-area-size) + var(--cell-gap) * (var(--effect-area-size) - 1));
     height: calc(var(--cell-size) * var(--effect-area-size) + var(--cell-gap) * (var(--effect-area-size) - 1));
     transform: translate(
@@ -214,145 +133,45 @@
   }
 }
 
-@keyframes b-game-booster-row {
-  0% {
-    opacity: 0;
-    transform: translateY(-50%) scaleX(0.04);
+@keyframes b-game-firecracker-row {
+  0% { transform: translate(-50%, -50%); }
+  16% { transform: translate(-50%, -50%) scale(var(--launch-squeeze-x), var(--launch-squeeze-y)); }
+  28% { transform: translate(-50%, -50%); }
+  46% {
+    left: var(--effect-source-x);
+    animation-timing-function: cubic-bezier(0.5, 0, 1, 1);
   }
-
-  24% {
-    opacity: 1;
-  }
-
+  90% { opacity: 1; }
   100% {
+    left: var(--launch-edge);
     opacity: 0;
-    transform: translateY(-50%) scaleX(1);
+    transform: translate(-50%, -50%);
   }
 }
 
-@keyframes b-game-booster-column {
-  0% {
-    opacity: 0;
-    transform: translateX(-50%) scaleY(0.04);
+@keyframes b-game-firecracker-column {
+  0% { transform: translate(-50%, -50%); }
+  16% { transform: translate(-50%, -50%) scale(var(--launch-squeeze-x), var(--launch-squeeze-y)); }
+  28% { transform: translate(-50%, -50%); }
+  46% {
+    top: var(--effect-source-y);
+    animation-timing-function: cubic-bezier(0.5, 0, 1, 1);
   }
-
-  24% {
-    opacity: 1;
-  }
-
+  90% { opacity: 1; }
   100% {
+    top: var(--launch-edge);
     opacity: 0;
-    transform: translateX(-50%) scaleY(1);
+    transform: translate(-50%, -50%);
   }
 }
 
-@keyframes b-game-firecracker-row-negative {
-  0% {
-    opacity: 1;
-    transform: translate(-50%, -62%) rotate(-3deg) scale(0.82);
-  }
-
-  88% {
-    opacity: 1;
-  }
-
-  100% {
-    left: 0;
-    opacity: 0;
-    transform:
-      translate(-50%, calc(-62% - var(--cell-size) * 0.22))
-      rotate(-16deg)
-      scale(0.82);
-  }
-}
-
-@keyframes b-game-firecracker-row-positive {
-  0% {
-    opacity: 1;
-    transform: translate(-50%, -38%) rotate(3deg) scale(0.82);
-  }
-
-  88% {
-    opacity: 1;
-  }
-
-  100% {
-    left: 100%;
-    opacity: 0;
-    transform:
-      translate(-50%, calc(-38% + var(--cell-size) * 0.22))
-      rotate(16deg)
-      scale(0.82);
-  }
-}
-
-@keyframes b-game-firecracker-column-negative {
-  0% {
-    opacity: 1;
-    transform: translate(-62%, -50%) rotate(90deg) scale(0.82);
-  }
-
-  88% {
-    opacity: 1;
-  }
-
-  100% {
-    top: 0;
-    opacity: 0;
-    transform:
-      translate(calc(-62% - var(--cell-size) * 0.22), -50%)
-      rotate(74deg)
-      scale(0.82);
-  }
-}
-
-@keyframes b-game-firecracker-column-positive {
-  0% {
-    opacity: 1;
-    transform: translate(-38%, -50%) rotate(90deg) scale(0.82);
-  }
-
-  88% {
-    opacity: 1;
-  }
-
-  100% {
-    top: 100%;
-    opacity: 0;
-    transform:
-      translate(calc(-38% + var(--cell-size) * 0.22), -50%)
-      rotate(106deg)
-      scale(0.82);
-  }
-}
-
-@keyframes b-game-firecracker-flame {
-  0% {
-    opacity: 0.72;
-    transform: translateY(-50%) scaleX(0.72) scaleY(0.78) rotate(-5deg);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateY(-50%) scaleX(1) scaleY(1.14) rotate(6deg);
-  }
-}
-
-@keyframes b-game-firecracker-sparks {
-  0% {
-    opacity: 1;
-    transform: translateY(-50%) scale(0.7);
-  }
-
-  100% {
-    opacity: 0;
-    transform:
-      translate(
-        var(--spark-travel),
-        calc(-50% - var(--cell-size) * 0.08)
-      )
-      scale(0.15);
-  }
+@keyframes b-game-firecracker-ignition {
+  0%, 26% { opacity: 0; transform: rotate(var(--exhaust-angle)) scaleX(0.05); }
+  32% { opacity: 1; transform: rotate(var(--exhaust-angle)) scaleX(0.3); }
+  46% { opacity: 1; transform: rotate(var(--exhaust-angle)) scaleX(1.2); }
+  65% { opacity: 1; transform: rotate(var(--exhaust-angle)) scaleX(0.85); }
+  90% { opacity: 1; transform: rotate(var(--exhaust-angle)) scaleX(0.5); }
+  100% { opacity: 0; transform: rotate(var(--exhaust-angle)) scaleX(0.35); }
 }
 
 @keyframes b-game-booster-kettle {

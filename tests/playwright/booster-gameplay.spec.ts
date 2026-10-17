@@ -94,16 +94,14 @@ for (const scenario of boosterScenarios.filter(({ type }) => (
     await expect(effect).toBeVisible()
 
     const origin = await effect.evaluate((element) => {
-      const rect = element.getBoundingClientRect()
-      const [x, y] = getComputedStyle(element, '::before')
-        .transformOrigin
-        .split(' ')
-        .map(Number.parseFloat)
+      const rocket = element.querySelector<HTMLElement>('.b-game-booster-effect__firecracker')!
+      const animation = rocket.getAnimations()[0]
 
-      return {
-        x: rect.x + x,
-        y: rect.y + y,
-      }
+      animation.pause()
+      animation.currentTime = 0
+      const rect = rocket.getBoundingClientRect()
+
+      return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 }
     })
 
     const expected = {
@@ -177,7 +175,7 @@ for (const scenario of boosterScenarios.filter(({ type }) => (
       const start = measure()
 
       animations.forEach((animation) => {
-        animation.currentTime = 480
+        animation.currentTime = Number(animation.effect!.getTiming().duration)
       })
 
       await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
@@ -185,27 +183,31 @@ for (const scenario of boosterScenarios.filter(({ type }) => (
       const end = measure()
       const styles = firecrackers.map((fragment) => ({
         backgroundImage: getComputedStyle(fragment).backgroundImage,
-        flameAnimation: getComputedStyle(fragment, '::before').animationName,
-        flameBackground: getComputedStyle(fragment, '::before').backgroundImage,
-        sparkAnimation: getComputedStyle(fragment, '::after').animationName,
+        flameAnimation: getComputedStyle(fragment.querySelector('.b-game-booster-effect__exhaust')!).animationName,
+        flameLayers: fragment.querySelectorAll('.b-game-firecracker-flame path').length,
       }))
 
       animations.forEach((animation) => {
-        animation.currentTime = 320
+        animation.currentTime = Number(animation.effect!.getTiming().duration) * 0.65
       })
+      firecrackers.forEach(fragment => fragment.querySelector('.b-game-booster-effect__exhaust')!.getAnimations().forEach(animation => {
+        animation.pause()
+        animation.currentTime = Number(animation.effect!.getTiming().duration) * 0.65
+      }))
 
       await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
 
       return { bounds, start, end, styles }
     })
 
-    expect(motion.styles[0].backgroundImage).toContain('tile-booster-firecracker-left')
-    expect(motion.styles[1].backgroundImage).toContain('tile-booster-firecracker-right')
+    expect(motion.styles[0].backgroundImage).toContain(scenario.type === BoosterType.RowFirecracker
+      ? 'tile-booster-firecracker-left' : 'tile-booster-firecracker-up')
+    expect(motion.styles[1].backgroundImage).toContain(scenario.type === BoosterType.RowFirecracker
+      ? 'tile-booster-firecracker-right' : 'tile-booster-firecracker-down')
 
     for (const style of motion.styles) {
-      expect(style.flameAnimation).toBe('b-game-firecracker-flame')
-      expect(style.flameBackground).toContain('radial-gradient(')
-      expect(style.sparkAnimation).toBe('b-game-firecracker-sparks')
+      expect(style.flameAnimation).toBe('b-game-firecracker-ignition')
+      expect(style.flameLayers).toBe(3)
     }
 
     expect(motion.end[0].scale).toBeCloseTo(motion.start[0].scale, 2)

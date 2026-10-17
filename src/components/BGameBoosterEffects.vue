@@ -15,20 +15,26 @@
                     b-game-booster-effect__firecracker
                     b-game-booster-effect__firecracker--negative
                 "
-            />
+            >
+                <BGameFirecrackerFlame />
+            </span>
             <span
                 aria-hidden="true"
                 class="
                     b-game-booster-effect__firecracker
                     b-game-booster-effect__firecracker--positive
                 "
-            />
+            >
+                <BGameFirecrackerFlame />
+            </span>
         </template>
     </div>
 </template>
 
 <script lang="ts" setup>
 import type { BoosterVisualEffect } from '@/composables/useBoosterAnimation'
+
+import BGameFirecrackerFlame from '@/components/BGameFirecrackerFlame.vue'
 
 import { BoosterType } from '@/domain/enums'
 

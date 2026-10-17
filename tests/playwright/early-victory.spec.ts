@@ -39,14 +39,23 @@ const createWinningAttempt = (turns: number): GameSnapshot => {
   }
 }
 
-const openWinningAttempt = async (page: Page, turns = 25): Promise<void> => {
+const openWinningAttempt = async (page: Page, turns = 25, controlledClock = false): Promise<void> => {
   const state = createPlayerState()
 
   state.statistics.gamesStarted = 1
   state.levels[1] = { levelId: 1, completed: false, updatedAt: 1, attempt: createWinningAttempt(turns) }
   await seedPlayerState(page, state)
   await page.goto('/game/1?resume=1')
+  if (controlledClock) {
+    await page.clock.install()
+    await page.clock.pauseAt(new Date())
+  }
   await page.locator('[data-tile-id="48"]').dblclick()
+  if (controlledClock) {
+    for (let step = 0; step < 100 && await page.locator('.b-game-objective-flight').count() === 0; step++) {
+      await page.clock.runFor(20)
+    }
+  }
   await expect(page.locator('.b-game-objective-flight').first()).toBeVisible()
   expect(await page.getByText('You win!', { exact: true }).isVisible()).toBe(true)
 }
@@ -58,34 +67,31 @@ const readState = (page: Page): Promise<PlayerState> => page.evaluate(async modu
 }, '/src/storage/playerStateRepository.ts')
 
 test('victory appears while the last objective flies and the board keeps animating underneath', async ({ page }, testInfo) => {
-  await openWinningAttempt(page, 1)
+  await openWinningAttempt(page, 1, true)
   const flights = page.locator('.b-game-objective-flight')
-  const overlay = page.locator('.b-game-layout__result')
 
   await expect(page.locator('.b-game-menu__turns-value')).toHaveText('0')
   await expect(page.locator('.b-game-menu__objective--completed')).toHaveCount(2)
-  const animation = await flights.first().evaluate(async element => {
+  const animation = await flights.first().evaluate(element => {
+    const overlay = document.querySelector('.b-game-layout__result')!
+    const rect = overlay.getBoundingClientRect()
+    const layering = {
+      overlay: Number(getComputedStyle(overlay).zIndex),
+      flight: Number(getComputedStyle(element).zIndex),
+      interceptsInput: overlay.contains(document.elementFromPoint(rect.x + 20, rect.y + 20)),
+    }
     const before = getComputedStyle(element).transform
 
-    await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
-    return { before, after: getComputedStyle(element).transform }
+    return { before, layering }
   })
 
-  expect(animation.after).not.toBe(animation.before)
-  const layering = await overlay.evaluate(element => {
-    const flight = document.querySelector('.b-game-objective-flight')!
-    const rect = element.getBoundingClientRect()
-
-    return {
-      overlay: Number(getComputedStyle(element).zIndex),
-      flight: Number(getComputedStyle(flight).zIndex),
-      interceptsInput: element.contains(document.elementFromPoint(rect.x + 20, rect.y + 20)),
-    }
-  })
-
-  expect(layering.overlay).toBeGreaterThan(layering.flight)
-  expect(layering.interceptsInput).toBe(true)
+  await page.clock.runFor(50)
+  await expect.poll(() => flights.first().evaluate(element => getComputedStyle(element).transform))
+    .not.toBe(animation.before)
+  expect(animation.layering.overlay).toBeGreaterThan(animation.layering.flight)
+  expect(animation.layering.interceptsInput).toBe(true)
   await testInfo.attach('victory-with-background-animations', { body: await page.screenshot(), contentType: 'image/png' })
+  await page.clock.resume()
   await expect(flights).toHaveCount(0)
   await expect(page.locator('.b-game-tile-break')).toHaveCount(0)
   await expect(page.getByText('You win!', { exact: true })).toBeVisible()

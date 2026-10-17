@@ -24,6 +24,7 @@
                         'b-game-ground__tile--selected': tile.selected,
                         'b-game-ground__tile--collecting': collectingTileIds.has(tile.id),
                         'b-game-tile--combining': combiningBoosterTileIds.has(tile.id),
+                        'b-game-tile--launching-firecracker': isLaunchingFirecracker(tile),
                         'b-game-tile--detonating-kettle': detonatingKettleTileIds.has(tile.id),
                         'b-game-tile--landing': landingTileIds.has(tile.id),
                     }"
@@ -74,6 +75,8 @@ import type { TileBreakEffect } from '@/composables/useTileBreakAnimation'
 
 import type { Tile } from '@/domain/types'
 
+import { computed } from 'vue'
+
 import BBoardSurface from '@/components/BBoardSurface.vue'
 import BGameBoosterCombination from '@/components/BGameBoosterCombination.vue'
 import BGameBoosterEffects from '@/components/BGameBoosterEffects.vue'
@@ -82,6 +85,8 @@ import BGameCookieBreakEffects from '@/components/BGameCookieBreakEffects.vue'
 import BGameTile from '@/components/BGameTile.vue'
 import BGameTileBreakEffects from '@/components/BGameTileBreakEffects.vue'
 
+import { BoosterType } from '@/domain/enums'
+
 import {
   getBoardEdgeGuideClasses,
   getBoardEdgeGuideKey,
@@ -89,7 +94,7 @@ import {
   getTileStyle,
 } from '@/presentation/tiles'
 
-defineProps<{
+const props = defineProps<{
   cells: GameCell[]
   edgeGuides: readonly BoardEdgeGuide[]
   tiles: Tile[]
@@ -105,6 +110,16 @@ defineProps<{
   tileMovementDurations: ReadonlyMap<number, number>
   surface: BoardSurface
 }>()
+
+const firecrackerSources = computed(() => new Set(props.boosterEffects
+  .filter(effect => effect.type !== BoosterType.AreaKettle)
+  .map(effect => `${effect.source.row}-${effect.source.column}`)))
+
+const isLaunchingFirecracker = (tile: Tile): boolean => {
+  const isFirecracker = tile.type === BoosterType.RowFirecracker || tile.type === BoosterType.ColumnFirecracker
+
+  return isFirecracker && firecrackerSources.value.has(`${tile.row}-${tile.column}`)
+}
 
 const emit = defineEmits<{
   'tile-click': [tile: Tile]

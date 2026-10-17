@@ -48,7 +48,8 @@
     }
   }
 
-  &--combining {
+  &--combining,
+  &--launching-firecracker {
     visibility: hidden;
   }
 

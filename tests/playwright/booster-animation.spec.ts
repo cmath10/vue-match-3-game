@@ -3,6 +3,7 @@ import type { BoosterWave } from '@/domain/types'
 import { expect, test } from '@playwright/test'
 
 import {
+  FIRECRACKER_ANIMATION_DURATION,
   getBoosterVisualEffects,
   getBoosterVisualEffectStyle,
 } from '@/composables/useBoosterAnimation'
@@ -56,6 +57,7 @@ test('visual effect position is expressed through board coordinates', () => {
   })).toEqual({
     '--effect-row': 3,
     '--effect-column': 7,
+    '--effect-duration': `${FIRECRACKER_ANIMATION_DURATION}ms`,
   })
 })
 

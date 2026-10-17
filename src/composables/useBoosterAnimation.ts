@@ -15,6 +15,8 @@ import { KETTLE_AREA_RADIUS, KETTLE_AREA_SIZE } from '@/domain/boosters/effects'
 
 import { useButtonCollection } from '@/composables/useButtonCollection'
 
+export const FIRECRACKER_ANIMATION_DURATION = 920
+
 export type BoosterVisualEffect = {
   id: string
   type: GeometricBoosterType
@@ -95,9 +97,15 @@ const animateEffects = async (
   state.visualEffects.value = getBoosterVisualEffects(wave)
   state.detonatingKettleTileIds.value = getDetonatingKettleTileIds(options.grid, wave)
   const visualAnimation = state.visualEffects.value.length > 0
-    ? options.waitAnimation() : Promise.resolve()
+    ? waitForVisualEffects(options, state.visualEffects.value) : Promise.resolve()
 
   await Promise.all([visualAnimation, buttonCollection.animateWave(wave)])
+}
+
+const waitForVisualEffects = (options: BoosterAnimationOptions, effects: BoosterVisualEffect[]) => {
+  return effects.some(effect => effect.type !== BoosterType.AreaKettle)
+    ? options.waitDuration(FIRECRACKER_ANIMATION_DURATION)
+    : options.waitAnimation()
 }
 
 const cancelAnimation = (
@@ -172,7 +180,7 @@ export const getBoosterVisualEffectStyle = (effect: BoosterVisualEffect) => {
         '--effect-area-radius': KETTLE_AREA_RADIUS,
         '--effect-area-size': KETTLE_AREA_SIZE,
       }
-    : position
+    : { ...position, '--effect-duration': `${FIRECRACKER_ANIMATION_DURATION}ms` }
 }
 
 const isGeometricBooster = (type: BoosterType): type is GeometricBoosterType => {
