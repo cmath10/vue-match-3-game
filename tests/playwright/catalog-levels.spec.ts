@@ -89,6 +89,22 @@ test('catalog contains twenty deterministic level definitions', () => {
   })
 })
 
+test('first level is a compact rectangle with a real exit under every column', () => {
+  const level = getCatalogLevel(1)
+
+  expect(level.topology.bounds).toEqual({ width: 7, height: 5 })
+  expect(level.topology.playableCells.size).toBe(35)
+  expect(level.edgeGuides.map(guide => guide.anchor)).toEqual(
+    Array.from({ length: 7 }, (_, column) => ({ side: 'bottom', column }))
+  )
+  for (let column = 0; column < 7; column++) {
+    for (let row = 0; row < 5; row++) {
+      expect(level.gravity.nodes.get(`${row}:${column}`)?.next)
+        .toBe(row === 4 ? null : `${row + 1}:${column}`)
+    }
+  }
+})
+
 test('catalog difficulty progresses through objective and gravity tiers', () => {
   const definitions = getLevelIds().map(createCatalogLevelDefinition)
 

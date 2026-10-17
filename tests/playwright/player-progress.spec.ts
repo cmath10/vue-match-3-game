@@ -3,6 +3,7 @@ import type { GameSnapshot } from '@/domain/progress'
 import { expect, test } from '@playwright/test'
 
 import { AttemptRandom } from '@/domain/random'
+import { CATALOG_LEVEL_REVISION } from '@/domain/levels/catalog'
 import {
   createPlayerState,
   createSessionStatistics,
@@ -66,7 +67,7 @@ test('migrates legacy progress and drops attempts from the replaced catalog revi
   expect(restored?.levels[5].attempt).toBeUndefined()
 })
 
-test('drops an incompatible current-state attempt without losing level progress', () => {
+test('keeps current attempts and drops the previous catalog revision without losing progress', () => {
   const state = createPlayerState()
 
   state.levels[1] = {
@@ -75,6 +76,11 @@ test('drops an incompatible current-state attempt without losing level progress'
     updatedAt: 10,
     attempt: createAttempt(1, 10),
   }
+  const attempt = state.levels[1].attempt!
+
+  attempt.level = { kind: 'catalog', levelId: 1, levelRevision: CATALOG_LEVEL_REVISION }
+  expect(restorePlayerState(state)?.levels[1].attempt).toEqual(attempt)
+  attempt.level.levelRevision--
   const restored = restorePlayerState(state)
 
   expect(restored?.levels[1].completed).toBe(true)

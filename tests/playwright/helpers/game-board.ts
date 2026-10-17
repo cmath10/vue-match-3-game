@@ -2,8 +2,8 @@ import type { Page } from '@playwright/test'
 
 import type { Board } from '@/domain/types'
 
-import { BOARD_HEIGHT, BOARD_WIDTH } from '@/domain/config'
 import { createRectangularBoardState } from '@/domain/board/topology'
+import { getCatalogLevel } from '@/domain/levels/catalog'
 import { getMoveMatch } from '@/domain/boosters/creation'
 
 import { BoosterType, TileType } from '@/domain/enums'
@@ -29,7 +29,7 @@ export type BoosterMove = Move & {
   boosterTileId: string
 }
 
-export { BOARD_HEIGHT, BOARD_WIDTH }
+export const { width: BOARD_WIDTH, height: BOARD_HEIGHT } = getCatalogLevel(1).topology.bounds
 
 const MATCHABLE_TILE_TYPES = new Set<string>(Object.values(TileType))
 

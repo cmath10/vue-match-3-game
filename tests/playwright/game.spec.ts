@@ -76,7 +76,7 @@ const expectSwapAnimationStarted = async (page: Page, move: Move) => {
   expect(currentDistance).toBeGreaterThan(1)
 }
 
-test('expanded board keeps an 11 by 9 grid readable on mobile', async ({ page }) => {
+test('first level keeps a 7 by 5 grid readable on mobile', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await seedMathRandom(page)
   await page.goto('/game/1')
@@ -84,8 +84,8 @@ test('expanded board keeps an 11 by 9 grid readable on mobile', async ({ page })
   const cells = page.locator('.b-game-ground__cell')
   const guides = page.locator('.b-game-board-shell__guide--gravity')
 
-  await expect(cells).toHaveCount(11 * 9)
-  await expect(guides).toHaveCount(11)
+  await expect(cells).toHaveCount(7 * 5)
+  await expect(guides).toHaveCount(7)
 
   const metrics = await page.locator('.b-game-ground').evaluate((ground) => {
     const grid = ground.querySelector<HTMLElement>('.b-game-ground__cells')!
@@ -106,8 +106,8 @@ test('expanded board keeps an 11 by 9 grid readable on mobile', async ({ page })
   })
 
   expect(metrics).toMatchObject({
-    columns: 11,
-    rows: 9,
+    columns: 7,
+    rows: 5,
     fitsWidth: true,
     fitsHeight: true,
   })

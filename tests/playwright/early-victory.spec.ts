@@ -50,7 +50,7 @@ const openWinningAttempt = async (page: Page, turns = 25, controlledClock = fals
     await page.clock.install()
     await page.clock.pauseAt(new Date())
   }
-  await page.locator('[data-tile-id="48"]').dblclick()
+  await page.locator(`[data-tile-id="${4 * getCatalogLevel(1).topology.bounds.width + 4}"]`).dblclick()
   if (controlledClock) {
     for (let step = 0; step < 100 && await page.locator('.b-game-objective-flight').count() === 0; step++) {
       await page.clock.runFor(20)
@@ -177,7 +177,7 @@ test('leaving an unfinished non-winning turn still saves it after its animations
   state.levels[1] = { levelId: 1, completed: false, updatedAt: 1, attempt }
   await seedPlayerState(page, state)
   await page.goto('/game/1?resume=1')
-  await page.locator('[data-tile-id="48"]').dblclick()
+  await page.locator(`[data-tile-id="${4 * getCatalogLevel(1).topology.bounds.width + 4}"]`).dblclick()
   await expect(page.locator('.b-game-objective-flight').first()).toBeVisible()
   await expect(page.locator('.b-game-layout__result')).toHaveCount(0)
   await page.getByRole('button', { name: 'Main menu' }).click()

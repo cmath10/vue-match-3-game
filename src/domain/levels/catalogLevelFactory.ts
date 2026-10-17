@@ -19,7 +19,7 @@ import { PACKAGE_HEALTH } from '@/domain/config'
 import { parseCellKey } from '@/domain/levels/coordinates'
 import { SpecialTileType } from '@/domain/enums'
 
-export const CATALOG_LEVEL_REVISION = 8
+export const CATALOG_LEVEL_REVISION = 9
 export const MAIN_POOL_ID = 'main'
 const ZONE_POOL_ID = 'zone'
 const STRONG_PACKAGE_HEALTH = 2

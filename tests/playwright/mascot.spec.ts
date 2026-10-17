@@ -71,7 +71,7 @@ test('mascot blinks briefly and respects reduced motion', async ({ page }) => {
 test('losing changes the mascot and replay restores its normal blinking portrait', async ({ page }, testInfo) => {
   await seedMathRandom(page)
   await page.goto('/game/1')
-  await expect(page.locator('.b-game-ground__tile')).toHaveCount(99)
+  await expect(page.locator('.b-game-ground__tile')).toHaveCount(35)
   await expect.poll(() => page.evaluate(async modulePath => {
     const { loadPlayerState } = await import(modulePath)
     return Boolean(((await loadPlayerState()) as PlayerState)?.levels[1]?.attempt)

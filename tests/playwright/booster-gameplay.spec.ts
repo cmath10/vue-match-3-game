@@ -24,10 +24,10 @@ type BoosterScenario = {
 }
 
 const boosterScenarios: BoosterScenario[] = [
-  { type: BoosterType.ButtonBox, seed: 9 },
-  { type: BoosterType.ColumnFirecracker, seed: 1 },
+  { type: BoosterType.ButtonBox, seed: 1 },
+  { type: BoosterType.ColumnFirecracker, seed: 2 },
   { type: BoosterType.RowFirecracker, seed: 1 },
-  { type: BoosterType.AreaKettle, seed: 6 },
+  { type: BoosterType.AreaKettle, seed: 1 },
 ]
 const buttonBoxScenario = boosterScenarios[0]
 const geometricBoosterScenarios = boosterScenarios.filter(scenario => scenario.type !== BoosterType.ButtonBox)

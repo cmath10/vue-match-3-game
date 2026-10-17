@@ -21,7 +21,7 @@ const visualTile = (tile: FixedTileDefinition) => ({
   health: tile.kind === 'special' && 'health' in tile ? tile.health : undefined,
 })
 
-for (const levelId of [3, 11, 13, 15]) {
+for (const levelId of [1, 3, 11, 13, 15]) {
   test(`level ${levelId} preview matches the freshly started game`, async ({ page }, testInfo) => {
     await page.addInitScript(seed => {
       Math.random = () => seed / 0x1_0000_0000

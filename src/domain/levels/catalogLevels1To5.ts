@@ -10,7 +10,7 @@ import { TileType } from '@/domain/enums'
 export const CATALOG_LEVELS_1_TO_5: readonly LevelDefinition[] = [
   defineDirectionalLevel({
     id: 1,
-    layout: rectangle(11, 9),
+    layout: rectangle(7, 5),
     mainTypes: THREE_TILE_TYPES,
     direction: 'down',
     objectives: [

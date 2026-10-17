@@ -154,9 +154,9 @@ test('restores an unfinished level and records its first move', async ({ page })
 
   const tiles = await getTiles(page)
 
-  expect(tiles).toHaveLength(99)
-  expect(new Set(tiles.map(tile => tile.id)).size).toBe(99)
-  expect(new Set(tiles.map(tile => `${tile.row}-${tile.column}`)).size).toBe(99)
+  expect(tiles).toHaveLength(35)
+  expect(new Set(tiles.map(tile => tile.id)).size).toBe(35)
+  expect(new Set(tiles.map(tile => `${tile.row}-${tile.column}`)).size).toBe(35)
   await makeMove(page, findValidMove(tiles))
   await expect(page.locator('.b-game-menu__turns-value')).toHaveText('24', { timeout: 10_000 })
   await expect.poll(() => getStoredTurns(page, 1)).toBe(24)

@@ -11,14 +11,9 @@ import { CATALOG_LEVEL_REVISION } from '@/domain/levels/catalog'
 import { createPlayerState, createSessionStatistics } from '@/domain/progress'
 import { getCatalogLevel } from '@/domain/levels/catalog'
 
-import {
-  AVAILABLE_TILE_TYPES,
-  BOARD_HEIGHT,
-  BOARD_WIDTH,
-  COUNTER_TYPES,
-} from '@/domain/config'
+import { AVAILABLE_TILE_TYPES, COUNTER_TYPES } from '@/domain/config'
 
-import { getTiles } from './helpers/game-board'
+import { BOARD_HEIGHT, BOARD_WIDTH, getTiles } from './helpers/game-board'
 import { seedPlayerState } from './helpers/player-state'
 import { swipeTile } from './helpers/game-board'
 
@@ -32,8 +27,8 @@ type CombinationScenario = {
   columnEffects: number
 }
 
-const SOURCE = { row: 4, column: 4 }
-const TARGET = { row: 4, column: 5 }
+const SOURCE = { row: 2, column: 3 }
+const TARGET = { row: 2, column: 4 }
 const TILE_COUNT = BOARD_WIDTH * BOARD_HEIGHT
 const scenarios: CombinationScenario[] = [
   {
