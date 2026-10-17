@@ -201,10 +201,24 @@ test('refilled tiles compress shortly before landing and restore their shape', a
 
   const initialTileIds = new Set((await getTiles(page)).map(tile => tile.id))
 
+  // Freeze game timers as well as CSS: taking a screenshot must not settle the turn.
+  await page.clock.install()
+  await page.clock.pauseAt(new Date())
   await makeValidMove(page)
 
+  for (let step = 0; step < 100; step++) {
+    await page.clock.runFor(20)
+    const hasRefilledTile = await page.locator('.b-game-ground__tile').evaluateAll((tiles, ids) => (
+      tiles.some(tile => !ids.includes(tile.getAttribute('data-tile-id') || ''))
+    ), [...initialTileIds])
+
+    if (hasRefilledTile) {
+      break
+    }
+  }
+
   const tile = await getNewTile(page, initialTileIds)
-  const motion = await tile.evaluate(async (element) => {
+  const motion = await tile.evaluate((element) => {
     const animation = element.ownerDocument.getAnimations().find(candidate => (
       candidate instanceof CSSAnimation
         && candidate.animationName === 'b-game-tile-landing'
@@ -227,17 +241,16 @@ test('refilled tiles compress shortly before landing and restore their shape', a
         y: Math.hypot(matrix.c, matrix.d),
       }
     }
-    const seek = async (time: number) => {
+    const seek = (time: number) => {
       animation.currentTime = time
-      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
 
       return measureScale()
     }
 
     animation.pause()
 
-    const resting = await seek(0)
-    const compressed = await seek(duration * 0.86)
+    const resting = seek(0)
+    const compressed = seek(duration * 0.86)
 
     return { resting, compressed }
   })
@@ -247,7 +260,7 @@ test('refilled tiles compress shortly before landing and restore their shape', a
     contentType: 'image/png',
   })
 
-  const landed = await tile.evaluate(async (element) => {
+  const landed = await tile.evaluate((element) => {
     const animation = element.ownerDocument.getAnimations().find(candidate => (
       candidate instanceof CSSAnimation
         && candidate.animationName === 'b-game-tile-landing'
@@ -261,7 +274,6 @@ test('refilled tiles compress shortly before landing and restore their shape', a
     }
 
     animation.currentTime = Number(animation.effect?.getTiming().duration)
-    await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
 
     const transform = getComputedStyle(element, '::before').transform
     const matrix = transform === 'none' ? new DOMMatrixReadOnly() : new DOMMatrixReadOnly(transform)
@@ -273,6 +285,7 @@ test('refilled tiles compress shortly before landing and restore their shape', a
   expect(motion.compressed.y).toBeLessThan(motion.resting.y)
   expect(motion.compressed.x).toBeGreaterThan(motion.resting.x)
   expect(landed).toBeCloseTo(1, 2)
+  await page.clock.resume()
   await expect(page.locator('.b-game-tile--landing')).toHaveCount(0)
 })
 
