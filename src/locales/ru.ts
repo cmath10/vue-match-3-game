@@ -60,7 +60,7 @@ export const ru = {
     'sweets-pillow': 'Подушечки',
     'sweets-bird': 'Птички',
     'special-mug': 'Кружки',
-    'special-package': 'Коробки',
+    'special-package': 'Пакеты',
     'special-cookie': 'Печенье',
     'booster-row-firecracker': 'Горизонтальные хлопушки',
     'booster-column-firecracker': 'Вертикальные хлопушки',

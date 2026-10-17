@@ -33,7 +33,14 @@
                     <h2>{{ t('statistics.tilesCollected') }}</h2>
                     <dl>
                         <div v-for="type in objectiveTypes" :key="type">
-                            <dt>{{ tileLabels[type] }}</dt>
+                            <dt>
+                                <BGameTile
+                                    :type="type"
+                                    :small="true"
+                                    aria-hidden="true"
+                                />
+                                <span>{{ tileLabels[type] }}</span>
+                            </dt>
                             <dd>{{ statistics.tilesCollected[type] ?? 0 }}</dd>
                         </div>
                     </dl>
@@ -43,7 +50,14 @@
                     <h2>{{ t('statistics.boostersUsed') }}</h2>
                     <dl>
                         <div v-for="type in boosterTypes" :key="type">
-                            <dt>{{ tileLabels[type] }}</dt>
+                            <dt>
+                                <BGameTile
+                                    :type="type"
+                                    :small="true"
+                                    aria-hidden="true"
+                                />
+                                <span>{{ tileLabels[type] }}</span>
+                            </dt>
                             <dd>{{ statistics.boostersUsed[type] ?? 0 }}</dd>
                         </div>
                     </dl>
@@ -57,6 +71,7 @@
 import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import BGameTile from '@/components/BGameTile.vue'
 import BLocaleSwitcher from '@/components/BLocaleSwitcher.vue'
 
 import { BoosterType } from '@/domain/enums'
