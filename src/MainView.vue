@@ -41,8 +41,6 @@
                 />
             </div>
 
-            <BGameFooter />
-
             <BGameResultOverlay
                 v-if="gameResult"
                 :next-level-available="nextLevelId !== null"
@@ -100,7 +98,6 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
 import BGameBoard from '@/components/BGameBoard.vue'
-import BGameFooter from '@/components/BGameFooter.vue'
 import BGameMenu from '@/components/BGameMenu.vue'
 import BGameObjectiveFlights from '@/components/BGameObjectiveFlights.vue'
 import BGameResultOverlay from '@/components/BGameResultOverlay.vue'

@@ -37,10 +37,9 @@ for (const viewport of [
     expect(objectives.y).toBeGreaterThanOrEqual(heading.y + heading.height)
     const ground = (await page.locator('.b-game-ground').boundingBox())!
     const field = (await page.locator('.b-game-layout__field').boundingBox())!
-    const footer = (await page.locator('.b-game-layout__footer').boundingBox())!
 
     expect(ground.y).toBeGreaterThanOrEqual(field.y)
-    expect(ground.y + ground.height).toBeLessThanOrEqual(footer.y)
+    expect(ground.y + ground.height).toBeLessThanOrEqual(field.y + field.height)
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(viewport.width)
     await expect(mascot.locator('.b-game-mascot__portrait--sad')).toHaveCSS('opacity', '0')
     await testInfo.attach(`mascot-${viewport.width}-${viewport.height}`, {

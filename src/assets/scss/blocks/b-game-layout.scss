@@ -1,15 +1,12 @@
 @import "../variables";
-@import "../mixins/m-game-glass-panel";
 
 .b-game-layout {
   --game-menu-inline-size: 18rem;
   --game-menu-block-size: 14rem;
   --game-field-padding-x: clamp(0.75rem, 3vw, 1rem);
   --game-field-padding-y: 0.75rem;
-  --game-footer-block-size: clamp(3.5rem, 9dvh, 4.75rem);
-  --game-footer-gap: 0.75rem;
   --game-board-available-width: calc(100vw - var(--game-field-padding-x) - var(--game-field-padding-x));
-  --game-board-available-height: calc(100dvh - var(--game-menu-block-size) - var(--game-field-padding-y) - var(--game-field-padding-y) - var(--game-footer-block-size) - var(--game-footer-gap));
+  --game-board-available-height: calc(100dvh - var(--game-menu-block-size) - var(--game-field-padding-y) - var(--game-field-padding-y));
 
   display: flex;
   flex-direction: column;
@@ -80,39 +77,6 @@
     gap: 0.75rem;
     justify-content: center;
   }
-
-  &__footer {
-    flex: 0 0 auto;
-    margin-top: var(--game-footer-gap);
-    color: rgba($white, 0.78);
-  }
-
-  &__footer-panel {
-    @include m-game-glass-panel();
-
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 1.5rem;
-    justify-content: center;
-    width: 100%;
-    padding: 0.75rem 1rem;
-    text-align: center;
-  }
-
-  &__link {
-    color: currentColor;
-    text-decoration-color: rgba($white, 0.42);
-    text-underline-offset: 0.2em;
-    transition:
-      color 0.16s ease,
-      text-decoration-color 0.16s ease;
-
-    &:hover,
-    &:focus {
-      color: $white;
-      text-decoration-color: $white;
-    }
-  }
 }
 
 @media (orientation: landscape) and (max-width: 991.98px) {
@@ -120,9 +84,8 @@
     --game-menu-inline-size: clamp(11rem, 24vw, 14rem);
     --game-field-padding-x: 0.75rem;
     --game-field-padding-y: 0.75rem;
-    --game-footer-block-size: 5rem;
     --game-board-available-width: calc(100vw - var(--game-menu-inline-size) - var(--game-field-padding-x) - var(--game-field-padding-x));
-    --game-board-available-height: calc(100dvh - var(--game-field-padding-y) - var(--game-field-padding-y) - var(--game-footer-block-size) - var(--game-footer-gap));
+    --game-board-available-height: calc(100dvh - var(--game-field-padding-y) - var(--game-field-padding-y));
 
     flex-direction: row;
 
@@ -132,10 +95,6 @@
       border-right: 1px solid rgba($white, 0.08);
       border-bottom: 0;
     }
-
-    &__footer-panel {
-      padding: 0.6rem 0.875rem;
-    }
   }
 }
 
@@ -143,10 +102,8 @@
   .b-game-layout {
     --game-field-padding-x: 1.5rem;
     --game-field-padding-y: 1.5rem;
-    --game-footer-block-size: 4rem;
-    --game-footer-gap: 1rem;
     --game-board-available-width: calc(100vw - var(--game-menu-inline-size) - var(--game-field-padding-x) - var(--game-field-padding-x));
-    --game-board-available-height: calc(100dvh - var(--game-field-padding-y) - var(--game-field-padding-y) - var(--game-footer-block-size) - var(--game-footer-gap));
+    --game-board-available-height: calc(100dvh - var(--game-field-padding-y) - var(--game-field-padding-y));
 
     flex-direction: row;
 
@@ -161,15 +118,8 @@
 
 @media (max-width: 575.98px) and (orientation: portrait) {
   .b-game-layout {
-    --game-footer-block-size: 7rem;
-    --game-footer-gap: 0.625rem;
-
     &__menu {
       padding: 0.75rem;
-    }
-
-    &__footer-panel {
-      padding: 0.625rem 0.75rem;
     }
   }
 }

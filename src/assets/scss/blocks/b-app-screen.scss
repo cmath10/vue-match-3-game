@@ -27,6 +27,8 @@
   }
 
   &--welcome {
+    grid-template-rows: minmax(min-content, 1fr) auto;
+    gap: 2rem;
     background:
       radial-gradient(circle at 20% 10%, rgba(150, 65, 38, 0.42), transparent 34rem),
       linear-gradient(rgba($primary, 0.45), rgba($primary-dark, 0.78)),

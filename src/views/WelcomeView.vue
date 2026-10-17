@@ -78,6 +78,8 @@
                 >
             </div>
         </section>
+
+        <BAppCredits />
     </main>
 </template>
 
@@ -86,6 +88,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
+import BAppCredits from '@/components/BAppCredits.vue'
 import BLocaleSwitcher from '@/components/BLocaleSwitcher.vue'
 
 import { assetUrls } from '@/assets'
