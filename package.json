@@ -17,7 +17,7 @@
     "bootstrap": "^5.3.8",
     "swiper": "^14.0.6",
     "vue": "^3.5.39",
-    "vue-i18n": "^11.4.6",
+    "vue-i18n": "^11.4.14",
     "vue-router": "^5.2.0"
   },
   "devDependencies": {
